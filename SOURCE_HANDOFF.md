@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-09-26** — chuẩn bị dữ liệu/huấn luyện/đánh giá PatchCore và đường truyền worker offline; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-09-26** — tổng hợp báo cáo hiện trạng/lộ trình PatchCore và noise; không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -22,6 +22,7 @@ Source do project quản lý trực tiếp nằm chủ yếu ở root, `auv_insp
 UnderwaterDemo/
 ├── AGENTS.md                         # Quy tắc cho AI/agent làm việc trong repo
 ├── SOURCE_HANDOFF.md                 # Tài liệu đang đọc; phải cập nhật cùng source
+├── PROJECT_STATUS_AND_ROADMAP.md     # Báo cáo hiện trạng, kết quả và kế hoạch tiếp theo
 ├── README.md                         # Setup repo chia sẻ, overlay HoloOcean và chạy dashboard
 ├── scripts/setup_project.ps1         # Clone/pin HoloOcean và cài overlay/artifact trên máy mới
 ├── holoocean_overlay/                # Map/asset/C++/plugin riêng để áp dụng lên HoloOcean upstream
@@ -580,6 +581,8 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-09-26`: Thêm `PROJECT_STATUS_AND_ROADMAP.md` tổng hợp kiến trúc, phần đã làm, kết quả offline PatchCore, giới hạn xác minh, lộ trình xử lý nhiễu và đề xuất nghiệm thu. Không thay đổi code, artifact, detector, route hoặc map.
 
 - `2026-09-26`: Dashboard tự giữ pose 5 giây khi runtime phát hiện hư hại, giữ lại ảnh bằng chứng đúng tick phát hiện rồi tự gửi lệnh tiếp tục. Nút Tiếp tục/Space chỉ bỏ qua thời gian chờ. Thêm countdown vào packet/UI và unit test thuần cho thời lượng; chưa chạy live Unreal cho thay đổi này. Không sửa detector, scenario, route hoặc map thủ công.
 
