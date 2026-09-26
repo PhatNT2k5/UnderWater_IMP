@@ -62,12 +62,6 @@ python .\auv_dashboard\run_dashboard.py
 
 PatchCore cần `.venv-patchcore` theo `auv_inspection/patchcore_data/requirements-patchcore.txt`. Artifact model, ngưỡng và ảnh sạch tham chiếu được setup script chép sẵn từ `patchcore_artifacts/`.
 
-## Lưu ý cho người chỉnh map
-
-- Chỉ chỉnh map đã lưu trong `holoocean/engine/Content/AUVInspection/Maps/AUVInspection.umap`.
-- Không chạy `auv_inspection/rebuild.py` trừ khi muốn tạo lại map từ generator; lệnh này có thể ghi đè chỉnh sửa thủ công.
-- Sau khi sửa map/asset, commit cả `.umap` và `.uasset` tương ứng. Git LFS đã được cấu hình cho các file đó.
-- Không commit `Saved/`, `Intermediate/`, `Binaries/`, `output/` hoặc log Unreal.
 
 ## Tài liệu
 
