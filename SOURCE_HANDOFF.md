@@ -27,7 +27,6 @@ UnderwaterDemo/
 ├── scripts/setup_project.ps1         # Clone/pin HoloOcean và cài overlay/artifact trên máy mới
 ├── holoocean_overlay/                # Map/asset/C++/plugin riêng để áp dụng lên HoloOcean upstream
 ├── patchcore_artifacts/              # Artifact PatchCore portable, quản lý bằng Git LFS
-├── control_demo.py                   # Demo điều khiển package Dam cũ bằng lực thruster
 ├── auv_dashboard/                    # Dashboard Tkinter hiện hành
 │   ├── README.md                     # Cách chạy, điều khiển, kiến trúc và giới hạn
 │   ├── __init__.py                   # Package dashboard
@@ -114,22 +113,6 @@ Dashboard Tkinter trong `auv_dashboard/` nhúng đúng cửa sổ Unreal do work
 
 ## 4. API/hàm Python theo từng file
 
-### `control_demo.py`
-
-Demo độc lập dùng scenario package `Dam-HoveringCamera`, điều khiển trực tiếp vector lực 8 thruster. Đây không phải luồng chính của map `AUVInspection`.
-
-- `on_press(key)`
-  - Callback của `pynput.keyboard.Listener`.
-  - `Esc` đặt `stop_event` và dừng listener; phím ký tự được thêm vào `pressed_keys` dưới lock.
-- `on_release(key)`
-  - Xóa phím ký tự khỏi `pressed_keys` dưới lock.
-- `get_command()`
-  - Trả về `numpy.ndarray` 8 phần tử chứa lực thruster.
-  - `W/S`: tiến/lùi; `A/D`: ngang; `I/K`: lên/xuống; `J/L`: yaw.
-  - Dùng hằng `FORCE = 25`.
-- `main()`
-  - Tạo keyboard listener, mở `holoocean.make("Dam-HoveringCamera")`, gọi `env.act()` + `env.tick()` trong loop.
-  - Hiển thị sensor `LeftCamera` bằng OpenCV và luôn dọn listener/window trong `finally`.
 
 ### `auv_inspection/inspection_route.py`
 
@@ -621,3 +604,4 @@ Checklist trước khi bàn giao:
 - `2026-09-23`: Khôi phục weighted blendable `MM_Fog_Water_Dam` cho `OriginalUnderwaterPostProcess`; ghi backup và bằng chứng transform actor không đổi.
 - `2026-09-23`: Thêm plugin editor-only `FunplayMCP 0.2.0` tương thích UE 5.3 và mô tả ranh giới cấu hình/token MCP.
 - `2026-09-23`: Tạo tài liệu bàn giao từ source hiện tại; thêm inventory file/hàm, call flow, config, thay đổi flashlight C++, lệnh vận hành và quy tắc tự duy trì.
+- `2026-09-26`: Xóa `control_demo.py`, demo cũ sử dụng world mẫu `Dam-HoveringCamera`; không thay đổi dashboard, pipeline AUV Inspection hoặc map thủ công.

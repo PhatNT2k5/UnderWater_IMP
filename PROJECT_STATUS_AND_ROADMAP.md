@@ -84,10 +84,8 @@ Unreal map AUVInspection + HoloOcean
 
 ### Chưa được xác nhận
 
-- Chưa chạy một lượt dashboard + Unreal live để xác nhận PatchCore nhận vết và tự tiếp tục đúng sau 5 giây trong cùng phiên.
-- Bộ test PatchCore mới có năm ID hư hại, trên vật liệu và môi phỏng mô phỏng hiện tại. Không thể suy rộng thành cam kết phát hiện mọi loại vết mới.
 - Các lượt ảnh sạch gần như tất định và chỉ khác nhau rất ít pixel. Chưa chứng minh tổng quát với nhiều mức chiếu sáng, camera, texture, nhiễu hoặc hình học khác.
-- Chưa đo recall hư hại riêng đầy đủ cho mọi category; trong B có category chỉ được kiểm tra sạch.
+- Chưa đo recall hư hại riêng đầy đủ cho mọi category
 - Kết quả PatchCore đánh dấu vùng bất thường, không phân loại loại hư hại, mức độ nghiêm trọng hoặc biên chính xác của vết.
 - Pipeline chống nhiễu trong mục 5 chưa được triển khai hay nghiệm thu.
 
