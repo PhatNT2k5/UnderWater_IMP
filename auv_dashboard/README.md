@@ -25,7 +25,7 @@ Dashboard tự mở một phiên Unreal riêng. Không cần chạy thêm `run_i
 - **Ba bước xử lý:** Classical hiển thị ảnh xám/CLAHE → mask vùng nghi vấn → kết quả khoanh vùng; PatchCore hiển thị ROI bề mặt → heatmap bất thường → kết quả đánh dấu. Ảnh gốc không lặp lại ở đây vì đã có trong ô **Camera robot** lớn phía trên. Classical phân tích quét ống; PatchCore phân tích cả ống và hai trụ khi đã có ngưỡng.
 - **Phát hiện hư hại:** danh sách cảnh báo cùng tọa độ X; nhấp đúp để mở ảnh bằng chứng đầy đủ.
 
-Khi có cảnh báo, AUV giữ vị trí theo đúng logic gốc. **Ba ô xử lý giữ ảnh tại tick phát hiện**, có nhãn ghi rõ thời điểm; ô camera robot vẫn chạy trực tiếp. Classical lưu `camera.png`, `preprocessed.png`, `mask.png`, `annotated.png`; PatchCore lưu `camera.png`, `roi.png`, `heatmap.png`, `mask.png`, `annotated.png`, `scores.npz` và metadata model/ngưỡng/tick/pose. Nhấn **Tiếp tục sau cảnh báo** hoặc **Space** để quét tiếp và đưa ba ô về ảnh hiện tại.
+Khi có cảnh báo, AUV giữ vị trí **5 giây**. **Ba ô xử lý giữ ảnh bằng chứng tại tick phát hiện**, có nhãn ghi rõ thời điểm; ô camera robot vẫn chạy trực tiếp. Sau 5 giây, dashboard tự gửi lệnh tiếp tục khảo sát. Classical lưu `camera.png`, `preprocessed.png`, `mask.png`, `annotated.png`; PatchCore lưu `camera.png`, `roi.png`, `heatmap.png`, `mask.png`, `annotated.png`, `scores.npz` và metadata model/ngưỡng/tick/pose. Nút **Tiếp tục sau cảnh báo** hoặc **Space** chỉ dùng để bỏ qua thời gian chờ.
 
 ## Điều khiển
 
@@ -34,7 +34,7 @@ Khi có cảnh báo, AUV giữ vị trí theo đúng logic gốc. **Ba ô xử l
 | Tự động / Thủ công | Chọn trước khi bắt đầu |
 | Classical / PatchCore | Chọn detector trước khi bắt đầu; PatchCore hiện chỉ hỗ trợ tuyến tự động và cần ngưỡng đã hiệu chỉnh |
 | Tạm dừng / Chạy tiếp | Tạm ngừng bước mô phỏng / chạy tiếp |
-| Tiếp tục sau cảnh báo / Space | Rời trạng thái giữ vị trí sau phát hiện |
+| Tiếp tục sau cảnh báo / Space | Bỏ qua thời gian giữ 5 giây sau phát hiện |
 | Dừng / Esc | Kết thúc phiên và lưu report |
 | Mở kết quả | Mở folder kết quả của phiên hiện tại |
 | Kéo / cuộn trên lộ trình | Xoay / thu phóng sơ đồ 3D |

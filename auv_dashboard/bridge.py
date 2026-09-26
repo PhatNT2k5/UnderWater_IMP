@@ -29,6 +29,14 @@ PROTECTED_FILES = (
     "auv_inspection/scenario.json", "auv_inspection/inspection_route.py",
     "holoocean/engine/Content/AUVInspection/Maps/AUVInspection.umap",
 )
+DAMAGE_HOLD_SECONDS = 5.0
+
+def damage_pause_remaining(started_at: float | None, now: float,
+                           hold_seconds: float = DAMAGE_HOLD_SECONDS) -> float:
+    """Return the remaining automatic evidence hold time."""
+    if started_at is None:
+        return 0.0
+    return max(0.0, hold_seconds - (now - started_at))
 
 
 def patchcore_category(station: str) -> str | None:
@@ -133,8 +141,8 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
     patchcore_client: PatchCoreClient | None = None
     state: dict[str, object] = {
         "tick": -1, "station": "start", "station_index": 0, "analysis": None,
-        "active": False, "damage_pause": False, "pause": False, "stop": False,
-        "continue": False, "follow": bool(options.get("follow", True)), "keys": set(),
+        "active": False, "damage_pause": False, "damage_pause_started_at": None,
+        "pause": False, "stop": False, "continue": False, "follow": bool(options.get("follow", True)), "keys": set(),
         "evidence": None, "viewport_enabled": False,
         "analysis_status": "idle", "analysis_tick": None, "runtime_tick": -1,
     }
@@ -318,6 +326,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
                                                         encoding="utf-8")
             evidence_names = ("camera.png", "roi.png", "heatmap.png", "annotated.png")
         state["damage_pause"] = True
+        state["damage_pause_started_at"] = time.monotonic()
         evidence_dir = Path(event["event_dir"])
         state["evidence"] = {
             "tick": event["tick"],
@@ -382,6 +391,8 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
             "station": "damage_pause" if state["damage_pause"] else state["station"],
             "station_index": state["station_index"], "total_stations": len(inspection.ROUTE),
             "detector_active": state["active"], "damage_pause": state["damage_pause"],
+            "damage_pause_remaining_seconds": damage_pause_remaining(
+                state["damage_pause_started_at"], now) if state["damage_pause"] else 0.0,
             "camera": camera,
             "viewport": encode_frame(state["viewport"][:, :, :3], quality=78)
             if state.get("viewport") is not None else None,
@@ -393,6 +404,17 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
         }
         publish_latest(frames, packet)
 
+    def resume_damage_pause(automatic: bool) -> int:
+        state["continue"] = False
+        state["damage_pause"] = False
+        state["damage_pause_started_at"] = None
+        state["evidence"] = None
+        text = ("Đã giữ vị trí 5 giây và tự tiếp tục khảo sát"
+                if automatic else "Đã tiếp tục khảo sát theo lệnh người dùng")
+        events.put({"type": "damage_resumed", "automatic": automatic})
+        events.put({"type": "status", "text": text})
+        return 32
+
     def wait_key(_delay: int) -> int:
         read_commands()
         while state["pause"] and not state["stop"]:
@@ -401,9 +423,10 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
         if state["stop"]:
             return 27
         if state["continue"]:
-            state["continue"] = False
-            state["damage_pause"] = False
-            return 32
+            return resume_damage_pause(automatic=False)
+        if state["damage_pause"] and damage_pause_remaining(
+                state["damage_pause_started_at"], time.monotonic()) <= 0:
+            return resume_damage_pause(automatic=True)
         time.sleep(max(0.0, 1.0 / 30.0 - (time.monotonic() - last_tick)))
         return -1
 

@@ -94,8 +94,8 @@ run_inspection.py
   ├─ auto: gửi pose target từ ROUTE
   │   manual: cập nhật pose target từ bàn phím
   ├─ khi camera nhìn ống: CLAHE → làm mượt → tương phản tối cục bộ → lọc vùng → xác nhận 3 frame
-  ├─ khi có cảnh báo: ghi ảnh/thời gian/tọa độ; GUI giữ AUV đến khi nhấn Space
-  │   headless auto: lưu bằng chứng rồi kết thúc lượt chạy
+  ├─ khi có cảnh báo: ghi ảnh/thời gian/tọa độ; dashboard giữ AUV 5 giây rồi tự tiếp tục
+  │   GUI trực tiếp: giữ AUV đến khi nhấn Space; headless auto: lưu bằng chứng rồi kết thúc lượt chạy
   └─ ghi output/run_<timestamp>/
       ├─ telemetry.json
       ├─ report.json
@@ -109,7 +109,7 @@ Ngoại lệ là `--capture-clean-structures`: bỏ qua detector/cảnh báo, ch
 
 Luồng dashboard hiện hành: `auv_dashboard/run_dashboard.py` tạo UI Tkinter, sau đó spawn `auv_dashboard.bridge.run_worker()`. Worker import và gọi chính `run_inspection.run()`; adapter chuyển `cv2.imshow`/`waitKey` và phím sang queue, giữ detector/controller gốc, rồi lưu kết quả vào folder phiên. Các thay thế runtime chỉ tồn tại trong worker.
 
-Dashboard Tkinter trong `auv_dashboard/` nhúng đúng cửa sổ Unreal do worker sở hữu bằng Win32, vẽ route XYZ trên Canvas và nhận camera robot trực tiếp từ `InspectionCamera`. Preview mục tiêu 12 FPS; ảnh cũ được bỏ nếu UI chậm, còn cảnh báo/hoàn tất/lỗi dùng queue riêng. Ba ô dưới thể hiện CLAHE/mask/annotation ở Classical hoặc ROI/heatmap/annotation ở PatchCore; ảnh gốc đã là camera robot lớn. Khi có cảnh báo, các ô giữ đúng PNG đã lưu của event và ghi tick. Pause từ UI tạm ngừng bước mô phỏng; cảnh báo giữ AUV tại vị trí nhưng vẫn chạy camera theo logic gốc. Mặc định hiện là PatchCore vì báo cáo B offline đạt và hash artifact khớp; chưa qua live Unreal, người dùng tự test dashboard.
+Dashboard Tkinter trong `auv_dashboard/` nhúng đúng cửa sổ Unreal do worker sở hữu bằng Win32, vẽ route XYZ trên Canvas và nhận camera robot trực tiếp từ `InspectionCamera`. Preview mục tiêu 12 FPS; ảnh cũ được bỏ nếu UI chậm, còn cảnh báo/hoàn tất/lỗi dùng queue riêng. Ba ô dưới thể hiện CLAHE/mask/annotation ở Classical hoặc ROI/heatmap/annotation ở PatchCore; ảnh gốc đã là camera robot lớn. Khi có cảnh báo, các ô giữ đúng PNG đã lưu của event và ghi tick. Pause từ UI tạm ngừng bước mô phỏng; cảnh báo giữ AUV tại vị trí 5 giây rồi tự tiếp tục, còn Space/nút Tiếp tục chỉ bỏ qua thời gian chờ. Mặc định hiện là PatchCore vì báo cáo B offline đạt và hash artifact khớp; chưa qua live Unreal, người dùng tự test dashboard.
 
 ## 4. API/hàm Python theo từng file
 
@@ -205,7 +205,7 @@ Entry point chính của hệ thống.
   - Mở Unreal bằng `subprocess.Popen`, đợi named semaphore tối đa 180 giây rồi attach `EditorEnvironment`.
   - Auto mode: dùng `advance_station()`, gửi pose target và chỉ kết thúc khi waypoint cuối đạt `<0.25 m`, yaw `<8°` liên tục 15 tick.
   - Manual mode: gọi `update_manual_target()` mỗi tick và gửi bản sao target cho HoloOcean.
-  - Sau 30 tick khởi động camera, phân tích mỗi tick khi nhìn ống; sau 3 frame ứng viên nhất quán, lưu bằng chứng và cảnh báo `POSSIBLE DAMAGE`. Trong GUI, giữ target tại pose hiện tại đến khi nhấn `Space`; manual tiếp tục từ pose hiện tại. Headless auto lưu bằng chứng rồi kết thúc.
+  - Sau 30 tick khởi động camera, phân tích mỗi tick khi nhìn ống; sau 3 frame ứng viên nhất quán, lưu bằng chứng và cảnh báo `POSSIBLE DAMAGE`. Trong GUI trực tiếp, giữ target tại pose hiện tại đến khi nhấn `Space`; dashboard adapter thay hành vi này bằng giữ 5 giây rồi tự tiếp tục, và manual tiếp tục từ pose hiện tại. Headless auto lưu bằng chứng rồi kết thúc.
   - Khóa cảnh báo trùng cho đến khi AUV đi cách vị trí cảnh báo trước ≥2 m. Ghi telemetry mỗi 3 tick; hiển thị camera/box/cảnh báo khi không headless.
   - Tạo `report.json` gồm mode, trạng thái tuyến, station, telemetry, `stopped_by_user`, `stopped_for_damage`, `damage_event_count`, `damage_events`.
   - Trong `finally`: đóng HoloOcean, terminate/kill Unreal nếu cần, đóng semaphore và cửa sổ OpenCV.
@@ -374,10 +374,11 @@ Lưu ý: map hiện tại đã được chỉnh thủ công sau lần sinh từ 
 | `advance()`, `gate()`, `analyze()` | Classical gọi hàm gốc; PatchCore mở gate cho bốn nhóm, gửi một frame mỗi ba tick thật của vòng `run()` đến service và lưu kết quả có tick phân tích cho preview |
 | `PatchCoreTracker.update()/reset()` | Adapter dùng sự kiện ba frame đã xác nhận từ service; không xác nhận lại trong runtime |
 | `draw()` | Classical gọi hàm gốc; PatchCore trả annotation đúng frame của service |
-| `save_event()` | Classical gọi lưu event gốc; PatchCore lưu camera/ROI/heatmap/mask/annotation/score và model/ngưỡng/tick/pose, sau đó giữ đúng ba ô bằng chứng và gửi sự kiện tin cậy |
+| `damage_pause_remaining()` | Tính số giây còn lại trong khoảng giữ AUV sau cảnh báo, mặc định 5 giây |
+| `save_event()` | Classical gọi lưu event gốc; PatchCore lưu camera/ROI/heatmap/mask/annotation/score và model/ngưỡng/tick/pose, sau đó giữ đúng ba ô bằng chứng, bắt đầu mốc 5 giây và gửi sự kiện tin cậy |
 | `is_key_pressed()` | Thay đọc phím toàn hệ thống bằng trạng thái lệnh riêng của dashboard; ở auto PatchCore, lần kiểm tra Escape đầu mỗi vòng ghi tick của `run()` nên không lệch khi `reset()` bước camera trước vòng |
 | `preview()` | Gửi viewport Unreal JPEG quality 78 và ảnh robot theo `preview_fps`; chỉ mã hóa pipeline theo `pipeline_fps` hoặc khi có bằng chứng mới; gửi pose/waypoint/candidate count, detector, trạng thái và tick phân tích qua queue |
-| `wait_key()` | Xử lý pause/stop/continue, trả mã phím cho runtime và giới hạn nhịp 30 Hz |
+| `resume_damage_pause()`, `wait_key()` | Xử lý pause/stop; khi hết 5 giây, trả Space cho runtime để tiếp tục tự động; nút/Space của UI vẫn có thể bỏ qua chờ; gửi trạng thái resume và giới hạn nhịp 30 Hz |
 
 `PROTECTED_FILES` gồm năm file được audit. Không đưa dữ liệu dashboard vào `auv_inspection/output/`. Dashboard sao chép nguyên scenario và nhận đủ bốn stage trong mọi preview; tham số flashlight vẫn do runtime gốc thực hiện.
 
@@ -408,15 +409,15 @@ Lưu ý: map hiện tại đã được chỉnh thủ công sau lần sinh từ 
 | `toggle_pause()`, `continue_run()`, `set_follow()`, `stop()` | Điều khiển phiên qua queue; stop lưu thời điểm cho timeout cleanup |
 | `key_down()`, `key_up()`, `release_keys()` | W/S/A/D/R/F/Q/E, Space, Esc; nhả phím khi Tk mất focus |
 | `open_output()`, `open_alert()` | Mở folder phiên hoặc annotated.png của event chọn |
-| `handle_event()` | Nhận PID, cảnh báo, trạng thái, traceback, report; cập nhật nút/danh sách và thêm marker XYZ vào route khi có hư hại |
-| `render_packet()` | Đưa `frames[1:4]` vào ba ô tương ứng Classical hoặc PatchCore vì ảnh gốc đã có ở camera robot; cập nhật route/trail XYZ, telemetry, tiến độ, FPS/latency, tick phân tích và trạng thái ROI/cảnh báo |
+| `handle_event()` | Nhận PID, cảnh báo, resume tự động/thủ công, trạng thái, traceback, report; cập nhật nút/danh sách và thêm marker XYZ vào route khi có hư hại |
+| `render_packet()` | Đưa `frames[1:4]` vào ba ô tương ứng Classical hoặc PatchCore vì ảnh gốc đã có ở camera robot; cập nhật route/trail XYZ, telemetry, tiến độ, FPS/latency, countdown tự tiếp tục, tick phân tích và trạng thái ROI/cảnh báo |
 | `poll()` | Drain event/latest frame, nhúng Unreal, quản lý worker và cleanup chỉ tiến trình sở hữu sau timeout 12 giây |
 | `save_ui_session()`, `close()`, `finish_close()` | Ghi ui_session.json khi worker kết thúc hoặc đóng UI, dừng/detach và đóng queues/Tk; giữ tóm tắt phiên trước nếu chạy lại |
 | `snapshot()`, `qa_tick()`, `validate_smoke_test()` | Chụp vùng UI có DirectX, tự pause/continue/stop và xác minh chín điều kiện QA live; pause cho phép tối đa 3 tick đã nằm trong queue preview 12 FPS |
 
 ### `auv_dashboard/test_dashboard.py`
 
-`DashboardBridgeTests` có bảy test: phân nhóm đúng scan ống/trụ và bỏ transition; mock worker xác minh PatchCore dùng tick của vòng runtime ngay cả khi `reset()` bước camera; queue không tăng khi UI chậm và giữ frame mới nhất; PNG giữ mask chính xác; JPEG giữ kích thước/kênh ảnh robot; phép chiếu route phân biệt độ sâu/chiều cao; spectator nhìn về AUV sau phép đổi trục thực tế của upstream ở năm góc yaw và không sửa mảng vị trí đầu vào. Đây là test không mở Unreal, tách với live smoke test.
+`DashboardBridgeTests` có tám test: countdown giữ 5 giây rồi hết; phân nhóm đúng scan ống/trụ và bỏ transition; mock worker xác minh PatchCore dùng tick của vòng runtime ngay cả khi `reset()` bước camera; queue không tăng khi UI chậm và giữ frame mới nhất; PNG giữ mask chính xác; JPEG giữ kích thước/kênh ảnh robot; phép chiếu route phân biệt độ sâu/chiều cao; spectator nhìn về AUV sau phép đổi trục thực tế của upstream ở năm góc yaw và không sửa mảng vị trí đầu vào. Đây là test không mở Unreal, tách với live smoke test.
 
 ## 5. File cấu hình và dữ liệu
 
@@ -579,6 +580,8 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-09-26`: Dashboard tự giữ pose 5 giây khi runtime phát hiện hư hại, giữ lại ảnh bằng chứng đúng tick phát hiện rồi tự gửi lệnh tiếp tục. Nút Tiếp tục/Space chỉ bỏ qua thời gian chờ. Thêm countdown vào packet/UI và unit test thuần cho thời lượng; chưa chạy live Unreal cho thay đổi này. Không sửa detector, scenario, route hoặc map thủ công.
 
 - `2026-09-26`: Chuẩn bị cấu trúc chia sẻ GitHub: thêm README, `.gitignore`, `.gitattributes` Git LFS và `scripts/setup_project.ps1`; script pin HoloOcean upstream `49e70552`, cài overlay map/asset/C++/plugin và artifact PatchCore. `worlds/`, checkout `holoocean/`, output/log, môi trường ảo và cache Unreal không được version để tránh upload 6.1 GB package và dữ liệu máy cục bộ. Chưa khởi tạo/commit/push GitHub tại thời điểm cập nhật.
 

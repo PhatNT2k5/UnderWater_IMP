@@ -14,7 +14,9 @@ import cv2
 import numpy as np
 
 from auv_dashboard import bridge
-from auv_dashboard.bridge import encode_frame, patchcore_category, publish_latest, viewport_pose
+from auv_dashboard.bridge import (
+    damage_pause_remaining, encode_frame, patchcore_category, publish_latest, viewport_pose,
+)
 from auv_dashboard.widgets import project_3d
 
 
@@ -77,6 +79,12 @@ class DashboardBridgeTests(unittest.TestCase):
             self.assertIn("finished", kinds)
             logging.shutdown()
         self.assertEqual(requested, [0, 3, 6])
+
+    def test_damage_pause_countdown_expires_after_five_seconds(self) -> None:
+        self.assertEqual(damage_pause_remaining(None, 100.0), 0.0)
+        self.assertAlmostEqual(damage_pause_remaining(10.0, 12.25), 2.75)
+        self.assertEqual(damage_pause_remaining(10.0, 15.0), 0.0)
+        self.assertEqual(damage_pause_remaining(10.0, 16.0), 0.0)
 
     def test_patchcore_covers_scan_stations_and_skips_transitions(self) -> None:
         self.assertEqual(patchcore_category("pipe_front_scan_004"), "pipe_front")

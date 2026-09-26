@@ -218,7 +218,7 @@ class Dashboard:
         footer.pack(fill="x")
         self.station_label = self.label(footer, "Chưa bắt đầu · Dữ liệu trực tiếp từ mô phỏng", 9, "#bdd1dd")
         self.station_label.pack(side="left", padx=18, pady=8)
-        self.fps_label = self.label(footer, "Space: tiếp tục  |  Esc: dừng", 9, "#bdd1dd")
+        self.fps_label = self.label(footer, "Cảnh báo: tự tiếp tục sau 5 giây  |  Esc: dừng", 9, "#bdd1dd")
         self.fps_label.pack(side="right", padx=18)
 
     def send(self, name: str, **payload: object) -> None:
@@ -355,9 +355,12 @@ class Dashboard:
             self.route_map.add_alert(item["position_m"])
             self.alert_list.insert("end", f"{len(self.alerts):02d}  Nghi vấn · x={item['position_m'][0]:.1f} m")
             self.continue_button.configure(state="normal")
-            self.status.configure(text="●  Phát hiện hư hại · Đang giữ vị trí", fg="#ffd08a")
+            self.status.configure(text="●  Phát hiện hư hại · Giữ vị trí 5 giây rồi tự tiếp tục", fg="#ffd08a")
             if self.smoke_test and self.qa_continue_at is None:
                 self.qa_continue_at = time.monotonic() + 1.0
+        elif kind == "damage_resumed":
+            self.damage_paused = False
+            self.continue_button.configure(state="disabled")
         elif kind == "status":
             self.status.configure(text="●  " + event["text"])
         elif kind == "error":
@@ -384,6 +387,15 @@ class Dashboard:
         self.progress.configure(value=100 * index / max(1, count - 1))
         self.progress_label.configure(text=f"{index + 1} / {count} điểm tuyến")
         active = packet["detector_active"]
+        damage_pause = bool(packet["damage_pause"])
+        if damage_pause:
+            remaining = float(packet.get("damage_pause_remaining_seconds", 0.0))
+            self.damage_paused = True
+            self.continue_button.configure(state="normal")
+            self.status.configure(
+                text=f"●  Phát hiện hư hại · Tự tiếp tục sau {remaining:.1f} giây",
+                fg="#ffd08a",
+            )
         if packet["evidence_tick"] is not None:
             text = f"Ảnh cảnh báo · tick {packet['evidence_tick']} · Camera robot vẫn trực tiếp"
         elif active and packet.get("analysis_status") == "analysis_unavailable":
@@ -399,7 +411,10 @@ class Dashboard:
         self.station_label.configure(text=f"{packet['station']}   |   Tick {packet['tick']}   |   {packet['tick'] / 30:.1f} s mô phỏng")
         fps = (len(self.arrivals) - 1) / max(0.01, self.arrivals[-1] - self.arrivals[0])
         age = max(0, time.monotonic() - packet["time"])
-        self.fps_label.configure(text=f"Camera {fps:.0f} fps   |   Trễ {age * 1000:.0f} ms   |   Space: tiếp tục")
+        self.fps_label.configure(text=(
+            f"Camera {fps:.0f} fps   |   Trễ {age * 1000:.0f} ms   |   "
+            + ("Space: bỏ qua chờ" if damage_pause else "Cảnh báo tự tiếp tục sau 5 giây")
+        ))
         if not self.paused and not self.damage_paused and not self.stopping and not self.finished:
             self.status.configure(text="●  Đang khảo sát", fg="#9ee5df")
         self.pause_button.configure(state="normal" if not self.stopping else "disabled")
