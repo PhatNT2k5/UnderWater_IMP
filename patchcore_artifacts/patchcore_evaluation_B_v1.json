@@ -1,0 +1,214 @@
+{
+  "thresholds": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\patchcore_thresholds_v1.json",
+  "model_dir": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\patchcore_model_v1",
+  "thresholds_sha256": "0a1c223f16ebbff968dd29caa7e71846ab3ec189983018a4a41d24ba6b19c098",
+  "model_sha256": "5f117d521e150a368500bc0c26aa091a7804ece0f2e2ccd9915d6d5c4294e288",
+  "reference_dataset": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\patchcore_dataset_clean_20260925",
+  "reference_sha256": "3ea6e110cb17e9839d2920161c98437bddd09669baf4c1d157ebc6e8ffa59f7a",
+  "clean_dataset": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\patchcore_dataset_test_clean_20260926",
+  "mixed_dataset": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\patchcore_dataset_B_20260926",
+  "visible_physical_defects": 5,
+  "detected_physical_defects": 5,
+  "missed_physical_defects": [],
+  "unobservable_inventory_ids": [],
+  "small_or_thin_visible_ids": [
+    "B_Crack1",
+    "B_Crack2",
+    "B_HoleSmall",
+    "B_PierCrack"
+  ],
+  "small_or_thin_detected_ids": [
+    "B_Crack1",
+    "B_Crack2",
+    "B_HoleSmall",
+    "B_PierCrack"
+  ],
+  "false_alerts_clean_route": 0,
+  "classical_pipe_comparison": {
+    "visible_ids": [
+      "B_Crack1",
+      "B_Crack2",
+      "B_HoleLarge",
+      "B_HoleSmall"
+    ],
+    "detected_ids": [
+      "B_HoleLarge"
+    ],
+    "missed_ids": [
+      "B_Crack1",
+      "B_Crack2",
+      "B_HoleSmall"
+    ],
+    "false_alerts_clean_route": 0,
+    "pier_scope": "not_supported"
+  },
+  "acceptance": {
+    "all_inventory_observable": true,
+    "recall_at_least_95_percent": true,
+    "small_or_thin_recall_at_least_90_percent": true,
+    "false_alerts_at_most_2": true,
+    "passed": true
+  },
+  "groups": {
+    "pipe_front": {
+      "threshold": 61.551551818847656,
+      "visible_ids": [
+        "B_Crack1",
+        "B_Crack2",
+        "B_HoleLarge",
+        "B_HoleSmall"
+      ],
+      "detected_ids": [
+        "B_Crack1",
+        "B_Crack2",
+        "B_HoleLarge",
+        "B_HoleSmall"
+      ],
+      "missed_ids": [],
+      "recall_count": [
+        4,
+        4
+      ],
+      "false_alerts_clean_route": 0,
+      "mixed_events": [
+        {
+          "tick": 620,
+          "image": "images/pipe_front/frame_000620.png",
+          "bbox": [
+            466,
+            229,
+            112,
+            89
+          ],
+          "peak_score": 71.99280548095703
+        },
+        {
+          "tick": 750,
+          "image": "images/pipe_front/frame_000750.png",
+          "bbox": [
+            367,
+            233,
+            47,
+            79
+          ],
+          "peak_score": 70.98974609375
+        },
+        {
+          "tick": 860,
+          "image": "images/pipe_front/frame_000860.png",
+          "bbox": [
+            228,
+            256,
+            63,
+            26
+          ],
+          "peak_score": 71.3317642211914
+        },
+        {
+          "tick": 1020,
+          "image": "images/pipe_front/frame_001020.png",
+          "bbox": [
+            331,
+            261,
+            67,
+            92
+          ],
+          "peak_score": 73.55546569824219
+        },
+        {
+          "tick": 1020,
+          "image": "images/pipe_front/frame_001020.png",
+          "bbox": [
+            391,
+            207,
+            41,
+            17
+          ],
+          "peak_score": 70.48751831054688
+        }
+      ],
+      "latency_ticks": {
+        "B_Crack2": 20,
+        "B_HoleSmall": 30,
+        "B_Crack1": 40,
+        "B_HoleLarge": 30
+      },
+      "processing_ms_median": 62.17854999999872,
+      "processing_ms_p95": 64.48394999983975
+    },
+    "pipe_back": {
+      "threshold": 53.064461303710935,
+      "visible_ids": [],
+      "detected_ids": [],
+      "missed_ids": [],
+      "recall_count": [
+        0,
+        0
+      ],
+      "false_alerts_clean_route": 0,
+      "mixed_events": [],
+      "latency_ticks": {},
+      "processing_ms_median": 61.491599999953905,
+      "processing_ms_p95": 62.682849999782775
+    },
+    "pier_0": {
+      "threshold": 58.91151809692383,
+      "visible_ids": [],
+      "detected_ids": [],
+      "missed_ids": [],
+      "recall_count": [
+        0,
+        0
+      ],
+      "false_alerts_clean_route": 0,
+      "mixed_events": [],
+      "latency_ticks": {},
+      "processing_ms_median": 61.54205000007096,
+      "processing_ms_p95": 63.00291500001549
+    },
+    "pier_1": {
+      "threshold": 54.33250863647461,
+      "visible_ids": [
+        "B_PierCrack"
+      ],
+      "detected_ids": [
+        "B_PierCrack"
+      ],
+      "missed_ids": [],
+      "recall_count": [
+        1,
+        1
+      ],
+      "false_alerts_clean_route": 0,
+      "mixed_events": [
+        {
+          "tick": 6870,
+          "image": "images/pier_1/frame_006870.png",
+          "bbox": [
+            439,
+            68,
+            62,
+            60
+          ],
+          "peak_score": 66.83364868164062
+        },
+        {
+          "tick": 7290,
+          "image": "images/pier_1/frame_007290.png",
+          "bbox": [
+            416,
+            26,
+            62,
+            71
+          ],
+          "peak_score": 59.71906280517578
+        }
+      ],
+      "latency_ticks": {
+        "B_PierCrack": 20
+      },
+      "processing_ms_median": 48.5555000000204,
+      "processing_ms_p95": 62.477899999976216
+    }
+  }
+}

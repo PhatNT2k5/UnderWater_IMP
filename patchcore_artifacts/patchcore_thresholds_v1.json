@@ -1,0 +1,1674 @@
+{
+  "model_dir": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\patchcore_model_v1",
+  "clean_dataset": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\patchcore_dataset_calibration_clean_20260926",
+  "mixed_dataset": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\patchcore_dataset_A3_20260926",
+  "selection_rule": "maximize small/thin then all visible defects subject to <=2 false events across the clean route",
+  "false_alerts_clean_route": 0,
+  "confirmation": "3 trajectory-consistent scored frames, max 13 px/tick, 60 px prediction error, max 15 tick gap",
+  "groups": {
+    "pipe_front": {
+      "threshold": 61.551551818847656,
+      "false_events": 0,
+      "detected_ids": [
+        "M_HairCrack",
+        "M_HairCrack2"
+      ],
+      "visible_ids": [
+        "M_HairCrack",
+        "M_HairCrack2"
+      ],
+      "missed_ids": [],
+      "trials": [
+        {
+          "threshold": 34.857967376708984,
+          "false_events": 396,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 35.8359724635074,
+          "false_events": 212,
+          "detected_ids": [
+            "M_HairCrack"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 36.813977550305815,
+          "false_events": 127,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 37.79198263710423,
+          "false_events": 108,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 38.76998772390265,
+          "false_events": 88,
+          "detected_ids": [
+            "M_HairCrack"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 39.74799281070107,
+          "false_events": 57,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 39.857967376708984,
+          "false_events": 56,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 40.72599789749948,
+          "false_events": 38,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 40.866472244262695,
+          "false_events": 35,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 41.049299240112305,
+          "false_events": 33,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 41.7040029842979,
+          "false_events": 27,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 42.17967224121094,
+          "false_events": 26,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 42.68200807109632,
+          "false_events": 23,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 43.30841064453125,
+          "false_events": 17,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 43.66001315789474,
+          "false_events": 13,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 44.39741897583008,
+          "false_events": 5,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 44.63801824469315,
+          "false_events": 3,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 45.11595916748047,
+          "false_events": 2,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 45.61602333149157,
+          "false_events": 2,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 46.15480041503906,
+          "false_events": 1,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 46.59402841828999,
+          "false_events": 2,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 46.87320327758789,
+          "false_events": 1,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 47.5720335050884,
+          "false_events": 1,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 47.751312255859375,
+          "false_events": 1,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 48.54939651489258,
+          "false_events": 1,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 48.55003859188682,
+          "false_events": 1,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 49.528043678685236,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 50.506048765483655,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 50.77618980407715,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 51.484053852282074,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 51.76439437866211,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 52.00335006713867,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 52.027424049377444,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 52.2818187713623,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 52.462058939080485,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 52.52755165100098,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 52.96653118133544,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 53.34455745697022,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 53.440064025878904,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 53.47224426269531,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 54.25723648071289,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 56.19688415527344,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 61.02370834350586,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 61.551551818847656,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 69.07945251464844,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 70.80166625976562,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 70.89374542236328,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 72.89749908447266,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 76.21540832519531,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 78.6622085571289,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack"
+          ],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 78.85994720458984,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 85.83194732666016,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 86.83952331542969,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        },
+        {
+          "threshold": 86.94607543945312,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack",
+            "M_HairCrack2"
+          ]
+        }
+      ],
+      "calibration_has_visible_defect": true
+    },
+    "pipe_back": {
+      "threshold": 53.064461303710935,
+      "false_events": 0,
+      "detected_ids": [],
+      "visible_ids": [],
+      "missed_ids": [],
+      "trials": [
+        {
+          "threshold": 36.27447509765625,
+          "false_events": 332,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 37.26212134507123,
+          "false_events": 176,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 38.249767592486215,
+          "false_events": 101,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 39.237413839901194,
+          "false_events": 69,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 40.22506008731617,
+          "false_events": 41,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 41.21270633473116,
+          "false_events": 32,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 41.27447509765625,
+          "false_events": 32,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 42.20035258214614,
+          "false_events": 23,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 42.65666160583496,
+          "false_events": 17,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 43.17030029296875,
+          "false_events": 15,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 43.187998829561124,
+          "false_events": 15,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 44.11652374267578,
+          "false_events": 12,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 44.1756450769761,
+          "false_events": 13,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 44.85920867919922,
+          "false_events": 9,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 45.16329132439108,
+          "false_events": 9,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 45.58102111816406,
+          "false_events": 7,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 45.86271286010742,
+          "false_events": 5,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 46.15093757180607,
+          "false_events": 5,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 46.56458053588867,
+          "false_events": 5,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 47.13858381922105,
+          "false_events": 4,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 47.20102386474609,
+          "false_events": 4,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 47.94608688354492,
+          "false_events": 3,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 48.126230066636026,
+          "false_events": 2,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 48.91322135925293,
+          "false_events": 1,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 49.11387631405101,
+          "false_events": 1,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 49.85380249023437,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 50.10152256146599,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 50.412628173828125,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 50.544865417480466,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 50.69013946533203,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 50.841424255371095,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 51.08916880888097,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 51.50980781555175,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 52.076815056295956,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 52.262078514099116,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 52.903184745788586,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 53.064461303710935,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        }
+      ],
+      "calibration_has_visible_defect": false
+    },
+    "pier_0": {
+      "threshold": 58.91151809692383,
+      "false_events": 0,
+      "detected_ids": [
+        "M_HairCrack3"
+      ],
+      "visible_ids": [
+        "M_HairCrack3"
+      ],
+      "missed_ids": [],
+      "trials": [
+        {
+          "threshold": 30.76984405517578,
+          "false_events": 338,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 31.75950312943892,
+          "false_events": 739,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 32.749162203702056,
+          "false_events": 821,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 33.7388212779652,
+          "false_events": 798,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 34.72848035222834,
+          "false_events": 466,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 35.718139426491476,
+          "false_events": 173,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 35.76984405517578,
+          "false_events": 162,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 36.70779850075461,
+          "false_events": 67,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 37.21474056243896,
+          "false_events": 33,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 37.68302841186524,
+          "false_events": 22,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 37.69745757501776,
+          "false_events": 23,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 38.25366744995117,
+          "false_events": 16,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 38.687116649280895,
+          "false_events": 15,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 38.784708404541014,
+          "false_events": 14,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 39.26656646728516,
+          "false_events": 11,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 39.67677572354403,
+          "false_events": 7,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 39.75442314147949,
+          "false_events": 6,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 40.3626220703125,
+          "false_events": 7,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 40.66643479780717,
+          "false_events": 5,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 41.324759292602536,
+          "false_events": 4,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 41.656093872070315,
+          "false_events": 3,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 42.42223281860352,
+          "false_events": 3,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 42.64575294633345,
+          "false_events": 3,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 43.21121959686279,
+          "false_events": 2,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 43.63541202059659,
+          "false_events": 2,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 44.216315841674806,
+          "false_events": 2,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 44.62507109485973,
+          "false_events": 1,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 45.614730169122865,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 46.32054565429687,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 46.60438924338601,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 47.59404831764915,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 48.33984313964844,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 48.583707391912284,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 49.57336646617543,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 50.466047019958516,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 50.56302554043856,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 51.36320472717285,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 51.552684614701704,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 52.00909675598145,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 52.43475492477417,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 52.520025936126714,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 52.54234368896484,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 53.66118621826172,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 55.02227020263672,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 55.10400390625,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 56.03787612915039,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 58.87946319580078,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 58.91151809692383,
+          "false_events": 0,
+          "detected_ids": [
+            "M_HairCrack3"
+          ],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 62.24441146850586,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 62.25321578979492,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        },
+        {
+          "threshold": 65.23794555664062,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": [
+            "M_HairCrack3"
+          ]
+        }
+      ],
+      "calibration_has_visible_defect": true
+    },
+    "pier_1": {
+      "threshold": 54.33250863647461,
+      "false_events": 0,
+      "detected_ids": [],
+      "visible_ids": [],
+      "missed_ids": [],
+      "trials": [
+        {
+          "threshold": 29.990367889404297,
+          "false_events": 108,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 30.96405351928711,
+          "false_events": 479,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 31.93773914916992,
+          "false_events": 789,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 32.91142477905274,
+          "false_events": 815,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 33.885110408935546,
+          "false_events": 696,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 34.85879603881836,
+          "false_events": 306,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 34.9903678894043,
+          "false_events": 275,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 35.83248166870117,
+          "false_events": 120,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 36.31114196777344,
+          "false_events": 74,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 36.644493103027344,
+          "false_events": 54,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 36.806167298583986,
+          "false_events": 39,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 37.243003845214844,
+          "false_events": 20,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 37.779852928466795,
+          "false_events": 10,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 37.810855865478516,
+          "false_events": 10,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 38.36631774902344,
+          "false_events": 8,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 38.75353855834961,
+          "false_events": 5,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 38.885379791259766,
+          "false_events": 5,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 39.72722418823242,
+          "false_events": 2,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 39.79530715942383,
+          "false_events": 2,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 40.651458740234375,
+          "false_events": 2,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 40.700909818115235,
+          "false_events": 2,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 41.60478973388672,
+          "false_events": 2,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 41.674595447998044,
+          "false_events": 2,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 42.0750846862793,
+          "false_events": 1,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 42.64828107788086,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 43.62196670776367,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 44.595652337646484,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 44.691627502441406,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 45.56933796752929,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 46.39287414550781,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 46.54302359741211,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 47.516709227294925,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 48.49039485717773,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 48.796035003662105,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 49.46408048706054,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 50.43776611694336,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 50.71690483093263,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 51.341375732421874,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 51.411451746826174,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 52.38513737670898,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 52.81355133056642,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 53.35882300659179,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 53.71706600189209,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 54.20862010955811,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        },
+        {
+          "threshold": 54.33250863647461,
+          "false_events": 0,
+          "detected_ids": [],
+          "visible_ids": []
+        }
+      ],
+      "calibration_has_visible_defect": false
+    }
+  }
+}

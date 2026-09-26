@@ -1,0 +1,1202 @@
+[
+  {
+    "image": "images/pipe_front/frame_000150.png",
+    "timestamp": "2026-09-25T16:48:35.506058+07:00",
+    "tick": 150,
+    "station": "pipe_front_scan_004",
+    "structure": "pipe",
+    "category": "pipe_front",
+    "position_m": [
+      -16.938283920288086,
+      2.063190221786499,
+      -10.22851276397705
+    ],
+    "yaw_deg": -89.9578857421875,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_front\\frame_000150.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_front/frame_000360.png",
+    "timestamp": "2026-09-25T16:48:39.498153+07:00",
+    "tick": 360,
+    "station": "pipe_front_scan_010",
+    "structure": "pipe",
+    "category": "pipe_front",
+    "position_m": [
+      -11.904786109924316,
+      2.062288522720337,
+      -10.22851276397705
+    ],
+    "yaw_deg": -89.96009063720703,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_front\\frame_000360.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_front/frame_000570.png",
+    "timestamp": "2026-09-25T16:48:44.972049+07:00",
+    "tick": 570,
+    "station": "pipe_front_scan_018",
+    "structure": "pipe",
+    "category": "pipe_front",
+    "position_m": [
+      -5.502537727355957,
+      2.0622901916503906,
+      -10.22851276397705
+    ],
+    "yaw_deg": -89.9615478515625,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_front\\frame_000570.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_front/frame_000780.png",
+    "timestamp": "2026-09-25T16:48:50.764427+07:00",
+    "tick": 780,
+    "station": "pipe_front_scan_026",
+    "structure": "pipe",
+    "category": "pipe_front",
+    "position_m": [
+      0.9002188444137573,
+      2.0622916221618652,
+      -10.22851276397705
+    ],
+    "yaw_deg": -89.96279907226562,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_front\\frame_000780.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_front/frame_000990.png",
+    "timestamp": "2026-09-25T16:48:56.531248+07:00",
+    "tick": 990,
+    "station": "pipe_front_scan_034",
+    "structure": "pipe",
+    "category": "pipe_front",
+    "position_m": [
+      7.302975654602051,
+      2.062293291091919,
+      -10.22851276397705
+    ],
+    "yaw_deg": -89.96414947509766,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_front\\frame_000990.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_front/frame_001200.png",
+    "timestamp": "2026-09-25T16:49:02.268651+07:00",
+    "tick": 1200,
+    "station": "pipe_front_scan_042",
+    "structure": "pipe",
+    "category": "pipe_front",
+    "position_m": [
+      13.705732345581055,
+      2.0622947216033936,
+      -10.22851276397705
+    ],
+    "yaw_deg": -89.96538543701172,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_front\\frame_001200.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_back/frame_001530.png",
+    "timestamp": "2026-09-25T16:49:11.310707+07:00",
+    "tick": 1530,
+    "station": "pipe_back_scan_001",
+    "structure": "pipe",
+    "category": "pipe_back",
+    "position_m": [
+      15.525391578674316,
+      -2.0615458488464355,
+      -10.22851276397705
+    ],
+    "yaw_deg": 89.17115783691406,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_back\\frame_001530.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_back/frame_001740.png",
+    "timestamp": "2026-09-25T16:49:16.667504+07:00",
+    "tick": 1740,
+    "station": "pipe_back_scan_010",
+    "structure": "pipe",
+    "category": "pipe_back",
+    "position_m": [
+      9.136110305786133,
+      -2.063413143157959,
+      -10.22851276397705
+    ],
+    "yaw_deg": 89.0550308227539,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_back\\frame_001740.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_back/frame_001950.png",
+    "timestamp": "2026-09-25T16:49:21.970858+07:00",
+    "tick": 1950,
+    "station": "pipe_back_scan_018",
+    "structure": "pipe",
+    "category": "pipe_back",
+    "position_m": [
+      2.733395576477051,
+      -2.0633761882781982,
+      -10.22851276397705
+    ],
+    "yaw_deg": 89.08766174316406,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_back\\frame_001950.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_back/frame_002170.png",
+    "timestamp": "2026-09-25T16:49:28.269472+07:00",
+    "tick": 2170,
+    "station": "pipe_back_scan_026",
+    "structure": "pipe",
+    "category": "pipe_back",
+    "position_m": [
+      -3.9742162227630615,
+      -2.0633387565612793,
+      -10.22851276397705
+    ],
+    "yaw_deg": 89.12063598632812,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_back\\frame_002170.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_back/frame_002380.png",
+    "timestamp": "2026-09-25T16:49:33.755663+07:00",
+    "tick": 2380,
+    "station": "pipe_back_scan_034",
+    "structure": "pipe",
+    "category": "pipe_back",
+    "position_m": [
+      -10.376937866210938,
+      -2.0633044242858887,
+      -10.22851276397705
+    ],
+    "yaw_deg": 89.15100860595703,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_back\\frame_002380.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pipe_back/frame_002590.png",
+    "timestamp": "2026-09-25T16:49:39.055567+07:00",
+    "tick": 2590,
+    "station": "pipe_back_scan_042",
+    "structure": "pipe",
+    "category": "pipe_back",
+    "position_m": [
+      -16.779661178588867,
+      -2.0632710456848145,
+      -10.22851276397705
+    ],
+    "yaw_deg": 89.18032836914062,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pipe_back\\frame_002590.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_002900.png",
+    "timestamp": "2026-09-25T16:49:46.773664+07:00",
+    "tick": 2900,
+    "station": "pier_0_level_0_orbit_04_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -11.071667671203613,
+      -3.6511149406433105,
+      -9.128512382507324
+    ],
+    "yaw_deg": -91.7021713256836,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_002900.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_002980.png",
+    "timestamp": "2026-09-25T16:49:48.827864+07:00",
+    "tick": 2980,
+    "station": "pier_0_level_0_orbit_07_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -12.203455924987793,
+      -5.545461654663086,
+      -9.128512382507324
+    ],
+    "yaw_deg": -17.325437545776367,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_002980.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003060.png",
+    "timestamp": "2026-09-25T16:49:50.995920+07:00",
+    "tick": 3060,
+    "station": "pier_0_level_0_orbit_11_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -11.778085708618164,
+      -7.978722095489502,
+      -9.128512382507324
+    ],
+    "yaw_deg": 47.26981735229492,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003060.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003140.png",
+    "timestamp": "2026-09-25T16:49:53.140928+07:00",
+    "tick": 3140,
+    "station": "pier_0_level_0_orbit_15_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -9.425345420837402,
+      -8.909029960632324,
+      -9.128512382507324
+    ],
+    "yaw_deg": 116.09564208984375,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003140.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003220.png",
+    "timestamp": "2026-09-25T16:49:55.135760+07:00",
+    "tick": 3220,
+    "station": "pier_0_level_0_orbit_20_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -7.360010147094727,
+      -6.804409027099609,
+      -9.128512382507324
+    ],
+    "yaw_deg": -176.3311309814453,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003220.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003300.png",
+    "timestamp": "2026-09-25T16:49:57.547817+07:00",
+    "tick": 3300,
+    "station": "pier_0_level_0_orbit_24_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -8.835220336914062,
+      -4.392588138580322,
+      -9.128512382507324
+    ],
+    "yaw_deg": -111.71810913085938,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003300.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003370.png",
+    "timestamp": "2026-09-25T16:49:59.244377+07:00",
+    "tick": 3370,
+    "station": "pier_0_level_1_orbit_01_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -10.050106048583984,
+      -3.655987024307251,
+      -7.872395992279053
+    ],
+    "yaw_deg": -90.94305419921875,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003370.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003450.png",
+    "timestamp": "2026-09-25T16:50:01.265801+07:00",
+    "tick": 3450,
+    "station": "pier_0_level_1_orbit_06_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -11.87065601348877,
+      -5.1796650886535645,
+      -6.740059852600098
+    ],
+    "yaw_deg": -27.884033203125,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003450.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003530.png",
+    "timestamp": "2026-09-25T16:50:03.326509+07:00",
+    "tick": 3530,
+    "station": "pier_0_level_1_orbit_10_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -12.091887474060059,
+      -7.5761542320251465,
+      -6.728572845458984
+    ],
+    "yaw_deg": 38.85747528076172,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003530.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003620.png",
+    "timestamp": "2026-09-25T16:50:05.573637+07:00",
+    "tick": 3620,
+    "station": "pier_0_level_1_orbit_15_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -9.513381958007812,
+      -8.951531410217285,
+      -6.728512763977051
+    ],
+    "yaw_deg": 115.27796936035156,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003620.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003700.png",
+    "timestamp": "2026-09-25T16:50:07.558575+07:00",
+    "tick": 3700,
+    "station": "pier_0_level_1_orbit_20_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -7.373135089874268,
+      -6.893164157867432,
+      -6.728512763977051
+    ],
+    "yaw_deg": -177.2576446533203,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003700.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003780.png",
+    "timestamp": "2026-09-25T16:50:09.555375+07:00",
+    "tick": 3780,
+    "station": "pier_0_level_1_orbit_24_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -8.750755310058594,
+      -4.481778144836426,
+      -6.728512763977051
+    ],
+    "yaw_deg": -113.04830932617188,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003780.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003850.png",
+    "timestamp": "2026-09-25T16:50:11.225496+07:00",
+    "tick": 3850,
+    "station": "pier_0_level_2_orbit_01_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -10.035691261291504,
+      -3.649937629699707,
+      -5.5552978515625
+    ],
+    "yaw_deg": -90.02259826660156,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003850.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_003930.png",
+    "timestamp": "2026-09-25T16:50:13.129499+07:00",
+    "tick": 3930,
+    "station": "pier_0_level_2_orbit_06_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -11.784801483154297,
+      -5.09621000289917,
+      -4.342573165893555
+    ],
+    "yaw_deg": -28.87200355529785,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_003930.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_004020.png",
+    "timestamp": "2026-09-25T16:50:15.277788+07:00",
+    "tick": 4020,
+    "station": "pier_0_level_2_orbit_10_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -11.923001289367676,
+      -7.779962539672852,
+      -4.328550338745117
+    ],
+    "yaw_deg": 46.03960037231445,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_004020.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_004100.png",
+    "timestamp": "2026-09-25T16:50:17.256888+07:00",
+    "tick": 4100,
+    "station": "pier_0_level_2_orbit_15_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -9.604058265686035,
+      -8.988791465759277,
+      -4.328512668609619
+    ],
+    "yaw_deg": 114.2162094116211,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_004100.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_004190.png",
+    "timestamp": "2026-09-25T16:50:19.397720+07:00",
+    "tick": 4190,
+    "station": "pier_0_level_2_orbit_20_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -7.365067958831787,
+      -6.680046081542969,
+      -4.328512668609619
+    ],
+    "yaw_deg": -169.418701171875,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_004190.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_004270.png",
+    "timestamp": "2026-09-25T16:50:21.343319+07:00",
+    "tick": 4270,
+    "station": "pier_0_level_2_orbit_24_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -8.955574989318848,
+      -4.277237892150879,
+      -4.328512668609619
+    ],
+    "yaw_deg": -105.1322250366211,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_004270.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_004340.png",
+    "timestamp": "2026-09-25T16:50:22.997467+07:00",
+    "tick": 4340,
+    "station": "pier_0_level_3_orbit_02_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -10.087603569030762,
+      -3.679708242416382,
+      -2.9604756832122803
+    ],
+    "yaw_deg": -86.22345733642578,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_004340.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_004420.png",
+    "timestamp": "2026-09-25T16:50:25.010229+07:00",
+    "tick": 4420,
+    "station": "pier_0_level_3_orbit_06_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -11.982305526733398,
+      -5.2955851554870605,
+      -1.9373936653137207
+    ],
+    "yaw_deg": -20.873567581176758,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_004420.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_004500.png",
+    "timestamp": "2026-09-25T16:50:26.961974+07:00",
+    "tick": 4500,
+    "station": "pier_0_level_3_orbit_10_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -11.993470191955566,
+      -7.689655303955078,
+      -1.9285587072372437
+    ],
+    "yaw_deg": 45.20934295654297,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_004500.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_004590.png",
+    "timestamp": "2026-09-25T16:50:29.168660+07:00",
+    "tick": 4590,
+    "station": "pier_0_level_3_orbit_15_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -9.390710830688477,
+      -8.88534164428711,
+      -1.9285123348236084
+    ],
+    "yaw_deg": 121.45765686035156,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_004590.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_004670.png",
+    "timestamp": "2026-09-25T16:50:31.127015+07:00",
+    "tick": 4670,
+    "station": "pier_0_level_3_orbit_20_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -7.3638224601745605,
+      -6.7696990966796875,
+      -1.9285122156143188
+    ],
+    "yaw_deg": -170.87017822265625,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_004670.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_0/frame_004750.png",
+    "timestamp": "2026-09-25T16:50:33.080608+07:00",
+    "tick": 4750,
+    "station": "pier_0_level_3_orbit_24_001",
+    "structure": "pier",
+    "category": "pier_0",
+    "position_m": [
+      -8.870438575744629,
+      -4.366367340087891,
+      -1.9285122156143188
+    ],
+    "yaw_deg": -106.32815551757812,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_0\\frame_004750.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_005390.png",
+    "timestamp": "2026-09-25T16:50:49.494804+07:00",
+    "tick": 5390,
+    "station": "pier_1_level_0_orbit_04_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      8.860719680786133,
+      -3.6450045108795166,
+      -1.9285122156143188
+    ],
+    "yaw_deg": -86.4893569946289,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_005390.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_005470.png",
+    "timestamp": "2026-09-25T16:50:51.426635+07:00",
+    "tick": 5470,
+    "station": "pier_1_level_0_orbit_06_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      7.886370658874512,
+      -5.463848114013672,
+      -1.9285122156143188
+    ],
+    "yaw_deg": -13.824719429016113,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_005470.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_005550.png",
+    "timestamp": "2026-09-25T16:50:53.355648+07:00",
+    "tick": 5550,
+    "station": "pier_1_level_0_orbit_11_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      8.153718948364258,
+      -7.887661933898926,
+      -1.9285122156143188
+    ],
+    "yaw_deg": 50.649776458740234,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_005550.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_005630.png",
+    "timestamp": "2026-09-25T16:50:55.303092+07:00",
+    "tick": 5630,
+    "station": "pier_1_level_0_orbit_15_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      10.485316276550293,
+      -8.945688247680664,
+      -1.9285122156143188
+    ],
+    "yaw_deg": 119.32278442382812,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_005630.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_005710.png",
+    "timestamp": "2026-09-25T16:50:57.277122+07:00",
+    "tick": 5710,
+    "station": "pier_1_level_0_orbit_20_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      12.620972633361816,
+      -6.889294147491455,
+      -1.9285122156143188
+    ],
+    "yaw_deg": -173.2666473388672,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_005710.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_005790.png",
+    "timestamp": "2026-09-25T16:50:59.210216+07:00",
+    "tick": 5790,
+    "station": "pier_1_level_0_orbit_24_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      11.243585586547852,
+      -4.484560966491699,
+      -1.9285122156143188
+    ],
+    "yaw_deg": -109.11006164550781,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_005790.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_005870.png",
+    "timestamp": "2026-09-25T16:51:01.103841+07:00",
+    "tick": 5870,
+    "station": "pier_1_level_1_orbit_01_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      9.922637939453125,
+      -3.6705753803253174,
+      -3.381452798843384
+    ],
+    "yaw_deg": -84.59259796142578,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_005870.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_005950.png",
+    "timestamp": "2026-09-25T16:51:02.992401+07:00",
+    "tick": 5950,
+    "station": "pier_1_level_1_orbit_06_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      8.081123352050781,
+      -5.241748332977295,
+      -4.321233749389648
+    ],
+    "yaw_deg": -20.49076271057129,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_005950.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006030.png",
+    "timestamp": "2026-09-25T16:51:04.929777+07:00",
+    "tick": 6030,
+    "station": "pier_1_level_1_orbit_10_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      7.962998390197754,
+      -7.629063606262207,
+      -4.328474044799805
+    ],
+    "yaw_deg": 45.91878128051758,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006030.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006120.png",
+    "timestamp": "2026-09-25T16:51:07.133668+07:00",
+    "tick": 6120,
+    "station": "pier_1_level_1_orbit_15_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      10.549410820007324,
+      -8.913610458374023,
+      -4.328512191772461
+    ],
+    "yaw_deg": 122.20225524902344,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006120.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006200.png",
+    "timestamp": "2026-09-25T16:51:09.097688+07:00",
+    "tick": 6200,
+    "station": "pier_1_level_1_orbit_20_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      12.629388809204102,
+      -6.828010082244873,
+      -4.328512191772461
+    ],
+    "yaw_deg": -170.4102020263672,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006200.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006280.png",
+    "timestamp": "2026-09-25T16:51:10.991991+07:00",
+    "tick": 6280,
+    "station": "pier_1_level_1_orbit_24_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      11.184318542480469,
+      -4.426757335662842,
+      -4.328512191772461
+    ],
+    "yaw_deg": -105.94754028320312,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006280.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006360.png",
+    "timestamp": "2026-09-25T16:51:12.850238+07:00",
+    "tick": 6360,
+    "station": "pier_1_level_2_orbit_02_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      9.903779029846191,
+      -3.6824474334716797,
+      -5.838425159454346
+    ],
+    "yaw_deg": -82.51374816894531,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006360.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006440.png",
+    "timestamp": "2026-09-25T16:51:14.784633+07:00",
+    "tick": 6440,
+    "station": "pier_1_level_2_orbit_06_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      8.025491714477539,
+      -5.30034065246582,
+      -6.7221293449401855
+    ],
+    "yaw_deg": -17.34163475036621,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006440.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006520.png",
+    "timestamp": "2026-09-25T16:51:16.751621+07:00",
+    "tick": 6520,
+    "station": "pier_1_level_2_orbit_10_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      8.012139320373535,
+      -7.689005374908447,
+      -6.728478908538818
+    ],
+    "yaw_deg": 48.692291259765625,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006520.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006610.png",
+    "timestamp": "2026-09-25T16:51:18.949517+07:00",
+    "tick": 6610,
+    "station": "pier_1_level_2_orbit_15_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      10.610273361206055,
+      -8.879986763000488,
+      -6.728512287139893
+    ],
+    "yaw_deg": 124.88845825195312,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006610.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006690.png",
+    "timestamp": "2026-09-25T16:51:20.943682+07:00",
+    "tick": 6690,
+    "station": "pier_1_level_2_orbit_20_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      12.631664276123047,
+      -6.766811847686768,
+      -6.728512287139893
+    ],
+    "yaw_deg": -167.48500061035156,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006690.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006770.png",
+    "timestamp": "2026-09-25T16:51:22.928994+07:00",
+    "tick": 6770,
+    "station": "pier_1_level_2_orbit_24_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      11.12507438659668,
+      -4.36916446685791,
+      -6.728512287139893
+    ],
+    "yaw_deg": -102.98795318603516,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006770.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006850.png",
+    "timestamp": "2026-09-25T16:51:24.886581+07:00",
+    "tick": 6850,
+    "station": "pier_1_level_3_orbit_02_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      9.881868362426758,
+      -3.6981148719787598,
+      -8.295676231384277
+    ],
+    "yaw_deg": -80.32669830322266,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006850.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_006940.png",
+    "timestamp": "2026-09-25T16:51:27.076156+07:00",
+    "tick": 6940,
+    "station": "pier_1_level_3_orbit_07_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      7.686131954193115,
+      -5.648547649383545,
+      -9.125608444213867
+    ],
+    "yaw_deg": -5.312282085418701,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_006940.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_007030.png",
+    "timestamp": "2026-09-25T16:51:29.254662+07:00",
+    "tick": 7030,
+    "station": "pier_1_level_3_orbit_12_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      8.590426445007324,
+      -8.34349250793457,
+      -9.128503799438477
+    ],
+    "yaw_deg": 67.77973937988281,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_007030.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_007120.png",
+    "timestamp": "2026-09-25T16:51:31.520359+07:00",
+    "tick": 7120,
+    "station": "pier_1_level_3_orbit_16_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      11.272897720336914,
+      -8.414427757263184,
+      -9.128511428833008
+    ],
+    "yaw_deg": 142.28750610351562,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_007120.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_007210.png",
+    "timestamp": "2026-09-25T16:51:33.660567+07:00",
+    "tick": 7210,
+    "station": "pier_1_level_3_orbit_21_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      12.326271057128906,
+      -5.799402236938477,
+      -9.128511428833008
+    ],
+    "yaw_deg": -141.6822052001953,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_007210.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  },
+  {
+    "image": "images/pier_1/frame_007300.png",
+    "timestamp": "2026-09-25T16:51:35.913341+07:00",
+    "tick": 7300,
+    "station": "pier_1_level_3_orbit_24_001",
+    "structure": "pier",
+    "category": "pier_1",
+    "position_m": [
+      10.080178260803223,
+      -3.698194742202759,
+      -9.128511428833008
+    ],
+    "yaw_deg": -84.84706115722656,
+    "width": 640,
+    "height": 480,
+    "source_image": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231\\images\\pier_1\\frame_007300.png",
+    "capture_id": "clean_structures_20260925_164825_357231",
+    "dataset_role": "train",
+    "scene_state": "clean"
+  }
+]

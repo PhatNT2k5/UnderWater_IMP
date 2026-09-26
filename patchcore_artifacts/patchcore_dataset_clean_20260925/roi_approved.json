@@ -1,0 +1,3314 @@
+{
+  "images/pipe_front/frame_000150.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000150.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000160.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000160.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000170.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000170.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000180.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000180.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000190.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000190.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000200.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000200.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000210.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000210.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000220.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000220.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000230.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000230.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000240.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000240.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000250.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000250.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000260.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000260.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000270.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000270.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000280.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000280.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000290.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000290.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000300.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000300.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000310.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000310.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000320.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000320.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000330.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000330.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000340.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000340.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000350.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000350.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000360.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000360.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000370.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000370.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000380.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000380.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000390.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000390.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000400.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000400.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000410.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000410.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000420.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000420.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000430.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000430.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000440.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000440.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000450.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000450.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000460.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000460.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000470.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000470.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000480.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000480.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000490.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000490.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000500.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000500.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000510.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000510.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000520.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000520.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000530.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000530.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000540.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000540.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000550.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000550.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000560.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000560.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000570.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000570.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000580.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000580.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000590.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000590.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000600.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000600.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000610.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000610.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000620.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000620.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000630.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000630.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000640.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000640.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000650.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000650.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000660.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000660.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000670.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000670.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000680.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000680.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000690.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000690.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000700.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000700.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000710.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000710.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000720.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000720.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000730.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000730.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000740.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000740.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000750.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000750.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000760.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000760.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000770.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000770.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000780.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000780.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000790.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000790.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000800.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000800.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000810.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000810.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000820.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000820.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000830.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000830.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000840.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000840.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000850.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000850.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000860.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000860.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000870.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000870.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000880.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000880.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000890.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000890.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000900.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000900.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_000910.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000910.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000920.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000920.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000930.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000930.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000940.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000940.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000950.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000950.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000960.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000960.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000970.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000970.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000980.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000980.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_000990.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_000990.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_001000.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001000.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_001010.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001010.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001020.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001020.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001030.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001030.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001040.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001040.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001050.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001050.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001060.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001060.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001070.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001070.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001080.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001080.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_001090.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001090.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_001100.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001100.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_001110.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001110.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_front/frame_001120.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001120.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001130.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001130.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001140.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001140.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001150.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001150.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001160.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001160.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001170.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001170.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001180.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001180.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001190.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001190.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_front/frame_001200.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_front_001200.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_001530.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001530.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_001540.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001540.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001550.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001550.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001560.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001560.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001570.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001570.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001580.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001580.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001590.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001590.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001600.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001600.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001610.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001610.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001620.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001620.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001630.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001630.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001640.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001640.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_001650.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001650.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001660.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001660.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001670.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001670.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001680.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001680.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001690.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001690.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001700.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001700.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001710.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001710.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001720.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001720.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001730.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001730.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_001740.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001740.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_001750.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001750.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001760.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001760.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001770.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001770.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001780.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001780.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001790.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001790.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001800.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001800.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001810.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001810.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001820.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001820.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001830.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001830.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_001840.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001840.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_001850.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001850.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_001860.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001860.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_001870.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001870.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001880.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001880.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001890.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001890.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001900.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001900.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001910.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001910.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001920.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001920.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001930.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001930.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001940.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001940.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001950.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001950.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_001960.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001960.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001970.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001970.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001980.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001980.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_001990.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_001990.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002000.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002000.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002010.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002010.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002020.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002020.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002030.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002030.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002040.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002040.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002050.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002050.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002060.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002060.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002070.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002070.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002080.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002080.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002090.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002090.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002100.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002100.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002110.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002110.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002120.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002120.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002130.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002130.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002140.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002140.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002150.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002150.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002160.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002160.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002170.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002170.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002180.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002180.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002190.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002190.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002200.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002200.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002210.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002210.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002220.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002220.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002230.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002230.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002240.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002240.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002250.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002250.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002260.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002260.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002270.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002270.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002280.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002280.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002290.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002290.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002300.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002300.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002310.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002310.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002320.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002320.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002330.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002330.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002340.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002340.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002350.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002350.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002360.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002360.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002370.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002370.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002380.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002380.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002390.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002390.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002400.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002400.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002410.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002410.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002420.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002420.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002430.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002430.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002440.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002440.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002450.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002450.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002460.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002460.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002470.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002470.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002480.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002480.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002490.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002490.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pipe_back/frame_002500.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002500.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002510.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002510.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002520.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002520.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002530.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002530.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002540.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002540.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002550.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002550.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002560.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002560.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002570.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002570.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002580.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002580.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pipe_back/frame_002590.png": {
+    "status": "approved",
+    "mask": "roi_masks/pipe_back_002590.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_002900.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_002900.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_002910.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_002910.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_002920.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_002920.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_002930.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_002930.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_002940.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_002940.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_002950.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_002950.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_002960.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_002960.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_002970.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_002970.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_002980.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_002980.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_002990.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_002990.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003000.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003000.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003010.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003010.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003020.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003020.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003030.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003030.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003040.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003040.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003050.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003050.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003060.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003060.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003070.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003070.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003080.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003080.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003090.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003090.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003100.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003100.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003110.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003110.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003120.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003120.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003130.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003130.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003140.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003140.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003150.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003150.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003160.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003160.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003170.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003170.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003180.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003180.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003190.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003190.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003200.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003200.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003210.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003210.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003220.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003220.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003230.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003230.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003240.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003240.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003250.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003250.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003260.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003260.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003270.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003270.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003280.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003280.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003290.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003290.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003300.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003300.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003370.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003370.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003380.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003380.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003390.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003390.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003400.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003400.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003410.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003410.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003420.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003420.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003430.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003430.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003440.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003440.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003450.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003450.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003460.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003460.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003470.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003470.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003480.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003480.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003490.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003490.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003500.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003500.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003510.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003510.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003520.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003520.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003530.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003530.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003540.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003540.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003550.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003550.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003560.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003560.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003570.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003570.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003580.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003580.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003590.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003590.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003600.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003600.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003610.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003610.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003620.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003620.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003630.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003630.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003640.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003640.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003650.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003650.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003660.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003660.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003670.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003670.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003680.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003680.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003690.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003690.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003700.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003700.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003710.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003710.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003720.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003720.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003730.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003730.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003740.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003740.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003750.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003750.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003760.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003760.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003770.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003770.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003780.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003780.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003850.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003850.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003860.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003860.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003870.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003870.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003880.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003880.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003890.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003890.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003900.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003900.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003910.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003910.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003920.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003920.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003930.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003930.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_003940.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003940.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003950.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003950.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003960.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003960.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003970.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003970.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003980.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003980.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_003990.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_003990.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004000.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004000.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004010.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004010.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004020.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004020.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004030.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004030.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004040.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004040.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004050.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004050.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004060.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004060.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004070.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004070.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004080.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004080.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004090.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004090.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004100.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004100.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004110.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004110.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004120.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004120.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004130.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004130.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004140.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004140.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004150.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004150.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004160.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004160.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004170.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004170.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004180.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004180.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004190.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004190.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004200.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004200.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004210.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004210.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004220.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004220.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004230.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004230.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004240.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004240.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004250.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004250.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004260.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004260.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004270.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004270.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004340.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004340.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004350.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004350.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004360.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004360.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004370.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004370.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004380.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004380.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004390.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004390.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004400.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004400.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004410.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004410.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004420.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004420.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004430.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004430.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004440.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004440.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004450.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004450.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004460.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004460.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004470.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004470.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004480.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004480.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004490.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004490.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004500.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004500.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004510.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004510.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004520.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004520.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004530.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004530.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004540.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004540.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004550.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004550.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004560.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004560.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004570.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004570.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004580.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004580.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004590.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004590.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004600.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004600.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004610.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004610.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004620.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004620.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004630.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004630.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004640.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004640.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004650.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004650.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004660.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004660.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004670.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004670.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004680.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004680.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004690.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004690.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_0/frame_004700.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004700.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004710.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004710.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004720.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004720.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004730.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004730.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004740.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004740.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_0/frame_004750.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_0_004750.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005390.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005390.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005400.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005400.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005410.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005410.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005420.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005420.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005430.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005430.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005440.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005440.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005450.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005450.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005460.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005460.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005470.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005470.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005480.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005480.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005490.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005490.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005500.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005500.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005510.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005510.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005520.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005520.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005530.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005530.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005540.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005540.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005550.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005550.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005560.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005560.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005570.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005570.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005580.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005580.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005590.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005590.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005600.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005600.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005610.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005610.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005620.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005620.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005630.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005630.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005640.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005640.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005650.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005650.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005660.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005660.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005670.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005670.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005680.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005680.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005690.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005690.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005700.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005700.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005710.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005710.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005720.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005720.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005730.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005730.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005740.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005740.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005750.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005750.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005760.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005760.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005770.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005770.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005780.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005780.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005790.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005790.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005870.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005870.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005880.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005880.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005890.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005890.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005900.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005900.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005910.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005910.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005920.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005920.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005930.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005930.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005940.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005940.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005950.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005950.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_005960.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005960.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005970.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005970.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005980.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005980.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_005990.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_005990.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006000.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006000.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006010.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006010.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006020.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006020.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006030.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006030.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006040.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006040.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006050.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006050.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006060.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006060.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006070.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006070.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006080.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006080.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006090.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006090.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006100.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006100.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006110.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006110.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006120.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006120.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006130.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006130.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006140.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006140.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006150.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006150.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006160.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006160.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006170.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006170.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006180.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006180.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006190.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006190.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006200.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006200.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006210.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006210.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006220.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006220.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006230.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006230.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006240.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006240.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006250.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006250.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006260.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006260.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006270.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006270.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006280.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006280.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006360.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006360.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006370.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006370.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006380.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006380.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006390.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006390.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006400.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006400.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006410.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006410.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006420.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006420.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006430.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006430.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006440.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006440.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006450.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006450.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006460.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006460.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006470.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006470.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006480.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006480.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006490.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006490.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006500.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006500.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006510.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006510.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006520.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006520.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006530.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006530.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006540.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006540.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006550.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006550.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006560.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006560.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006570.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006570.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006580.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006580.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006590.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006590.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006600.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006600.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006610.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006610.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006620.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006620.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006630.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006630.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006640.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006640.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006650.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006650.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006660.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006660.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006670.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006670.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006680.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006680.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006690.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006690.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006700.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006700.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006710.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006710.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006720.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006720.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006730.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006730.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006740.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006740.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006750.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006750.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006760.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006760.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006770.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006770.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006850.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006850.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006860.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006860.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006870.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006870.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006880.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006880.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006890.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006890.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006900.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006900.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006910.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006910.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006920.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006920.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006930.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006930.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006940.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006940.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_006950.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006950.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006960.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006960.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006970.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006970.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006980.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006980.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_006990.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_006990.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007000.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007000.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007010.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007010.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007020.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007020.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007030.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007030.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_007040.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007040.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007050.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007050.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007060.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007060.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007070.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007070.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007080.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007080.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007090.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007090.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007100.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007100.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007110.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007110.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_007120.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007120.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_007130.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007130.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007140.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007140.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007150.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007150.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007160.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007160.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007170.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007170.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007180.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007180.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007190.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007190.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007200.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007200.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_007210.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007210.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_007220.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007220.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_007230.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007230.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007240.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007240.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007250.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007250.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007260.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007260.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007270.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007270.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "geometry_fallback"
+  },
+  "images/pier_1/frame_007280.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007280.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_007290.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007290.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  },
+  "images/pier_1/frame_007300.png": {
+    "status": "approved",
+    "mask": "roi_masks/pier_1_007300.png",
+    "reviewer": "contact_sheet_20260926",
+    "method": "orb_affine"
+  }
+}

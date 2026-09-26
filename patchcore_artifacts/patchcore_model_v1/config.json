@@ -1,0 +1,28 @@
+{
+  "model": "PatchCore",
+  "backbone": "wide_resnet50_2",
+  "layers": [
+    "layer2",
+    "layer3"
+  ],
+  "tile_size": 256,
+  "tile_step": 128,
+  "preprocessing": "RGB ImageNet mean/std, no frame resize",
+  "source_dataset": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\patchcore_dataset_clean_20260925",
+  "source_manifest_sha256": "f275cb10ad348b22e4983a2c16515de68204ab9b4160e111afaf20b6fa514e20",
+  "source_capture": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231",
+  "bank_sizes": {
+    "pipe_front": 678,
+    "pipe_back": 684,
+    "pier_0": 800,
+    "pier_1": 800
+  },
+  "device": "cuda",
+  "python": "3.11.15",
+  "torch": "2.14.0+cu130",
+  "torchvision": "0.29.0+cu130",
+  "anomalib": "2.6.2",
+  "opencv": "5.0.0",
+  "coreset_ratio": 0.1,
+  "max_candidates_per_group": 8000
+}

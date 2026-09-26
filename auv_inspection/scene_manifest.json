@@ -1,0 +1,105 @@
+{
+  "map": "/Game/AUVInspection/Maps/AUVInspection",
+  "actor_count": 202,
+  "coordinate_system": "HoloOcean meters: x=UE.x/100, y=-UE.y/100, z=UE.z/100",
+  "defects": [
+    {
+      "id": 1,
+      "class": "crack",
+      "structure": "pipeline",
+      "severity": 0.65,
+      "enabled": true,
+      "location_m": [
+        -9.5,
+        0.455,
+        -10.3
+      ],
+      "label_source": "scene_ground_truth",
+      "stencil_id": 1
+    },
+    {
+      "id": 2,
+      "class": "crack",
+      "structure": "bridge_pier",
+      "severity": 0.8,
+      "enabled": true,
+      "location_m": [
+        -10.0,
+        -5.535,
+        -8.5
+      ],
+      "label_source": "scene_ground_truth",
+      "stencil_id": 2
+    },
+    {
+      "id": 3,
+      "class": "corrosion",
+      "structure": "pipeline",
+      "severity": 0.65,
+      "enabled": true,
+      "location_m": [
+        -0.5,
+        0.455,
+        -10.3
+      ],
+      "label_source": "scene_ground_truth",
+      "stencil_id": 3
+    },
+    {
+      "id": 4,
+      "class": "corrosion",
+      "structure": "bridge_pier",
+      "severity": 0.8,
+      "enabled": true,
+      "location_m": [
+        -10.0,
+        -5.535,
+        -6.3
+      ],
+      "label_source": "scene_ground_truth",
+      "stencil_id": 4
+    },
+    {
+      "id": 5,
+      "class": "biofouling",
+      "structure": "pipeline",
+      "severity": 0.65,
+      "enabled": true,
+      "location_m": [
+        8.5,
+        0.455,
+        -10.3
+      ],
+      "label_source": "scene_ground_truth",
+      "stencil_id": 5
+    },
+    {
+      "id": 6,
+      "class": "biofouling",
+      "structure": "bridge_pier",
+      "severity": 0.8,
+      "enabled": true,
+      "location_m": [
+        10.0,
+        -5.535,
+        -8.5
+      ],
+      "label_source": "scene_ground_truth",
+      "stencil_id": 6
+    },
+    {
+      "id": 7,
+      "class": "deformation",
+      "structure": "pipeline",
+      "severity": 0.5,
+      "enabled": true,
+      "location_m": [
+        7.5,
+        0,
+        -10.3
+      ],
+      "label_source": "scene_ground_truth"
+    }
+  ],
+  "simulation_only": true
+}

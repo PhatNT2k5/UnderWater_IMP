@@ -1,0 +1,33 @@
+BỘ DECAL VẾT NỨT TÓC NHỎ CHO UNREAL ENGINE
+
+Import 4 file T_PipeHairline_BaseColor, Normal, ORM, Opacity vào Content Browser.
+Tạo material M_PipeHairline với Material Domain = Deferred Decal,
+Blend Mode = Translucent, Shading Model = Default Lit.
+
+Nối các node:
+  BaseColor RGB -> Base Color
+  Normal RGB -> Normal
+  ORM R -> Ambient Occlusion
+  ORM G -> Roughness
+  ORM B -> Metallic
+  Opacity R -> Opacity
+
+Opacity đã đúng chiều trắng = hiện, đen = trong suốt: KHÔNG thêm OneMinus.
+Thiết lập texture / Sampler Type:
+  BaseColor: sRGB ON, Default / Color
+  Normal: sRGB OFF, Normalmap / Normal
+  ORM: sRGB OFF, Masks (no sRGB) / Masks
+  Opacity: sRGB OFF, Grayscale / Linear Grayscale
+
+Nếu dùng texture BaseColor_Alpha thay cho BaseColor, vẫn nối Opacity riêng.
+Texture Alpha chỉ đi kèm để tiện dùng ở công cụ khác.
+
+Kéo material vào Level để tạo Decal Actor. Xoay mũi tên chiếu vào ống.
+Đặt thử Decal Size X=1-3, Y=8-12, Z=8-12 (cm trong project dùng mặc định
+1 Unreal Unit = 1 cm); tùy đường kính ống mà thu tiếp. X là độ sâu chiếu.
+Giữ X nhỏ để không xuyên tới mặt sau. Nhìn thử dưới đúng ánh sáng mô phỏng.
+
+Vết nứt này là decal bề mặt, KHÔNG tạo lỗ thật trên mesh. Kích thước nhỏ
+và tương phản thấp giúp khó nhận ra từ xa; để robot 'phát hiện' rồi đánh dấu,
+bạn còn cần logic quét/camera, trigger hoặc Blueprint riêng. Texture tự nó
+không thể làm cho robot chỉ nhìn thấy khi đi ngang qua.

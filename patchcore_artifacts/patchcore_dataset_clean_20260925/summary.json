@@ -1,0 +1,16 @@
+{
+  "capture": "D:\\FPT_UNIVERSITY\\Ky 8\\IMP302\\UnderwaterDemo\\auv_inspection\\output\\clean_structures_20260925_164825_357231",
+  "capture_manifest_sha256": "48c3ce8681142feb310e3232a5fb0604748c17736c1ceeba9bb61deab4788933",
+  "route_completed": true,
+  "map_sha256": null,
+  "dataset_role": "train",
+  "scene_state": "clean",
+  "frames": 552,
+  "keyframes": 60,
+  "by_category": {
+    "pipe_front": 106,
+    "pipe_back": 107,
+    "pier_0": 168,
+    "pier_1": 171
+  }
+}

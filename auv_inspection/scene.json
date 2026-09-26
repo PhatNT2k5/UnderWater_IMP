@@ -1,0 +1,4 @@
+{
+  "defects": {"crack": true, "corrosion": true, "biofouling": true, "deformation": true},
+  "fog_density": 0.018
+}

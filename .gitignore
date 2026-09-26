@@ -1,0 +1,29 @@
+# Python environments and caches
+.venv/
+.venv-patchcore/
+__pycache__/
+*.py[cod]
+
+# Runtime evidence and derived PatchCore data.  Portable artifacts are staged
+# explicitly under patchcore_artifacts/.
+auv_inspection/output/
+auv_dashboard/output/
+
+# Local HoloOcean checkout, Unreal generated files and packaged worlds.
+holoocean/
+worlds/
+**/Binaries/
+**/DerivedDataCache/
+**/Intermediate/
+**/Saved/
+*.tmp
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.vs/
+.DS_Store
+Thumbs.db
+
+# FunplayMCP writes a machine-local token below this folder; Unreal Saved/ is
+# already ignored above. The plugin source in holoocean_overlay/ is versioned.

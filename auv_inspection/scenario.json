@@ -1,0 +1,26 @@
+{
+  "name": "AUVInspection",
+  "world": "/Game/AUVInspection/Maps/AUVInspection",
+  "main_agent": "auv0",
+  "ticks_per_sec": 30,
+  "frames_per_sec": false,
+  "env_min": [-35, -30, -13],
+  "env_max": [35, 30, 5],
+  "window_width": 1280,
+  "window_height": 720,
+  "agents": [{
+    "agent_name": "auv0",
+    "agent_type": "HoveringAUV",
+    "control_scheme": 1,
+    "location": [-14, 3.5, -10.3],
+    "rotation": [0, 0, -90],
+    "sensors": [
+      {"sensor_type": "PoseSensor", "socket": "IMUSocket"},
+      {"sensor_type": "VelocitySensor", "socket": "IMUSocket"},
+      {"sensor_type": "DepthSensor", "socket": "DepthSocket"},
+      {"sensor_type": "IMUSensor", "socket": "IMUSocket"},
+      {"sensor_type": "CameraSensor", "sensor_name": "InspectionCamera", "socket": "CameraLeftSocket", "Hz": 30,
+       "configuration": {"CaptureWidth": 640, "CaptureHeight": 480, "FovAngle": 80, "ExposureCompensation": 0, "BloomIntensity": 0, "MotionBlurIntensity": 0}}
+    ]
+  }]
+}
