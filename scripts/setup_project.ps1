@@ -66,6 +66,14 @@ function Get-ReferenceFingerprint {
     }
     finally { $digest.Dispose() }
 }
+function Write-JsonNoBom {
+    param([string]$Path, [object]$Value)
+
+    # Windows PowerShell 5.1 "Set-Content -Encoding utf8" adds a BOM that Python's utf-8 json reader rejects.
+    $json = $Value | ConvertTo-Json -Depth 100
+    [System.IO.File]::WriteAllText($Path, $json, (New-Object System.Text.UTF8Encoding($false)))
+}
+
 function Assert-CanWriteFile {
     param([string]$Path)
 
@@ -125,7 +133,7 @@ Assert-CanWriteFile $thresholdDestination
 Copy-Item -LiteralPath (Join-Path $artifactRoot "patchcore_thresholds_v1.json") -Destination $thresholdDestination -Force
 $thresholds = Get-Content -LiteralPath $thresholdDestination -Raw | ConvertFrom-Json
 $thresholds.model_dir = Join-Path $repositoryRoot "auv_inspection\output\patchcore_model_v1"
-$thresholds | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $thresholdDestination -Encoding utf8
+Write-JsonNoBom $thresholdDestination $thresholds
 
 $evaluationDestination = Join-Path $repositoryRoot "auv_inspection\output\patchcore_evaluation_B_v1.json"
 Assert-CanWriteFile $evaluationDestination
@@ -136,6 +144,6 @@ $evaluation.reference_dataset = $referenceDestination
 $evaluation.thresholds = $thresholdDestination
 $evaluation.reference_sha256 = Get-ReferenceFingerprint $referenceDestination
 $evaluation.thresholds_sha256 = (Get-FileHash -LiteralPath $thresholdDestination -Algorithm SHA256).Hash.ToLowerInvariant()
-$evaluation | ConvertTo-Json -Depth 100 | Set-Content -LiteralPath $evaluationDestination -Encoding utf8
+Write-JsonNoBom $evaluationDestination $evaluation
 
 Write-Host "Overlay installed. Open $enginePath\Holodeck.uproject with Unreal Engine 5.3, build if requested, then run auv_dashboard\run_dashboard.py."
