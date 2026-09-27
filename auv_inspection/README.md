@@ -116,13 +116,7 @@ Chẩn đoán tracker trên chính 552 ảnh train sạch và A cũ: điều ki�
 
 Mở `holoocean/engine/Holodeck.uproject`, tìm `Content/AUVInspection/Maps/AUVInspection` trong Content Browser. Actor `AUV_EditorPreview_RuntimeSpawnedByPython` chỉ giúp bố trí trong editor; AUV vật lý thật được Python sinh khi chạy demo.
 
-Để dựng lại, đóng map trong editor trước, sửa `scene.json` rồi chạy:
-
-```powershell
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\rebuild.py
-```
-
-Script chỉ dựng lại map `AUVInspection`. Bản `.umap` trước đó được chép vào `output/backups/`. Chỉnh sửa thủ công trong map này sẽ bị thay thế khi rebuild; map mẫu `ExampleLevel`/`TestWorld` được giữ nguyên. Không đổi cấu hình mặc định hay mã C++ của HoloOcean.
+Map hiện tại đã được chỉnh thủ công và là nguồn sự thật; chỉnh trực tiếp trong editor thay vì dựng lại. Launcher `rebuild.py` của generator cũ không có trong repo, nên không có lệnh rebuild chính thức. `build_map.py` + `scene.json` chỉ còn để tham khảo: generator này xóa toàn bộ actor rồi dựng lại từ `scene.json`, tức là **sẽ mất mọi chỉnh sửa thủ công** (nước Dam, decal, vị trí công trình). Không chạy nếu chưa thống nhất rõ ràng việc tái tạo map.
 
 ## Kết quả và giới hạn
 

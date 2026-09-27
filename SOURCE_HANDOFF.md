@@ -54,8 +54,10 @@ UnderwaterDemo/
 │   ├── test_inspection_route.py       # Unit test hình học của tuyến
 │   ├── check_flashlight_runtime.py    # Harness kiểm tra tắt/bật đèn runtime
 │   ├── check_detection_runtime.py     # QA hai mặt ống, tự tiếp tục sau cảnh báo
-│   ├── rebuild.py                     # Launcher dựng lại map qua Unreal commandlet
-│   ├── build_map.py                   # Unreal Python thực sự tạo actor/material/map
+│   ├── build_map.py                   # Unreal Python generator map cũ (launcher rebuild.py không có trong repo)
+│   ├── create_validation_maps.py      # Unreal Python: tạo bản sao map sạch/B, giữ nguyên map A
+│   ├── finalize_validation_b.py       # Unreal Python: hoàn thiện năm vết của map B
+│   ├── inspect_validation_assets.py   # Unreal Python read-only: đọc domain/blend material hư hại
 │   ├── scenario.json                  # Scenario runtime, agent, sensor, exposure
 │   ├── scene.json                     # Input cho build_map.py
 │   ├── scene_manifest.json            # Manifest của lần build map cũ
@@ -313,16 +315,31 @@ Harness runtime ngắn để so sánh trạng thái tắt/bật đèn; không ph
   - Monkey-patch environment và route bằng `unittest.mock.patch`, chạy headless 360 tick với 100 target giữ nguyên.
   - Harness có thể tạo bằng chứng vết nứt nếu frame đạt ngưỡng detector; ảnh lịch sử trong `ROUTE_VALIDATION.md` không đại diện cho recorder mặc định hiện tại.
 
-### `auv_inspection/rebuild.py`
+### `auv_inspection/rebuild.py` (không có trong repo)
 
-Launcher ngoài Unreal. **Có thể ghi đè toàn bộ chỉnh sửa thủ công trong map.**
+File này **không tồn tại** trong repo đã publish và không có trong lịch sử Git; `VALIDATION.md` (lịch sử 2026-09-19) vẫn nhắc tới nó, còn `auv_inspection/README.md` đã bỏ lệnh chạy. Theo mô tả trước đây, đây là launcher ngoài Unreal chạy `build_map.py` qua `PythonScriptCommandlet` và **có thể ghi đè toàn bộ chỉnh sửa thủ công trong map**. Không tạo lại hoặc chạy launcher này nếu người dùng chưa yêu cầu rõ ràng việc tái tạo map.
 
-- `main() -> None`
-  - Parse `--editor`, nếu thiếu thì tìm `UnrealEditor-Cmd.exe` của UE 5.3 từ Epic manifest.
-  - Tạo temp directory có path ngắn, copy `build_map.py`, đặt `AUV_INSPECTION_ROOT`, rồi chạy `PythonScriptCommandlet` với `check=True`.
-  - Việc backup `.umap` và dựng actor thật sự diễn ra trong `build_map.py`.
+### `auv_inspection/create_validation_maps.py`
 
-Không chạy `rebuild.py` nếu người dùng chỉ sửa map thủ công hoặc chưa xác nhận muốn tái tạo map.
+Script chỉ chạy trong Unreal Python (`import unreal`), không phải runtime.
+
+- `create_variants() -> None`
+  - Hash `AUVInspection.umap` gốc, rồi với từng role `clean`/`test_b` tạo bản sao `AUVInspection_PatchCoreClean_20260926_v3` / `AUVInspection_PatchCoreB_20260926_v3`; từ chối ghi đè map đích đã có.
+  - Nạp lại đúng world đích trước khi sửa. `clean`: xóa mọi `DecalActor`. `test_b`: chỉ chấp nhận `DecalActor_1/2/6`, dời sang vị trí cố định trong source; decal lạ làm dừng lỗi.
+  - Lưu map đích, xác minh hash map gốc không đổi, ghi `output/validation_maps_20260926.json`.
+- Module gọi `create_variants()` ngay khi chạy. Đã dùng một lần; chạy lại sẽ dừng vì map đích đã tồn tại.
+
+### `auv_inspection/finalize_validation_b.py`
+
+Script Unreal Python cấp module (không có hàm), chạy sau `create_validation_maps.py`.
+
+- Nạp map `AUVInspection_PatchCoreB_20260926_v3`, xác nhận đúng world; dừng nếu đã có actor `B_Hole*` (tránh chạy hai lần).
+- Đổi scale (x0,8 / x1,2 / x0,8) và roll (+20 / -20 / +15 độ) của `DecalActor_1/2/6`; spawn thêm `B_HoleSmall` và `B_HoleLarge` dùng material `M_PipeBreak` trên mặt ống.
+- Lưu map B, xác minh hash map A gốc không đổi, ghi inventory decal vào `output/validation_B_inventory.json`.
+
+### `auv_inspection/inspect_validation_assets.py`
+
+Script Unreal Python read-only: đọc class, `material_domain`, `blend_mode` của `M_HairCrack`, `M_PipeBreak`, `M_Crack` và ghi `output/validation_materials.json`. Không sửa asset.
 
 ### `auv_inspection/build_map.py`
 
@@ -342,6 +359,8 @@ Script chỉ chạy trong Unreal Python (`import unreal`); đơn vị hình họ
   - Tạo material, seabed, backdrop, ống/flange/support, hai trụ + dầm, defect, đá, light, fog, mặt nước và manager.
   - Tạo AUV preview chỉ dành cho editor; AUV vật lý thật vẫn do Python/HoloOcean spawn.
   - Save level/assets và ghi lại `scene_manifest.json`.
+
+Launcher `rebuild.py` từng gọi script này không có trong repo; không có lệnh chính thức nào để chạy `build_map.py` trong bản hiện tại.
 
 Lưu ý: map hiện tại đã được chỉnh thủ công sau lần sinh từ `build_map.py`; vì vậy `scene.json` và `scene_manifest.json` không mô tả đầy đủ state hiện tại của `.umap`.
 
@@ -531,14 +550,25 @@ Từ root `UnderwaterDemo`:
 
 # QA live cả hai mặt ống, tự tiếp tục cảnh báo, không mở cửa sổ
 & "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\check_detection_runtime.py
-
-# NGUY HIỂM VỚI MAP SỬA THỦ CÔNG: chỉ chạy khi người dùng yêu cầu rebuild
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\rebuild.py
 ```
+
+Không có lệnh rebuild map: `auv_inspection/rebuild.py` không có trong repo (xem mục 4).
 
 ## 8. Trạng thái đã xác minh và giới hạn
 
-- Dashboard Tkinter ba-stage đã chạy live tại `auv_dashboard/output/session_20260923_220549_429030/`: 9/9 smoke QA đạt, camera robot 282×230 hiển thị trực tiếp, ba ô dưới đúng CLAHE/mask/annotation, Unreal nhúng trực tiếp, route/marker cảnh báo cập nhật, pause/continue/stop sạch và worker exitcode 0. Đã xem `dashboard_alert.png`; audit năm file bảo vệ trước/sau trùng. Năm unit test đạt. Hai lượt trước đó chỉ trượt ngưỡng QA pause cũ 2 tick vì đúng 3 tick preview đã nằm trong queue; mọi điều kiện khác đều đạt. Ngưỡng hiện hành là 3 tick, tương ứng một gói preview 12 FPS.
+### PatchCore (chỉ offline, chưa live Unreal)
+
+- Hiệu chỉnh trên A3 + lượt sạch calibration độc lập: 3/3 ID, 0 sự kiện sạch; ngưỡng front/back/pier0/pier1 = `61.55155/53.06446/58.91152/54.33251` trong `patchcore_thresholds_v1.json`.
+- Nghiệm thu B với nhãn đã khóa trước khi score (`patchcore_evaluation_B_v1.json`): 5/5 vết, 4/4 vết nhỏ/mảnh, 0 báo nhầm trên lượt sạch test. Classical trên cùng B: 1/4 vết ống, không hỗ trợ trụ.
+- Client/service JSON-lines riêng tiến trình replay 277 frame B: tất cả `ready`, khớp toàn bộ tick/box offline (`patchcore_worker_B_offline/report.json`). Thời gian score offline khoảng 62-106 ms/frame trên RTX 4060; chưa đo khi chạy đồng thời Unreal.
+- `default_detector()` trả PatchCore khi `approval_gate.approval_matches()` xác nhận hash ngưỡng, model, ROI tham chiếu và điều kiện nghiệm thu B. Bản portable của ngưỡng/model/dataset sạch/báo cáo B nằm trong `patchcore_artifacts/`.
+- **Chưa xác minh:** PatchCore chạy live trên dashboard cùng Unreal (FPS, pause/continue, độ trễ cảnh báo, tự tiếp tục 5 giây). Người dùng tự thực hiện.
+- Giới hạn: chỉ năm vết, mô phỏng gần như tất định, ROI dùng nhánh `pose_match` vì route gần trùng; chưa chứng minh tổng quát khi ánh sáng, góc nhìn hoặc nhiễu thay đổi (xem `auv_inspection/NOISE_ROBUSTNESS_TODO.md`, `auv_inspection/PATCHCORE_HANDOFF.md`).
+- Unit test PatchCore trong `auv_inspection/patchcore_data/tests/` hiện có 7 test method (tracker 2, approval gate 1, calibration budget 3, label integrity 1); không phải live validation.
+
+### Classical, runtime và dashboard
+
+- Dashboard Tkinter ba-stage đã chạy live với Classical tại `auv_dashboard/output/session_20260923_220549_429030/`: 9/9 smoke QA đạt, camera robot 282×230 hiển thị trực tiếp, ba ô dưới đúng CLAHE/mask/annotation, Unreal nhúng trực tiếp, route/marker cảnh báo cập nhật, pause/continue/stop sạch và worker exitcode 0. Đã xem `dashboard_alert.png`; audit năm file bảo vệ trước/sau trùng. Tại thời điểm đó 5 unit test dashboard đạt; hiện `test_dashboard.py` có 8 test (xem mục 4). Hành vi tự tiếp tục sau 5 giây ra đời sau lượt live này, mới chỉ có unit test. Hai lượt trước đó chỉ trượt ngưỡng QA pause cũ 2 tick vì đúng 3 tick preview đã nằm trong queue; mọi điều kiện khác đều đạt. Ngưỡng hiện hành là 3 tick, tương ứng một gói preview 12 FPS.
 - Dashboard dùng Tkinter + Pillow + pywin32 + OpenCV/NumPy đã có trong `mainenv`, không cài dependency mới. Nhúng cửa sổ chỉ hỗ trợ Windows; 12 fps là mức tối đa preview, tốc độ thực tế phụ thuộc GPU. Chế độ manual dùng điều khiển gốc nhưng chưa kiểm tra toàn bộ phím bằng tay trong UI mới; phím chỉ được nhận khi Tk có focus, cần nhấp vùng giao diện nếu vừa tương tác với cảnh Unreal. Forced shutdown sau 12 giây có thể không lưu đủ report.
 - Bản sửa mặt sau ngày 23/09: replay `run_20260923_200549_863948` giữ 3/3 ảnh hư hại mặt trước và loại 11/11 ảnh báo nhầm mặt sau. `tests/test_crack_detection.py` + `tests/test_camera_regression.py` qua 10 test method, gồm thêm 3 biến thể lật ngang. Dữ liệu này dùng để hiệu chỉnh, không phải accuracy trên tập độc lập.
 - QA live `output/run_20260923_201417_730981/` đã xong cả hai mặt ống (106 waypoint của route QA): 1.062 frame mặt trước, 1.116 frame mặt sau; 3 cảnh báo đúng mặt trước tại tick 148/497/892, không ứng viên hoặc cảnh báo mặt sau. Đã xem các ảnh event và frame mặt sau. `output/detector_qa_20260923_201417/summary.json` cùng `frames.json`/ảnh cảm biến là bằng chứng. SHA-256 map trước/sau trùng `82f86647af711b386defb663dc6786c9edee9558991cc7cdc4e40ff7ad6ae78a`. Không chạy phần trụ trong harness này.
@@ -579,17 +609,19 @@ Checklist trước khi bàn giao:
 
 - `2026-09-27`: Sửa `Copy-OverlayDirectory()` trong `scripts/setup_project.ps1`: `Copy-Item -LiteralPath <src>\*` không mở rộng wildcard nên bốn thư mục (map/asset AUVInspection, plugin FunplayMCP, model và dataset PatchCore) được tạo rỗng, khiến `Update-ReferenceManifest()` lỗi thiếu `manifest.jsonl`. Nay liệt kê con bằng `Get-ChildItem -LiteralPath` rồi copy, và dừng rõ lỗi nếu nguồn rỗng. Đã thử hàm trên scratchpad (572/572 file, chạy lại với `-Force` không lồng thư mục); chưa chạy lại toàn bộ script trên máy người dùng. Không đổi artifact, map hay runtime.
 
+- `2026-09-26`: Đồng bộ tài liệu với repo đã publish: đánh dấu `auv_inspection/rebuild.py` không có trong repo và bỏ lệnh rebuild ở mục 7; thêm mô tả `create_validation_maps.py`, `finalize_validation_b.py`, `inspect_validation_assets.py` vào mục 2 và 4; tách mục 8 thành PatchCore (offline, chưa live) và Classical/runtime/dashboard; sửa số test dashboard (hiện 8) và thêm ghi chú lỗi thời cho các dòng nhật ký cũ về GitHub và `default_detector()`; `auv_inspection/README.md` bỏ lệnh `rebuild.py`, thay bằng cảnh báo generator cũ xóa chỉnh sửa thủ công. Chỉ sửa tài liệu, không chạy test, không đổi code, artifact hay map.
+
 - `2026-09-26`: Thêm `PROJECT_STATUS_AND_ROADMAP.md` tổng hợp kiến trúc, phần đã làm, kết quả offline PatchCore, giới hạn xác minh, lộ trình xử lý nhiễu và đề xuất nghiệm thu. Không thay đổi code, artifact, detector, route hoặc map.
 
 - `2026-09-26`: Dashboard tự giữ pose 5 giây khi runtime phát hiện hư hại, giữ lại ảnh bằng chứng đúng tick phát hiện rồi tự gửi lệnh tiếp tục. Nút Tiếp tục/Space chỉ bỏ qua thời gian chờ. Thêm countdown vào packet/UI và unit test thuần cho thời lượng; chưa chạy live Unreal cho thay đổi này. Không sửa detector, scenario, route hoặc map thủ công.
 
-- `2026-09-26`: Chuẩn bị cấu trúc chia sẻ GitHub: thêm README, `.gitignore`, `.gitattributes` Git LFS và `scripts/setup_project.ps1`; script pin HoloOcean upstream `49e70552`, cài overlay map/asset/C++/plugin và artifact PatchCore. `worlds/`, checkout `holoocean/`, output/log, môi trường ảo và cache Unreal không được version để tránh upload 6.1 GB package và dữ liệu máy cục bộ. Chưa khởi tạo/commit/push GitHub tại thời điểm cập nhật.
+- `2026-09-26`: Chuẩn bị cấu trúc chia sẻ GitHub: thêm README, `.gitignore`, `.gitattributes` Git LFS và `scripts/setup_project.ps1`; script pin HoloOcean upstream `49e70552`, cài overlay map/asset/C++/plugin và artifact PatchCore. `worlds/`, checkout `holoocean/`, output/log, môi trường ảo và cache Unreal không được version để tránh upload 6.1 GB package và dữ liệu máy cục bộ. Chưa khởi tạo/commit/push GitHub tại thời điểm cập nhật. *(Đã lỗi thời: repo đã được publish sau đó, xem commit `a891431`.)*
 
 - `2026-09-26`: Thêm `auv_inspection/NOISE_ROBUSTNESS_TODO.md` ghi backlog nhiễu quan sát chưa triển khai: noise/haze, nước đục, particle, bọt khí, blur, lệch pose, ánh sáng và sonar; gồm quality gate, ràng buộc xử lý thống nhất dữ liệu sạch/live và tiêu chí nghiệm thu. Không đổi runtime, model artifact, ngưỡng hay map.
 
 - `2026-09-26`: Thêm `auv_inspection/PATCHCORE_GUIDE_VI.md` cho thành viên nhóm: mô tả dataset/ROI bốn nhóm, memory bank, fit chỉ từ ảnh sạch, calibration/test, pipeline inference, heatmap, tracker và giới hạn với hư hại mới. Không sửa runtime, model artifact, ngưỡng hay map.
 
-- `2026-09-26`: Hoàn tất B 552 frame tại `capture_test_mixed_20260926_130548_302454`, duyệt 552 ROI và năm ID bằng ảnh raw/overlay, đánh dấu mép mờ unclear, khóa nhãn trước score. `patchcore_evaluation_B_v1.json` đạt 5/5 vết, 4/4 nhỏ/mảnh, 0 báo nhầm trên sạch test; Classical 1/4 vết ống, trụ không hỗ trợ. Đã xem bảy box sự kiện; client/service thật replay 277 frame B đều ready và khớp toàn bộ tick/box offline (`patchcore_worker_B_offline/report.json`). Unit PatchCore 7/7 và dashboard 7/7; default_detector() trả PatchCore, chưa mở UI/live Unreal PatchCore theo yêu cầu người dùng. Thêm `auv_inspection/PATCHCORE_HANDOFF.md` với kết quả, giới hạn năm vết/mô phỏng gần tất định và hướng dẫn test dashboard. Source map A giữ hash daba22ec...; các bản riêng sạch/B đã được người dùng cho phép.
+- `2026-09-26`: Hoàn tất B 552 frame tại `capture_test_mixed_20260926_130548_302454`, duyệt 552 ROI và năm ID bằng ảnh raw/overlay, đánh dấu mép mờ unclear, khóa nhãn trước score. `patchcore_evaluation_B_v1.json` đạt 5/5 vết, 4/4 nhỏ/mảnh, 0 báo nhầm trên sạch test; Classical 1/4 vết ống, trụ không hỗ trợ. Đã xem bảy box sự kiện; client/service thật replay 277 frame B đều ready và khớp toàn bộ tick/box offline (`patchcore_worker_B_offline/report.json`). Unit PatchCore 7/7 và dashboard 7/7 (sau đó thêm test countdown, hiện 8 test); default_detector() trả PatchCore, chưa mở UI/live Unreal PatchCore theo yêu cầu người dùng. Thêm `auv_inspection/PATCHCORE_HANDOFF.md` với kết quả, giới hạn năm vết/mô phỏng gần tất định và hướng dẫn test dashboard. Source map A giữ hash daba22ec...; các bản riêng sạch/B đã được người dùng cho phép.
 
 - `2026-09-26`: Hiệu chỉnh trên A3 và lượt sạch độc lập hoàn tất: ngưỡng front/back/pier0/pier1 = 61.55155/53.06446/58.91152/54.33251, phát hiện 3/3 ID A và 0 sự kiện sạch calibration; lưu `output/patchcore_thresholds_v1.json`, chưa phải kết quả test. Lượt sạch test `capture_test_clean_20260926_125649_289753` đủ 552 frame, đã score. B lần đầu dừng `stopped_by_user` sau 466 frame; không dùng làm tập test hoàn chỉnh. `run_inspection.main()/run()` thêm cờ opt-in `--ignore-global-escape` chỉ hợp lệ cho capture headless, tránh Esc ở ứng dụng khác dừng thu ảnh; Ctrl+C vẫn hoạt động, dashboard/default không đổi. Đang thu lại B tại `capture_test_mixed_20260926_130548_302454` với cờ này.
 - `2026-09-26`: Hoàn tất lượt sạch calibration `capture_calibration_clean_20260926_125138_366081` (552 frame, đủ 359 waypoint). Dataset `patchcore_dataset_A3_20260926` giữ ba ID theo yêu cầu mới; chuyển nhãn/mask đã duyệt sau đối chiếu 552 frame với A cũ, tối đa 9 pixel chênh >8/frame, lưu audit, không thay dữ liệu A cũ. Dataset sạch calibration cũng khớp train sạch trong giới hạn này và chuyển mask đã duyệt; đây là lượt độc lập nhưng mô phỏng gần như tất định, chưa chứng minh tổng quát dưới thay đổi ánh sáng/góc nhìn. A3 đã score 552 frame, median 106 ms/frame khi chia sẻ GPU với capture. `inspect_validation_assets.py` đọc material domain; `finalize_validation_b.py` nạp riêng map B, đổi hướng/scale ba vết và thêm hai decal M_PipeBreak nhỏ/lớn, lưu inventory và xác minh hash A không đổi. B có năm ID, chưa xem score hay nghiệm thu. Lượt sạch test `capture_test_clean_20260926_125649_289753` và score sạch calibration đang chạy tại thời điểm cập nhật. Dashboard test vẫn dành cho người dùng.
@@ -602,7 +634,7 @@ Checklist trước khi bàn giao:
 - `2026-09-26`: Duyệt 27 vùng thay đổi trên A hiện tại bằng ảnh ghép sạch/A và overlay nhãn; lưu `damage_labels.json` đầy đủ theo năm ID, trong đó chỉ ba ID có frame nhìn thấy và hai ID trên trụ cao vẫn không quan sát đủ. `load_labels()` đã kiểm tra cấu trúc đầy đủ; chưa dùng nhãn này để hiệu chỉnh chính thức do thiếu calibration sạch và hai decal chưa thấy.
 - `2026-09-26`: Smoke thật client/service PatchCore riêng tiến trình trên 33 frame đã chụp (ống/trụ), tất cả trả `ready`, bốn cảnh báo tại đúng tick/box của tính offline, median 83,8 ms/frame; ngưỡng chỉ là chẩn đoán. Screenshot editor người dùng cho thấy ba gizmo decal bên trụ nhưng không chứng minh vết trong cảm biến; truy vấn read-only xác nhận hai decal trên vẫn chồng x/y, z lệch 10 cm và scale nhỏ hơn decal trụ thấp. Không chỉnh map.
 - `2026-09-26`: Sửa preview để hiệu chỉnh offset PoseSensor ~0,123 m sau teleport; live headless một pose tick 4000 đạt sai lệch vị trí 0,0 m/yaw ~0,016° ở `output/preview_poses_20260926_022701_702185/`. Lượt capture mới ghi thêm roll/pitch/yaw từ ma trận sensor; capture cũ chưa có roll/pitch nên so sánh pixel vẫn nhiễu do hướng/ánh sáng khác. Unit capture/preview 5/5 và py_compile đạt. Map giữ nguyên.
-- `2026-09-26`: Ràng buộc mặc định PatchCore với hash file ngưỡng, sáu artifact model và dataset ROI tham chiếu của chính tập B đã đánh giá; sửa `evaluate.py` ghi các hash này và dashboard dùng cổng chung. Test cổng mới cùng bốn test PatchCore cũ 5/5, dashboard 7/7, `default_detector()` hiện vẫn Classical, py_compile đạt. Hash model thật mất khoảng 0,07 giây, ROI tham chiếu khoảng 0,05 giây. Chưa tạo báo cáo B vì dữ liệu test chưa có.
+- `2026-09-26`: Ràng buộc mặc định PatchCore với hash file ngưỡng, sáu artifact model và dataset ROI tham chiếu của chính tập B đã đánh giá; sửa `evaluate.py` ghi các hash này và dashboard dùng cổng chung. Test cổng mới cùng bốn test PatchCore cũ 5/5, dashboard 7/7, `default_detector()` hiện vẫn Classical, py_compile đạt. *(Đã lỗi thời: sau nghiệm thu B, `default_detector()` trả PatchCore.)* Hash model thật mất khoảng 0,07 giây, ROI tham chiếu khoảng 0,05 giây. Chưa tạo báo cáo B vì dữ liệu test chưa có.
 - `2026-09-25`: Bổ sung `--capture-clean-structures` để thu cả bốn tầng vòng quanh mỗi trụ; phân nhóm `pipe_front`, `pipe_back`, `pier_0`, `pier_1` trong ảnh/metadata/report và giữ `--capture-clean-pipe` cho trường hợp chỉ cần ống. Cập nhật test và README, không chỉnh map/route/detector.
 - `2026-09-25`: Thêm `--capture-clean-pipe`/`--capture-every-ticks` vào runtime auto để lưu frame camera gốc trên hai mặt ống vào folder riêng và bỏ qua cảnh báo; thêm metadata JSONL, báo cáo số ảnh theo mặt, README và unit test file ảnh. Giữ nguyên route, detector, scenario và map thủ công; live capture chờ người dùng chuẩn bị map sạch.
 - `2026-09-23`: Bỏ ô “Ảnh gốc” trùng với camera robot khỏi hàng xử lý Tkinter, mở camera robot từ 218×184 lên 282×230 và ánh xạ `frames[1:4]` thành CLAHE/mask/kết quả. Vẫn lưu đủ bốn PNG bằng chứng. Hiệu chỉnh smoke pause từ 2 lên 3 tick theo một gói queue 12 FPS; unit 5/5 và live smoke 9/9 qua, ảnh/audit xác nhận source bảo vệ không đổi.
