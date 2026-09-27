@@ -41,6 +41,9 @@ FINAL_YAW_TOLERANCE_DEG = 8.0
 FINAL_HOLD_TICKS = 15
 CAMERA_WARMUP_TICKS = 30
 CRACK_REARM_DISTANCE_M = 2.0
+ENGINE_VERSION = "5.3"
+ENGINE_REGISTRY_KEY = rf"SOFTWARE\EpicGames\Unreal Engine\{ENGINE_VERSION}"
+EDITOR_ENV_VAR = "AUV_UNREAL_EDITOR"
 KEY_CODES = {
     "forward": ord("W"),
     "backward": ord("S"),
@@ -63,16 +66,42 @@ class EditorEnvironment(HoloOceanEnvironment):
         return 60
 
 
+def launcher_engine_dir() -> Path | None:
+    """Return the UE install directory registered by the Epic Games Launcher."""
+    manifest = Path(os.environ.get("PROGRAMDATA", "C:/ProgramData")) / "Epic/UnrealEngineLauncher/LauncherInstalled.dat"
+    if not manifest.is_file():
+        return None
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    match = next((i for i in data.get("InstallationList", []) if i["AppName"] == f"UE_{ENGINE_VERSION}"), None)
+    return Path(match["InstallLocation"]) if match else None
+
+
+def registry_engine_dir() -> Path | None:
+    """Return the UE install directory from the engine-version registry key."""
+    try:
+        import winreg
+    except ImportError:
+        return None
+    try:
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, ENGINE_REGISTRY_KEY) as key:
+            value, _ = winreg.QueryValueEx(key, "InstalledDirectory")
+    except OSError:
+        return None
+    return Path(value)
+
+
 def find_editor(explicit: str | None) -> Path:
-    if explicit:
-        editor = Path(explicit)
+    """Resolve UnrealEditor.exe: --editor, env var, Epic Launcher, then registry."""
+    override = explicit or os.environ.get(EDITOR_ENV_VAR)
+    if override:
+        editor = Path(override)
     else:
-        manifest = Path(os.environ.get("PROGRAMDATA", "C:/ProgramData")) / "Epic/UnrealEngineLauncher/LauncherInstalled.dat"
-        data = json.loads(manifest.read_text(encoding="utf-8"))
-        match = next((i for i in data["InstallationList"] if i["AppName"] == "UE_5.3"), None)
-        if not match:
-            raise FileNotFoundError("UE 5.3 not found; pass --editor path/to/UnrealEditor.exe")
-        editor = Path(match["InstallLocation"]) / "Engine/Binaries/Win64/UnrealEditor.exe"
+        engine_dir = launcher_engine_dir() or registry_engine_dir()
+        if engine_dir is None:
+            raise FileNotFoundError(
+                f"UE {ENGINE_VERSION} not found; pass --editor or set {EDITOR_ENV_VAR} "
+                "to path/to/UnrealEditor.exe")
+        editor = engine_dir / "Engine/Binaries/Win64/UnrealEditor.exe"
     if not editor.is_file():
         raise FileNotFoundError(editor)
     return editor
@@ -652,7 +681,8 @@ def run(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--editor", help="Path to UnrealEditor.exe")
+    parser.add_argument("--editor", help=f"Path to UnrealEditor.exe (default: ${EDITOR_ENV_VAR}, "
+                        "Epic Launcher, then the UE registry key)")
     parser.add_argument("--world", help="Map asset path under /Game/AUVInspection/Maps/ for an isolated capture")
     parser.add_argument("--steps", type=int, default=60000)
     parser.add_argument("--headless", action="store_true")

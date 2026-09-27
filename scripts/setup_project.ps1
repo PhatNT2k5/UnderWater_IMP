@@ -19,8 +19,13 @@ function Copy-OverlayDirectory {
     if ((Test-Path -LiteralPath $Destination) -and -not $Force) {
         throw "Destination overlay already exists: $Destination. Review it first, then rerun with -Force."
     }
+    # -LiteralPath does not expand "*", so enumerate children explicitly.
+    $items = @(Get-ChildItem -LiteralPath $Source -Force)
+    if ($items.Count -eq 0) {
+        throw "Overlay source is empty: $Source. Run 'git lfs pull' and retry."
+    }
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
-    Copy-Item -LiteralPath (Join-Path $Source "*") -Destination $Destination -Recurse -Force
+    $items | Copy-Item -Destination $Destination -Recurse -Force
 }
 
 function Update-ReferenceManifest {
