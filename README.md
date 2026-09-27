@@ -52,15 +52,39 @@ Sau đó mở `holoocean\engine\Holodeck.uproject` trong Unreal Engine 5.3 và b
 Content/AUVInspection/Maps/AUVInspection.umap
 ```
 
-## Chạy dashboard
+Build lần đầu cần Visual Studio 2022 (workload C++), **.NET Framework SDK 4.6+** và toolset **MSVC v14.38**. MSVC 14.40 trở lên báo lỗi `C4668 '__has_feature'` trong header UE 5.3; khi đó chỉ định 14.38 trong `%APPDATA%\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml` (`<WindowsPlatform><CompilerVersion>14.38.xxxxx</CompilerVersion></WindowsPlatform>`, lấy đúng số thư mục trong `VC\Tools\MSVC\`).
 
-Sau khi HoloOcean đã build và Python runtime được cài theo tài liệu `auv_inspection/README.md`:
+Runtime tìm `UnrealEditor.exe` theo thứ tự: `--editor`, biến môi trường `AUV_UNREAL_EDITOR`, manifest Epic Launcher, rồi registry `HKLM\SOFTWARE\EpicGames\Unreal Engine\5.3` (`InstalledDirectory`). Nếu UE cài ngoài Launcher, đặt một trong hai giá trị cuối để dashboard chạy được.
+
+## Môi trường Python
+
+`mainenv` cho Unreal/HoloOcean/dashboard cần **Python 3.11+** (`approval_gate` dùng `hashlib.file_digest`):
 
 ```powershell
-python .\auv_dashboard\run_dashboard.py
+conda create -n mainenv python=3.11 -y
+conda activate mainenv
+pip install numpy scipy matplotlib pywin32 opencv-python pillow
 ```
 
-PatchCore cần `.venv-patchcore` theo `auv_inspection/patchcore_data/requirements-patchcore.txt`. Artifact model, ngưỡng và ảnh sạch tham chiếu được setup script chép sẵn từ `patchcore_artifacts/`.
+HoloOcean client được import trực tiếp từ `holoocean/client/src`, không cần `pip install`. Nếu conda không nằm ở `%USERPROFILE%\.conda`, các lệnh dạng `& "$env:USERPROFILE\.conda\envs\mainenv\python.exe"` trong tài liệu con được thay bằng `python` sau `conda activate mainenv`.
+
+PatchCore chạy trong venv riêng tại `.venv-patchcore` (dashboard gọi đúng `.venv-patchcore\Scripts\python.exe`), tạo bằng Python 3.11:
+
+```powershell
+python -m venv .venv-patchcore
+.\.venv-patchcore\Scripts\python.exe -m pip install -r .\auv_inspection\patchcore_data\requirements-patchcore.txt
+```
+
+Artifact model, ngưỡng và ảnh sạch tham chiếu được setup script chép sẵn từ `patchcore_artifacts/`.
+
+## Chạy dashboard
+
+Sau khi HoloOcean đã build, từ root repository với `mainenv` đã activate:
+
+```powershell
+python -m unittest auv_dashboard.test_dashboard auv_inspection.tests.test_find_editor -v
+python .\auv_dashboard\run_dashboard.py
+```
 
 
 ## Tài liệu

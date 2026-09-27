@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-09-26** - đồng bộ tài liệu với repo đã publish (rebuild.py vắng mặt, trạng thái PatchCore, số test, ba script map validation); không chỉnh code hay map thủ công.
+> Cập nhật gần nhất: **2026-09-27** - sửa `scripts/setup_project.ps1` không chép overlay/artifact; `find_editor()` thêm biến môi trường/registry, launcher dashboard nhận conda env; không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -31,7 +31,7 @@ UnderwaterDemo/
 │   ├── README.md                     # Cách chạy, điều khiển, kiến trúc và giới hạn
 │   ├── __init__.py                   # Package dashboard
 │   ├── run_dashboard.py              # CLI, DPI, Tk mainloop, live smoke test
-│   ├── start_dashboard.cmd           # Launcher nhấp đúp dùng Python mainenv
+│   ├── start_dashboard.cmd           # Launcher nhấp đúp dùng Python mainenv (DASHBOARD_PYTHON/conda)
 │   ├── app.py                        # UI, queue, lifecycle, bằng chứng kiểm thử
 │   ├── bridge.py                     # Adapter runtime trong worker riêng
 │   ├── viewport.py                   # Nhúng cửa sổ Unreal theo PID sở hữu
@@ -47,6 +47,7 @@ UnderwaterDemo/
 │   ├── tests/test_crack_detection.py # Regression test detector bằng ảnh tổng hợp
 │   ├── tests/test_camera_regression.py # Regression bằng 14 frame camera thật
 │   ├── tests/test_clean_structure_capture.py # Kiểm tra PNG/metadata thu ảnh ống và trụ
+│   ├── tests/test_find_editor.py       # Thứ tự tìm UnrealEditor.exe
 │   ├── tests/data/pipe_views/          # Fixture/nhãn được giữ khi dọn output
 │   ├── test_detection_gate.py         # Regression test phạm vi bật detector camera
 │   ├── inspection_route.py            # Sinh tuyến khảo sát cố định
@@ -161,9 +162,13 @@ Entry point chính của hệ thống.
 
 - `class EditorEnvironment(HoloOceanEnvironment)`
   - Override property `_timeout` thành 60 giây để giới hạn thời gian chờ khi kết nối process Unreal editor game.
+- `launcher_engine_dir() -> Path | None`
+  - Đọc `%PROGRAMDATA%\Epic\UnrealEngineLauncher\LauncherInstalled.dat`, trả thư mục cài `UE_5.3`; trả `None` nếu thiếu file hoặc không có bản ghi.
+- `registry_engine_dir() -> Path | None`
+  - Đọc `InstalledDirectory` trong `HKLM\SOFTWARE\EpicGames\Unreal Engine\5.3` (`ENGINE_REGISTRY_KEY`); trả `None` nếu không có key hoặc không phải Windows.
 - `find_editor(explicit: str | None) -> Path`
-  - Dùng path từ `--editor`, hoặc đọc Epic Launcher manifest để tìm `UE_5.3`.
-  - Xác nhận file tồn tại; ném `FileNotFoundError` nếu không tìm thấy.
+  - Thứ tự: `--editor`, biến môi trường `AUV_UNREAL_EDITOR` (`EDITOR_ENV_VAR`), Epic Launcher, rồi registry. Hai nguồn cuối ghép `Engine/Binaries/Win64/UnrealEditor.exe`.
+  - Xác nhận file tồn tại; ném `FileNotFoundError` (thông báo nêu `--editor`/`AUV_UNREAL_EDITOR`) nếu không tìm thấy. Dashboard luôn gọi với `editor=None` nên phụ thuộc ba nguồn sau.
 - `is_key_pressed(key_code: int) -> bool`
   - Dùng `win32api.GetAsyncKeyState`; trả về trạng thái giữ phím Windows virtual-key.
 - `update_manual_target(target, delta_seconds, move_speed, yaw_speed, env_min, env_max) -> np.ndarray`
@@ -285,6 +290,11 @@ Regression test thị giác bằng ảnh tổng hợp, không mở Unreal:
 - `test_excludes_transit_and_pier_entry()`: xác nhận không chụp đoạn chuyển tiếp hoặc waypoint tiếp cận trụ.
 - `test_includes_four_orbit_levels_for_each_pier()`: xác nhận selector thu ảnh trên toàn bộ waypoint orbit của bốn tầng cho cả hai trụ trong route hiện hành.
 
+### `auv_inspection/tests/test_find_editor.py`
+
+- `make_engine(root, name)`: tạo cây thư mục giả có `UnrealEditor.exe` rỗng trong thư mục tạm.
+- `FindEditorTests`: sáu test mock `launcher_engine_dir()`/`registry_engine_dir()` và xóa `AUV_UNREAL_EDITOR` khỏi môi trường test; kiểm tra thứ tự ưu tiên `--editor` > biến môi trường > Launcher > registry, thông báo lỗi nêu tên biến, và path tìm được phải tồn tại. Không đọc registry/manifest thật, không mở Unreal.
+
 ### `auv_inspection/check_detection_runtime.py`
 
 - `main()`: QA thật bằng Unreal/HoloOcean, mặc định `--steps 6000`. Giữ nguyên các waypoint từ đầu đến cuối `pipe_back_scan`, chỉ cắt phần đi trụ trong bản route bộ nhớ của harness. Production route trên đĩa giữ nguyên.
@@ -358,7 +368,7 @@ Lưu ý: map hiện tại đã được chỉnh thủ công sau lần sinh từ 
 
 - `main()`: đọc `--autostart`, `--steps` (mặc định 60000, số dương), `--smoke-test`; thiết lập DPI, tạo Tk/`Dashboard`, chạy mainloop. Smoke test kiểm tra kết quả sau khi đóng và trả lỗi nếu không đạt.
 - Entry point gọi `multiprocessing.freeze_support()` để tương thích spawn trên Windows.
-- `start_dashboard.cmd`: chạy Python `%USERPROFILE%\.conda\envs\mainenv\python.exe`, truyền tiếp tham số, giữ console khi có lỗi. `__init__.py` đánh dấu package, không có side effect.
+- `start_dashboard.cmd`: chọn Python theo thứ tự `DASHBOARD_PYTHON`, `%USERPROFILE%\.conda\envs\mainenv\python.exe`, rồi `%CONDA_PREFIX%\python.exe` khi env conda đang activate là `mainenv`; báo lỗi hướng dẫn nếu không thấy, truyền tiếp tham số, giữ console khi có lỗi. `__init__.py` đánh dấu package, không có side effect.
 
 ### `auv_dashboard/bridge.py`
 
@@ -594,6 +604,10 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-09-27`: Hỗ trợ máy cài UE/conda ngoài đường dẫn mặc định. `run_inspection.find_editor()` tìm theo `--editor`, `AUV_UNREAL_EDITOR`, Epic Launcher, rồi registry `HKLM\SOFTWARE\EpicGames\Unreal Engine\5.3`, tách `launcher_engine_dir()`/`registry_engine_dir()`; thêm `tests/test_find_editor.py` (6 test). `start_dashboard.cmd` nhận `DASHBOARD_PYTHON` hoặc env conda `mainenv` đang activate. README gốc thêm yêu cầu build (.NET Framework SDK, MSVC 14.38 do lỗi C4668 với MSVC 14.40+), cách tạo `mainenv` Python 3.11+ và `.venv-patchcore`; README dashboard cập nhật tương ứng. Unit test chạy trên `mainenv` máy người dùng; lookup thật trả đúng `UnrealEditor.exe`. Chưa chạy Unreal/dashboard live sau thay đổi. Không đổi detector, route, artifact hay map.
+
+- `2026-09-27`: Sửa `Copy-OverlayDirectory()` trong `scripts/setup_project.ps1`: `Copy-Item -LiteralPath <src>\*` không mở rộng wildcard nên bốn thư mục (map/asset AUVInspection, plugin FunplayMCP, model và dataset PatchCore) được tạo rỗng, khiến `Update-ReferenceManifest()` lỗi thiếu `manifest.jsonl`. Nay liệt kê con bằng `Get-ChildItem -LiteralPath` rồi copy, và dừng rõ lỗi nếu nguồn rỗng. Đã thử hàm trên scratchpad (572/572 file, chạy lại với `-Force` không lồng thư mục); chưa chạy lại toàn bộ script trên máy người dùng. Không đổi artifact, map hay runtime.
 
 - `2026-09-26`: Đồng bộ tài liệu với repo đã publish: đánh dấu `auv_inspection/rebuild.py` không có trong repo và bỏ lệnh rebuild ở mục 7; thêm mô tả `create_validation_maps.py`, `finalize_validation_b.py`, `inspect_validation_assets.py` vào mục 2 và 4; tách mục 8 thành PatchCore (offline, chưa live) và Classical/runtime/dashboard; sửa số test dashboard (hiện 8) và thêm ghi chú lỗi thời cho các dòng nhật ký cũ về GitHub và `default_detector()`; `auv_inspection/README.md` bỏ lệnh `rebuild.py`, thay bằng cảnh báo generator cũ xóa chỉnh sửa thủ công. Chỉ sửa tài liệu, không chạy test, không đổi code, artifact hay map.
 

@@ -4,7 +4,7 @@ Dashboard **Tkinter**, chạy Unreal/HoloOcean thật và dùng trực tiếp `I
 
 ## Chạy
 
-Nhấp đúp **`start_dashboard.cmd`**, rồi nhấn **Bắt đầu khảo sát**. Launcher dùng Python `mainenv` hiện có.
+Nhấp đúp **`start_dashboard.cmd`**, rồi nhấn **Bắt đầu khảo sát**. Launcher tìm Python theo thứ tự: biến `DASHBOARD_PYTHON`, `%USERPROFILE%\.conda\envs\mainenv\python.exe`, rồi env conda `mainenv` đang activate. Nếu conda cài ở nơi khác (ví dụ `D:\Anaconda`), chạy `conda activate mainenv` rồi gọi launcher từ cùng terminal, hoặc đặt `DASHBOARD_PYTHON`.
 
 Hoặc chạy từ root `UnderwaterDemo`:
 
@@ -83,7 +83,8 @@ auv_dashboard/
 
 ## Dependency và giới hạn
 
-- Windows, Python có Tkinter, `numpy`, `opencv-python`, `Pillow`, `pywin32`, HoloOcean client và Unreal 5.3 của project. Tất cả đã có trong môi trường `mainenv`; task này không cài dependency mới.
+- Windows, Python 3.11+ có Tkinter, `numpy`, `opencv-python`, `Pillow`, `pywin32`, HoloOcean client và Unreal 5.3 của project. Cách tạo `mainenv` xem README gốc.
+- Dashboard không nhận `--editor`; `run_inspection.find_editor()` tìm `UnrealEditor.exe` qua biến `AUV_UNREAL_EDITOR`, manifest Epic Launcher, rồi registry `HKLM\SOFTWARE\EpicGames\Unreal Engine\5.3`.
 - Phần nhúng cửa sổ dùng Win32 nên không chạy nguyên trạng trên Linux/macOS. UI khuyến nghị màn hình từ 1440×900; kích thước tối thiểu 1080×700.
 - Camera quan sát bù phép đổi trục của `TeleportCameraCommand` trong checkout HoloOcean hiện tại. Cần kiểm tra lại khi nâng framework.
 - Bản đồ nhỏ lấy tuyến hiện hành; nếu chỉnh geometry trong Unreal thì cần cập nhật tuyến riêng. Dashboard không tự dò vật cản.
