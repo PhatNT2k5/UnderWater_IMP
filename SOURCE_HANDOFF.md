@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-10-08** - P0 đã chạy live (3/3 vết map A, 1 báo nhầm); P1 phần 1-2: suy giảm ảnh offline và capture ngẫu nhiên hóa `--randomize`; đã chạy 2 capture heldout với Unreal; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-08** - P0 đã chạy live (3/3 vết map A, 1 báo nhầm); P1 xong: suy giảm ảnh, capture ngẫu nhiên hóa, harness chấm theo vết vật lý và baseline v1.1 trên điều kiện chưa thấy (chưa đạt tiêu chí); không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -47,6 +47,12 @@ UnderwaterDemo/
 │   ├── robustness/tests/test_degradation.py # Tính tái lập và tính đơn điệu theo mức
 │   ├── robustness/conditions.py        # Điều kiện mô phỏng theo seed: train/heldout (P1)
 │   ├── robustness/tests/test_conditions.py # Khoảng train/heldout, route an toàn, lịch chụp
+│   ├── robustness/geometry.py          # Camera pinhole, pixel <-> điểm trên ống/trụ (P1, nền cho P2)
+│   ├── robustness/defect_inventory.py  # Vị trí vết vật lý, khớp cảnh báo với vết
+│   ├── robustness/inventories/map_A.json # 3 vết của map A (proposed, đã duyệt bằng ảnh heldout)
+│   ├── robustness/metrics.py           # Wilson, quãng đường khảo sát, tỷ lệ trên 100 m
+│   ├── robustness/evaluate_capture.py  # Phát lại capture qua detector, chấm theo vết vật lý
+│   ├── robustness/benchmark.py         # Lưới detector × capture × điều kiện, bảng tổng hợp
 │   ├── run_inspection.py             # Entry point chạy map và điều khiển AUV
 │   ├── crack_detection.py            # Tiền xử lý ảnh và phát hiện nghi vấn vết nứt
 │   ├── tests/test_crack_detection.py # Regression test detector bằng ảnh tổng hợp
@@ -290,6 +296,38 @@ Thư viện suy giảm ảnh offline có seed cho P1 của `GENERALIZATION_PLAN.
 - Độ đục không ngẫu nhiên hóa trong mô phỏng: lệnh `water_fog` của HoloOcean chỉ sửa PostProcessVolume có tag `WaterPPV` (đơn vị: giá trị nhập × 40000 = `Fog_Depth` cm), các map dự án không có tag này. Cần tag trên bản sao map nếu muốn dùng.
 - Giới hạn: tên station của route ngẫu nhiên khác số thứ tự (ví dụ `pier_0_level_1_orbit_02_002`), nên ROI PatchCore dựa trên station (P0) sẽ `reference_unavailable` ở các waypoint mới; P2 bỏ phụ thuộc này.
 - Dòng chảy gần như không làm lệch pose trong mô phỏng: bộ điều khiển `HoveringAUVControlPD` có `Kp = 100`, gia tốc tối đa 1 m/s², nên lực cản khoảng 24 N (0,35 m/s, `Cd = 0,8`, `A = 0,5 m²`) trên AUV 31,02 kg chỉ gây lệch khoảng 0,8 cm. Đo trên capture heldout: sai lệch ngang giống lượt không dòng chảy. Xem D14 trong `GENERALIZATION_PLAN.md`.
+
+### `auv_inspection/robustness/geometry.py`
+
+Mô hình camera pinhole và hình học công trình đã biết (P1 phần 3; nền cho ROI hình học ở P2). **Chưa hiệu chỉnh:** camera đặt tại vị trí PoseSensor với yaw của AUV, roll/pitch 0, bỏ qua offset `CameraLeftSocket` (HoloOcean không ghi tọa độ socket); ống là hình trụ trục x tại (y 0, z -10,3) bán kính 0,5 m ước lượng từ chiều cao góc của ống trong ảnh; trụ là hộp vuông nửa cạnh 0,95 m. So với 552 mask đã duyệt (lấy mẫu lưới 8 px): IoU median 0,81-0,87 theo nhóm.
+
+- `FOCAL_PX` khoảng 381,4 px từ FOV ngang 80° và ảnh 640×480; `camera_basis()`, `pixel_ray()`, `project()` (điểm thế giới ra pixel và độ sâu, `None` nếu sau camera).
+- `intersect_pipe()`, `intersect_pier()` (slab), `structure_hit()`, `pixel_to_surface()` trả `SurfacePoint`.
+- `in_view(point, camera, yaw, category)`: điểm nằm trong ảnh (lề 20 px) và là điểm công trình đầu tiên tia chạm (dung sai 0,15 m), nên mặt sau ống không tính là nhìn thấy.
+- `surface_coordinates()`: ống (x, góc quanh trục), trụ (z, góc quanh trục).
+
+### `auv_inspection/robustness/defect_inventory.py` và `robustness/inventories/map_A.json`
+
+- `Defect` là điểm, hoặc **đoạn thẳng** khi có `end` (vết nứt dài); `distance_to()` đo tới điểm hoặc tới đoạn, `centre()` dùng cho khả năng quan sát. `Inventory`, `load_inventory()` (từ chối ID trùng, đọc `end_m` nếu có); `event_category()`; `locate_box()` chiếu tâm box cảnh báo lên công trình; `locate_event()` đọc `event.json` (event Classical không có yaw, mặt trước ống dùng -90°); `match_defect()` chọn vết cùng nhóm gần nhất trong bán kính; `defects_in_view()`.
+- `map_A.json` (trạng thái `proposed`): 3 vết của map A (SHA256 `daba22ec...`): `A_pipe_front_1` x -10,25, `A_pipe_front_2` x -7,66 (trung bình từ event PatchCore phiên P0 và Classical ngày 27/09, hai nguồn lệch 16-27 cm), bán kính 0,6 m; `A_pier_0_1` là đoạn trên mặt trước trụ 0 từ (-9,81; -5,55; -8,74) tới (-10,88; -5,55; -8,01), bán kính 0,35 m, vẽ theo hai đầu mút vết nứt nhìn thấy ở tick 3478 của capture heldout. Bản đầu dùng điểm (-10,0; -5,55; -8,4) bán kính 0,6 m đã khiến baseline tính một cảnh báo PatchCore nằm ngay trên vết (cách điểm 0,71 m) là báo nhầm; sửa theo ảnh, không theo kết quả detector, ghi trong `revisions`. Đã chiếu lên capture heldout để duyệt bằng ảnh: hai vết ống trúng vết ở frame giữa đoạn quan sát.
+
+### `auv_inspection/robustness/metrics.py`
+
+`wilson_interval()`, `surveyed_length_m()` (tổng quãng đường giữa các frame kiểm tra, bỏ bước nhảy trên 1 m giữa các đoạn), `rate_per_100m()`, `fraction()` (số đếm, tỷ lệ, Wilson 95%).
+
+### `auv_inspection/robustness/evaluate_capture.py`
+
+Phát lại một capture qua detector (tùy chọn suy giảm ảnh theo seed + tick) và chấm điểm theo vết vật lý; chạy trong `.venv-patchcore`.
+
+- `FrameResult(available, flagged, alert_bbox)`; `classical_detector()` theo cổng runtime (chỉ ống, reset tracker khi rời ống/đổi nhóm/sau cảnh báo); `patchcore_detector()` gọi `live_service.create_session()/analyze_request()` với station, pose từ `frames.jsonl`.
+- `evaluate(capture, detector_name, detector, inventory, degradations, seed)`: kiểm tra hash map khớp inventory (capture mixed bắt buộc có inventory), khóa cảnh báo trùng trong 2 m như runtime, định vị cảnh báo bằng `locate_box()` và khớp vết; vết **quan sát được** khi nằm trong tầm nhìn ít nhất 3 frame; trả recall theo vết (Wilson), số báo nhầm và báo nhầm trên 100 m, tỷ lệ frame có ứng viên khi không có vết trong tầm nhìn, số frame phân tích/bỏ qua theo nhóm, ms/frame trung vị trên frame được phân tích, danh sách event và các lưu ý (capture lấy mẫu thưa hơn runtime, frame tương quan, khả năng quan sát chỉ theo hình học).
+- `main()`: CLI `--detector`, `--inventory` hoặc `--clean`, `--degradation`, `--seed`, `--output` (không ghi đè).
+
+### `auv_inspection/robustness/benchmark.py`
+
+Chạy lưới detector × capture × điều kiện (`DEFAULT_CONDITIONS`: gốc, độ đục 2/4, marine snow 3/5, đèn yếu 4, mờ chuyển động 3); mỗi kết quả một JSON riêng, đã có thì dùng lại; ghi `summary.json` và `summary.md`. Mỗi lượt tạo detector mới để không rò trạng thái tracker.
+
+`robustness/tests/test_geometry.py` (7 test: tiêu cự, điểm giữa ảnh chạm ống ở khoảng cách đúng, `project` nghịch đảo `pixel_to_surface`, hướng trái/phải ảnh, mặt sau ống và điểm sau camera không thấy, mặt trụ, tia trượt); `robustness/tests/test_metrics_inventory.py` (6 test: giá trị Wilson tham chiếu, quãng đường bỏ bước nhảy, inventory map A, khớp/không khớp vết, khớp dọc vết nứt dạng đoạn, khả năng quan sát theo vị trí); `robustness/tests/test_evaluate_capture.py` (3 test với capture và detector giả: cảnh báo trên vết được tính phát hiện và cảnh báo lặp trong 2 m bị khóa, cảnh báo xa vết là báo nhầm, capture sạch không cần inventory và capture mixed phải đúng hash).
 
 `robustness/tests/test_conditions.py`: 9 test: nominal đúng route và đèn cũ; tái lập theo profile/seed; mẫu train nằm trong khoảng train; mẫu heldout nằm trong khoảng heldout và **không bao giờ** trong khoảng train (60 seed); route ngẫu nhiên giữ thứ tự đoạn, đủ 24 bước góc mỗi vòng trụ và qua kiểm tra va chạm (60 seed × 2 profile); lịch chụp cố định trùng quy tắc modulo cũ, lịch ngẫu nhiên giữ khoảng cách 3-17 tick; dòng chảy dao động trong biên độ; `run()` từ chối ngẫu nhiên hóa ở manual trước khi mở Unreal.
 
@@ -599,6 +637,10 @@ Từ root `UnderwaterDemo`:
 & "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\run_inspection.py --capture-structures --dataset-role train --scene-state clean --randomize train --seed 1 --headless --steps 60000
 & "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_inspection.robustness.tests.test_conditions -v
 
+# Đánh giá theo vết vật lý trên capture (P1), chạy trong .venv-patchcore; benchmark lưới detector × điều kiện
+& .\.venv-patchcore\Scripts\python.exe -m auv_inspection.robustness.evaluate_capture <capture_mixed> --detector patchcore --inventory .\auv_inspection\robustness\inventories\map_A.json --output <ket_qua.json>
+& .\.venv-patchcore\Scripts\python.exe -m auv_inspection.robustness.benchmark <thu_muc_ket_qua> --mixed <capture_mixed> .\auv_inspection\robustness\inventories\map_A.json --clean <capture_clean>
+
 # Tạo bản suy giảm có seed của một thư mục PNG (P1); không ghi đè thư mục đích
 & "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m auv_inspection.robustness.degradation <thu_muc_png> <thu_muc_moi> --degradation turbidity:3 --degradation marine_snow:2 --seed 0
 & "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_inspection.robustness.tests.test_degradation -v
@@ -610,6 +652,13 @@ Từ root `UnderwaterDemo`:
 Không có lệnh rebuild map: `auv_inspection/rebuild.py` không có trong repo (xem mục 4).
 
 ## 8. Trạng thái đã xác minh và giới hạn
+
+### Baseline v1.1 trên điều kiện chưa thấy (P1 phần 3, offline)
+
+- Benchmark `auv_inspection/output/benchmark_p1_baseline_v1_1/` (28 tổ hợp: Classical/PatchCore × 2 capture heldout × 7 điều kiện suy giảm), chấm theo vết vật lý với `inventories/map_A.json` (trạng thái `proposed`). Bảng tóm tắt và phân tích ở mục "Baseline v1.1" của `GENERALIZATION_PLAN.md`.
+- Classical: 0/3 vết, 0 báo nhầm ở mọi điều kiện; không có ứng viên trên các frame thấy rõ vết ở khoảng cách 2,77 m. PatchCore: 1/3 vết (vết trụ) ở 5/7 điều kiện, 0/3 với marine snow; trên map sạch 1,42 báo nhầm/100 m ở điều kiện gốc, tới 13,25/100 m với marine snow mức 5; tỷ lệ frame được phân tích sụp khi pose xa tham chiếu (ống 0% ở 2,77 m, trụ 1% ở 3,36 m). PatchCore khoảng 200-250 ms/frame offline trên RTX 3050.
+- Đây là bằng chứng offline trên 2 capture Unreal thật, không phải lượt live dashboard; chưa đạt tiêu chí nghiệm thu nào.
+- Bộ kết quả đầu tiên (`benchmark_p1_baseline_v1_1_superseded_point_label/`) giữ lại để đối chiếu: dùng nhãn trụ dạng điểm và thời gian xử lý tính cả frame bị bỏ qua; không dùng làm baseline.
 
 ### Capture ngẫu nhiên hóa với Unreal (P1 phần 2)
 
@@ -671,6 +720,8 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-10-08`: P1 phần 3: thêm `robustness/geometry.py`, `defect_inventory.py`, `inventories/map_A.json`, `metrics.py`, `evaluate_capture.py`, `benchmark.py` và 16 unit test (geometry 7, metrics/inventory 6, harness 3); `test_conditions.py` bỏ qua test cần `pywin32` khi chạy trong `.venv-patchcore`. Chạy benchmark baseline v1.1 (kết quả ở mục 8 và `GENERALIZATION_PLAN.md`). Trong quá trình chạy phát hiện và sửa 2 lỗi đánh giá: nhãn trụ dạng điểm chấm sai một cảnh báo nằm trên vết, thời gian xử lý tính cả frame bị bỏ qua; đã chạy lại toàn bộ và giữ bộ cũ để đối chiếu. Không đổi detector, artifact hay map.
 
 - `2026-10-08`: Ghi kết quả 2 capture heldout với Unreal (P1 phần 2) vào mục 8: cả hai đi hết route, khoảng cách/độ sâu/yaw/đèn/lịch chụp có tác dụng; dòng chảy không đo được vì bộ điều khiển PD của HoveringAUV quá cứng (`Kp = 100`), thêm D14 vào `GENERALIZATION_PLAN.md`. Không đổi code.
 

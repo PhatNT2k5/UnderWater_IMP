@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 from math import hypot
 from pathlib import Path
 import sys
@@ -97,6 +98,7 @@ class ConditionTests(unittest.TestCase):
             self.assertLessEqual(deviation, conditions.current_variation_mps + 1e-9)
         self.assertEqual(current_at(NOMINAL, 900, 30), [0.0, 0.0, 0.0])
 
+    @unittest.skipUnless(importlib.util.find_spec("win32api"), "run_inspection needs pywin32 (mainenv)")
     def test_runtime_rejects_randomized_manual_runs_before_launching_unreal(self) -> None:
         import run_inspection
         args = argparse.Namespace(mode="manual", randomize="train", seed=1, preview_source=None)

@@ -13,7 +13,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | Phase | Nội dung | Trạng thái | Bằng chứng |
 |---|---|---|---|
 | P0 | Gỡ chặn live: tracker không reset khi frame không đủ điều kiện; ROI dùng mask gần nhất với dung sai | **Xong** (baseline v1.1) | Unit 15/15; replay pose: ROI có ở 99,1-100% frame (trước 28-49%). Live `session_20261008_174818_976289` map A: **3/3 vết** (2 ống, 1 trụ 0), **1 báo nhầm** ở đầu ống (`nearest_mask` lệch 27 cm), route 359/359, 12,2 tick/s |
-| P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | Đang làm: phần 2/3 xong | Phần 1: `robustness/degradation.py`, 7 yếu tố × 5 mức, 9 unit test. Phần 2: `--randomize train\|heldout --seed`, 9 unit test; Unreal: `capture_test_mixed_20261008_190916_184618` (map A, heldout seed 1, 598 ảnh) và `capture_test_clean_20261008_191432_831527` (map sạch v3, heldout seed 2, 635 ảnh), cả hai đi hết route; khoảng cách ống, lệch độ sâu/yaw, đèn, lịch chụp có tác dụng; dòng chảy không đo được (D14). Phần 3 (bộ chỉ số, đo baseline) chưa làm |
+| P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | **Xong** (xem mục Baseline v1.1). Phần 3: `geometry.py`, `defect_inventory.py` + `inventories/map_A.json`, `metrics.py`, `evaluate_capture.py`, `benchmark.py`, 16 unit test; benchmark 28 tổ hợp | Phần 1: `robustness/degradation.py`, 7 yếu tố × 5 mức, 9 unit test. Phần 2: `--randomize train\|heldout --seed`, 9 unit test; Unreal: `capture_test_mixed_20261008_190916_184618` (map A, heldout seed 1, 598 ảnh) và `capture_test_clean_20261008_191432_831527` (map sạch v3, heldout seed 2, 635 ảnh), cả hai đi hết route; khoảng cách ống, lệch độ sâu/yaw, đèn, lịch chụp có tác dụng; dòng chảy không đo được (D14). Phần 3 (bộ chỉ số, đo baseline) chưa làm |
 | P2 | ROI hình học + tọa độ bề mặt | Chưa làm | |
 | P3 | Cổng chất lượng ảnh | Chưa làm | |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng SPRT trên bề mặt | Chưa làm | |
@@ -22,6 +22,27 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | Chưa làm | |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
+
+## Baseline v1.1 trên điều kiện chưa thấy (P1, 2026-10-08)
+
+Hai capture heldout (mục 4): map A có 3 vết (`capture_test_mixed_20261008_190916_184618`, cách ống 2,77 m, bán kính trụ 3,19 m) và map sạch (`capture_test_clean_20261008_191432_831527`, 1,62 m, 3,36 m). Chấm theo vết vật lý bằng `auv_inspection/robustness/benchmark.py`; kết quả đầy đủ ở `auv_inspection/output/benchmark_p1_baseline_v1_1/summary.md`.
+
+| Điều kiện | Classical: vết map A | Classical: báo nhầm/100 m (sạch) | PatchCore: vết map A | PatchCore: báo nhầm/100 m (sạch) | PatchCore: frame sạch có ứng viên |
+|---|---|---|---|---|---|
+| Gốc | 0/3 | 0 | 1/3 | 1,42 | 12% |
+| Độ đục 2 | 0/3 | 0 | 1/3 | 1,89 | 28% |
+| Độ đục 4 | 0/3 | 0 | 1/3 | 4,73 | 46% |
+| Marine snow 3 | 0/3 | 0 | 0/3 | 11,35 | 99% |
+| Marine snow 5 | 0/3 | 0 | 0/3 | 13,25 | 100% |
+| Đèn yếu 4 | 0/3 | 0 | 1/3 | 0,95 | 10% |
+| Mờ chuyển động 3 | 0/3 | 0 | 1/3 | 6,62 | 61% |
+
+- **So với tiêu chí:** recall 0-33% (mục tiêu ≥ 90%); PatchCore báo nhầm 1,42/100 m ngay ở điều kiện gốc (mục tiêu ≤ 1); tỷ lệ frame sạch có ứng viên 12% (mục tiêu FPR ≤ 5%). **Chưa đạt tiêu chí nào.**
+- **Classical** không tạo ứng viên nào trên các frame thấy rõ vết nứt ở khoảng cách 2,77 m: ngưỡng chỉnh tay cho 2 m không ngoại suy được. Giữ làm baseline, không đầu tư thêm.
+- **PatchCore** mất khả năng phân tích khi pose xa ảnh tham chiếu: ống 0% frame ở 2,77 m, trụ 1% ở bán kính 3,36 m (ROI theo station/pose, D2/D5) → **P2**. Vết duy nhất bắt được là vết trụ (tick 3478).
+- Marine snow làm gần như mọi frame sạch vượt ngưỡng (bank chỉ học bề mặt không có hạt); độ đục và mờ chuyển động tăng báo nhầm; 3 báo nhầm gốc nằm ở mặt sau ống khi AUV gần hơn train (1,62 m so với 2,06 m) → **P3** (cổng chất lượng), **P5** (bằng chứng trên bề mặt lọc hạt di chuyển), **P4** (bank nhiều điều kiện, loại không gian nhiễu).
+- PatchCore khoảng 200-250 ms/frame trên RTX 3050 khi chạy offline một mình (D13).
+- Lưu ý: 1 lượt mỗi loại map, 3 vết; khả năng quan sát vết tính theo hình học, không theo ánh sáng; frame liên tiếp tương quan. Đây là baseline để so sánh, không phải ước lượng chính xác hiệu năng.
 
 ## Tiêu chí nghiệm thu (bản đầu)
 
@@ -41,6 +62,7 @@ Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 �
 |---|---|
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
+| 2026-10-08 | P1 phần 3: chấm theo **vết vật lý**, định vị cảnh báo bằng hình học camera chưa hiệu chỉnh (IoU 0,81-0,87 so với 552 mask đã duyệt), dung sai khớp 0,6 m (vết ống) và đoạn thẳng + 0,35 m (vết nứt dài trên trụ). Nhãn trụ được đổi từ điểm sang đoạn sau khi ảnh cho thấy một cảnh báo PatchCore nằm trên vết nhưng ngoài bán kính điểm; sửa theo ảnh, không theo kết quả detector, ghi trong `revisions` của `map_A.json`. Nhãn map A vẫn ở trạng thái `proposed` chờ người dùng xác nhận |
 | 2026-10-08 | Giữ dòng chảy trong `RunConditions` (lực vật lý đúng, có tác dụng khi gần bão hòa bộ điều khiển) nhưng **không coi là nguồn sai lệch pose**. Sai số pose thực tế (DVL/INS) sẽ mô phỏng ở P2 bằng nhiễu trên pose đưa cho khối nhận thức, vì đó mới là cái detector thấy trên AUV thật |
 | 2026-10-08 | P1 phần 2: profile `heldout` lấy **mọi** yếu tố ngoài khoảng `train` (ngoại suy), có test bảo đảm không mẫu nào lọt vào khoảng train. Route ngẫu nhiên phải qua `clearance_violations()`; bán kính trụ heldout tối thiểu 2,35 m (2,2 m bị từ chối vì góc hộp an toàn trụ vuông ở khoảng 2,26 m) |
 | 2026-10-08 | Không ngẫu nhiên hóa độ đục trong mô phỏng ở P1: `water_fog` cần tag `WaterPPV` mà map dự án không có. Muốn bật cần thêm tag vào **bản sao** map (người dùng quyết định); trước mắt độ đục dùng suy giảm offline |
