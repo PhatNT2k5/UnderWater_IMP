@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-09-27** - sửa `scripts/setup_project.ps1` không chép overlay/artifact; `find_editor()` thêm biến môi trường/registry, launcher dashboard nhận conda env; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-08** - thêm `GENERALIZATION_PLAN.md` (kế hoạch tổng quát hóa P0-P7, tiêu chí nghiệm thu); không chỉnh code hay map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -23,6 +23,7 @@ UnderwaterDemo/
 ├── AGENTS.md                         # Quy tắc cho AI/agent làm việc trong repo
 ├── SOURCE_HANDOFF.md                 # Tài liệu đang đọc; phải cập nhật cùng source
 ├── PROJECT_STATUS_AND_ROADMAP.md     # Báo cáo hiện trạng, kết quả và kế hoạch tiếp theo
+├── GENERALIZATION_PLAN.md            # Kế hoạch tổng quát hóa P0-P7, tiến độ, tiêu chí nghiệm thu
 ├── README.md                         # Setup repo chia sẻ, overlay HoloOcean và chạy dashboard
 ├── scripts/setup_project.ps1         # Clone/pin HoloOcean và cài overlay/artifact trên máy mới
 ├── holoocean_overlay/                # Map/asset/C++/plugin riêng để áp dụng lên HoloOcean upstream
@@ -604,6 +605,8 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-10-08`: Thêm `GENERALIZATION_PLAN.md`: chẩn đoán các điểm tất định (D1-D12, gồm phiên live PatchCore 2026-09-27 bỏ 47-72% frame vì thiếu ảnh tham chiếu và tracker reset), kiến trúc mới (cổng chất lượng, ROI hình học, DINOv2/Mahalanobis/loại nhiễu, ngưỡng conformal, SPRT trên bề mặt, quay lại chụp gần), ngẫu nhiên hóa điều kiện, giao thức đánh giá, lộ trình P0-P7 và tiêu chí nghiệm thu bản đầu. README gốc liên kết tới file này. Chỉ thêm tài liệu, không đổi code, artifact hay map.
 
 - `2026-09-27`: `scripts/setup_project.ps1` thêm `Write-JsonNoBom()` để ghi `patchcore_thresholds_v1.json`/`patchcore_evaluation_B_v1.json` bằng UTF-8 không BOM. Trước đó `Set-Content -Encoding utf8` của Windows PowerShell 5.1 thêm BOM, khiến `approval_gate.approval_matches()` trả sai (dashboard mặc định Classical) và `live_service.create_session()` lỗi `JSONDecodeError` khi đọc ngưỡng. Đã chạy lại đoạn cài artifact trên máy người dùng: cổng trả PatchCore, `PatchCoreClient` khởi động service tới `ready` trên RTX 3050 trong khoảng 22 giây. Chưa chạy PatchCore live cùng Unreal. Không đổi nội dung ngưỡng, model hay map.
 
