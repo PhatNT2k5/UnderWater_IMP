@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-10-08** - P0 (ROI giao mask tham chiếu, tracker không reset) đã chạy live: 3/3 vết map A, 1 báo nhầm; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-08** - P0 đã chạy live (3/3 vết map A, 1 báo nhầm); P1 phần 1: thư viện suy giảm ảnh `auv_inspection/robustness/`; không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -43,6 +43,8 @@ UnderwaterDemo/
 │   ├── README.md                     # Hướng dẫn sử dụng AUVInspection
 │   ├── PATCHCORE_GUIDE_VI.md          # Giải thích tiếng Việt về dữ liệu và pipeline PatchCore
 │   ├── NOISE_ROBUSTNESS_TODO.md        # Backlog độ bền PatchCore trước nhiễu quan sát
+│   ├── robustness/degradation.py       # Suy giảm ảnh có seed, 7 yếu tố × 5 mức (P1)
+│   ├── robustness/tests/test_degradation.py # Tính tái lập và tính đơn điệu theo mức
 │   ├── run_inspection.py             # Entry point chạy map và điều khiển AUV
 │   ├── crack_detection.py            # Tiền xử lý ảnh và phát hiện nghi vấn vết nứt
 │   ├── tests/test_crack_detection.py # Regression test detector bằng ảnh tổng hợp
@@ -252,6 +254,21 @@ Audit `live_roi.py` trên 552 frame A với tham chiếu train sạch: 552/552 f
 Chẩn đoán sau khi chấm điểm toàn bộ 552 ảnh train sạch (`output/patchcore_scores_train_clean_diagnostic_20260926/`, median 62,3 ms/frame): quy tắc tâm đứng yên 35 px không tạo cảnh báo ống dù hai vết rõ đi khoảng 90 px/10 tick. Tracker quỹ đạo mới, với các ngưỡng thử 52/53,5/52/54,5 theo bốn nhóm, tạo hai sự kiện ống ở tick 420/490 và hai sự kiện trụ 0 ở 2930/3390; không có sự kiện trên chính ảnh train sạch (`output/patchcore_diagnostic_A_20260926.json`). Hai sự kiện trụ là hai lần quét **cùng một vết vật lý**. Đây chỉ là chẩn đoán để sửa tracking; train sạch không phải calibration độc lập, A còn hai vết không thấy trong camera, không coi số này là recall hay ngưỡng chính thức.
 
 Smoke offline `live_service.analyze_request()` trên frame A tick 150 cho ma trận 480×640 khớp **chính xác** score đã lưu của cùng frame (sai khác tối đa 0,0); phiên đầu gồm khởi động GPU khoảng 340 ms, ba lần gọi cùng frame đo 305/93/92 ms khi không nén ma trận score. Client subprocess JSON-lines đã xử lý liên tiếp 33 frame A ở hai nhóm qua `output/patchcore_worker_diagnostic_A_20260926_022225/`: tất cả trạng thái `ready`, bốn sự kiện đúng tick/box của offline tại 420/490/2930/3390, median 83,8 ms/frame. File ngưỡng ở phiên đó ghi rõ `diagnostic_only_not_calibrated`; đây chưa phải chạy PatchCore đồng thời Unreal hoặc nghiệm thu độc lập.
+
+### `auv_inspection/robustness/degradation.py`
+
+Thư viện suy giảm ảnh offline có seed cho P1 của `GENERALIZATION_PLAN.md`; chỉ dùng NumPy/OpenCV nên chạy được ở cả `mainenv` và `.venv-patchcore`. **Không dùng làm tiền xử lý live.** Hệ số là bộ mức nghiêm trọng chọn để phủ từ nước trong tới rất đục ở khoảng cách 2 m, không phải hệ số Jerlov đã khớp.
+
+- `Degradation(factor, severity)`: một yếu tố và mức 1-5; `check_severity()` từ chối mức ngoài 1-5.
+- `uniform_depth()`: khoảng cách đồng nhất 2 m cho tới khi P2 cung cấp độ sâu hình học. Đã thử tách công trình/nền theo ROI và loại bỏ vì đáy gần nằm ngoài ROI, bị xóa trắng và tạo viền giả.
+- `gaussian_random_field()`: nhiễu mịn bất biến tỷ lệ làm môi trường không đồng nhất; `blur_by_depth()`: làm mờ Gaussian thay đổi theo độ sâu bằng nội suy vài bản làm mờ.
+- `turbidity()`: truyền thẳng `J·e^(−βz)` + tán xạ thuận làm mờ theo `φz` với `G = 0,6β` + tán xạ ngược `B∞(1 − e^(−βz))`; β trung bình 0,15-1,2 m⁻¹, đỏ suy hao nhanh nhất.
+- `marine_snow()`: hạt Gaussian 30-600 hạt, 15% thành vệt chuyển động, chỉ vẽ trong vùng nhỏ quanh hạt (mức 5 khoảng 36 ms).
+- `illumination()`, `defocus()`, `motion_blur()`, `sensor_noise()` (Poisson-Gaussian), `jpeg()`: các yếu tố camera và ánh sáng.
+- `apply_degradations(frame, degradations, seed, depth_m=None)`: áp theo thứ tự vật lý `PIPELINE_ORDER` (môi trường, hạt, ánh sáng, quang học, chuyển động, cảm biến, nén); mỗi yếu tố một luồng ngẫu nhiên `[seed, index]`; từ chối yếu tố lạ hoặc lặp.
+- `degrade_folder(source, destination, degradations, seed)`: frame thứ i dùng `seed + i`, từ chối ghi đè, ghi `degradation.json` gồm nguồn, seed, yếu tố/mức và mô hình độ sâu; `main()` cung cấp CLI.
+
+`robustness/tests/test_degradation.py`: 9 test trên ảnh tổng hợp có vết nứt: tái lập theo seed, giữ kích thước/kiểu, từ chối yêu cầu sai, độ tương phản giảm đơn điệu theo độ đục và giảm theo khoảng cách, độ nét giảm theo mất nét/mờ chuyển động, độ sáng giảm theo đèn yếu, sai khác tăng theo nhiễu/hạt/JPEG, CLI ghi tham số và không ghi đè.
 
 ### `auv_inspection/test_inspection_route.py`
 
@@ -551,6 +568,10 @@ Từ root `UnderwaterDemo`:
 # Regression ảnh tổng hợp + 14 frame InspectionCamera thật (chạy từ root)
 & "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_inspection.tests.test_crack_detection auv_inspection.tests.test_camera_regression -v
 
+# Tạo bản suy giảm có seed của một thư mục PNG (P1); không ghi đè thư mục đích
+& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m auv_inspection.robustness.degradation <thu_muc_png> <thu_muc_moi> --degradation turbidity:3 --degradation marine_snow:2 --seed 0
+& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_inspection.robustness.tests.test_degradation -v
+
 # QA live cả hai mặt ống, tự tiếp tục cảnh báo, không mở cửa sổ
 & "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\check_detection_runtime.py
 ```
@@ -613,6 +634,8 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-10-08`: P1 phần 1: thêm package `auv_inspection/robustness/` với `degradation.py` (7 yếu tố × 5 mức, có seed, CLI) và 9 unit test (đạt ở `mainenv` và `.venv-patchcore`). Đã xem lưới mức nghiêm trọng trên frame thật của phiên P0 để QA trực quan; bản đầu dùng độ sâu theo ROI gây viền giả và marine snow dạng khối chữ nhật, mất 2,2 s ở mức 5, đã sửa trước khi commit. CLI chạy 14 fixture camera trong khoảng 2,8 s. Thử minh họa (không phải đánh giá) Classical từng frame trên 14 fixture × 3 seed: tỷ lệ bắt hư hại 67% ở độ đục mức 2 và 0% ở mức 5; marine snow mức 5 gây 21% frame sạch báo nhầm; nhiễu cảm biến và JPEG không ảnh hưởng. Không đổi detector, artifact hay map.
 
 - `2026-10-08`: Ghi kết quả live P0 (`session_20261008_174818_976289`) vào mục 8 và bảng tiến độ của `GENERALIZATION_PLAN.md`: 3/3 vết map A, 1 báo nhầm ở đầu ống, 12,2 tick/s; thêm D13 (suy luận đồng bộ chặn vòng mô phỏng). Không đổi code.
 

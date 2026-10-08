@@ -13,7 +13,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | Phase | Nội dung | Trạng thái | Bằng chứng |
 |---|---|---|---|
 | P0 | Gỡ chặn live: tracker không reset khi frame không đủ điều kiện; ROI dùng mask gần nhất với dung sai | **Xong** (baseline v1.1) | Unit 15/15; replay pose: ROI có ở 99,1-100% frame (trước 28-49%). Live `session_20261008_174818_976289` map A: **3/3 vết** (2 ống, 1 trụ 0), **1 báo nhầm** ở đầu ống (`nearest_mask` lệch 27 cm), route 359/359, 12,2 tick/s |
-| P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | Chưa làm | |
+| P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | Đang làm: phần 1/3 xong | Phần 1: `auv_inspection/robustness/degradation.py`, 7 yếu tố × 5 mức, 9 unit test. Phần 2 (capture ngẫu nhiên hóa) và phần 3 (bộ chỉ số, đo baseline) chưa làm |
 | P2 | ROI hình học + tọa độ bề mặt | Chưa làm | |
 | P3 | Cổng chất lượng ảnh | Chưa làm | |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng SPRT trên bề mặt | Chưa làm | |
@@ -41,6 +41,7 @@ Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 �
 |---|---|
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
+| 2026-10-08 | P1 phần 1: suy giảm offline dùng **khoảng cách đồng nhất 2 m** cho tới P2. Mô hình tách công trình/nền theo ROI bị loại vì đáy gần nằm ngoài ROI, bị xóa trắng và tạo viền giả. Hệ số độ đục là bộ mức nghiêm trọng, chưa khớp với nước Jerlov thật |
 | 2026-10-08 | Chốt baseline v1.1 từ live P0: 3/3 vết map A, 1 báo nhầm ở đầu ống. Không vá riêng báo nhầm này (ví dụ siết dung sai `nearest_mask`) vì sẽ làm mất cả vết trụ (lệch 19 cm); nguyên nhân là ROI không biết ống kết thúc ở đâu, P2 xử lý tận gốc |
 | 2026-10-08 | P0: ROI giữa hai pose tham chiếu dùng **giao hai mask** thay vì co mask hay ORB. Lý do: trên 552 mask đã duyệt, co mask gần như không cải thiện tỷ lệ ROI nằm trên bề mặt, còn giao hai mask nâng p10 lên 0,89-1,00 (đổi lại độ phủ trụ giảm); ORB chưa từng được đánh giá và cần ảnh gốc không có trong repo |
 
