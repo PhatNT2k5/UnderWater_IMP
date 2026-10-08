@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-10-08** - P0 đã chạy live (3/3 vết map A, 1 báo nhầm); P1 phần 1: thư viện suy giảm ảnh `auv_inspection/robustness/`; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-08** - P0 đã chạy live (3/3 vết map A, 1 báo nhầm); P1 phần 1-2: suy giảm ảnh offline và capture ngẫu nhiên hóa `--randomize`; chưa chạy capture ngẫu nhiên hóa với Unreal; không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -45,6 +45,8 @@ UnderwaterDemo/
 │   ├── NOISE_ROBUSTNESS_TODO.md        # Backlog độ bền PatchCore trước nhiễu quan sát
 │   ├── robustness/degradation.py       # Suy giảm ảnh có seed, 7 yếu tố × 5 mức (P1)
 │   ├── robustness/tests/test_degradation.py # Tính tái lập và tính đơn điệu theo mức
+│   ├── robustness/conditions.py        # Điều kiện mô phỏng theo seed: train/heldout (P1)
+│   ├── robustness/tests/test_conditions.py # Khoảng train/heldout, route an toàn, lịch chụp
 │   ├── run_inspection.py             # Entry point chạy map và điều khiển AUV
 │   ├── crack_detection.py            # Tiền xử lý ảnh và phát hiện nghi vấn vết nứt
 │   ├── tests/test_crack_detection.py # Regression test detector bằng ảnh tổng hợp
@@ -139,10 +141,14 @@ Hàm:
 - `advance_station(route, station, location, lookahead_m=1.2) -> tuple[int, list[str]]`
   - Bỏ qua các waypoint trung gian đã nằm trong bán kính lookahead để AUV chuyển động liên tục.
   - Không tự vượt qua waypoint cuối; trả về index mới và danh sách tên đã đi qua.
-- `build_route() -> list[Waypoint]`
+- `build_route(pipe_offset=PIPE_OFFSET, pier_radius=PIER_RADIUS) -> list[Waypoint]`
   - Dùng helper cục bộ `append(...)` để nội suy đoạn dài thành bước tối đa khoảng `0.8 m` và nội suy yaw theo đường ngắn nhất.
   - Đi mặt trước ống, vòng ngoài đầu ống, quay lại mặt sau, rồi thực hiện bốn vòng đủ quanh mỗi trụ.
-  - Camera luôn được hướng vào bề mặt cần quan sát.
+  - Camera luôn được hướng vào bề mặt cần quan sát. Mặc định cho đúng route đã validate; khoảng cách khác chỉ dùng cho capture ngẫu nhiên hóa (số waypoint nội suy đổi theo độ dài đoạn, bán kính trụ trên khoảng 3,07 m tách mỗi cung 15° thành hai waypoint).
+- `STRUCTURE_BOXES`, `CLEARANCE_MARGIN_M`: hộp bao ống/trụ/móng và biên an toàn 0,65 m, trước đây nằm trong test.
+- `smooth_noise(count, rng)`: tổng ba sóng sin chu kỳ 15-60 waypoint, chuẩn hóa về [-1, 1], tránh target zig-zag.
+- `perturb_route(route, rng, depth_jitter_m, yaw_jitter_deg)`: cộng lệch độ sâu và yaw mượt; giữ nguyên tên và số waypoint.
+- `clearance_violations(route, margin_m=0.65)`: lấy mẫu 21 điểm mỗi đoạn, trả các điểm đi vào hộp bao đã nới biên.
 - `ROUTE`
   - Giá trị module-level được tạo ngay khi import bằng `build_route()`; hiện có 359 waypoint theo validation hiện hành.
 
@@ -178,8 +184,8 @@ Entry point chính của hệ thống.
   - Copy pose target hiện tại rồi cập nhật theo phím.
   - `W/S` tiến/lùi theo heading; `A/D` strafe; `R/F` lên/xuống; `Q/E` yaw.
   - Chuẩn hóa vector di chuyển chéo, clamp vị trí trong biên scenario và chuẩn hóa yaw.
-- `enable_inspection_lights(env) -> None`
-  - Bật `flashlight1` và `flashlight2`; tham số hiện có trong source là intensity `2500`, beam_width `1000`, pitch/yaw `0`. Task sửa detector mặt sau giữ nguyên các giá trị người dùng đã chỉnh này.
+- `enable_inspection_lights(env, intensity=2500, pitch_deg=0) -> None`
+  - Bật `flashlight1` và `flashlight2`; mặc định intensity `2500`, beam_width `1000`, pitch/yaw `0` như các giá trị người dùng đã chỉnh. Lượt `--randomize` truyền intensity và pitch đã lấy mẫu.
 - `is_pipe_view(mode, station_name, location) -> bool`
   - Kích hoạt detector trên toàn thân ống đã đo: `x=PIPE_X_MIN-0.5..PIPE_X_MAX+0.5 m` (hiện là `-18.51..15.61 m`), `|y|≤3.5 m`, `z=-12..-8.5 m`; auto cần ở `pipe_front_scan` hoặc `pipe_back_scan`, manual phụ thuộc vị trí. Biên cũ `x=-13..13 m` từng bỏ qua lỗ hiện rõ ở `pipe_front_scan_004`.
 - `save_damage_event(output, frame, analysis, candidate, mode, tick, station_name, location, event_index) -> dict`
@@ -205,9 +211,10 @@ Entry point chính của hệ thống.
   - Trong `finally`: đóng HoloOcean, terminate/kill Unreal nếu cần, đóng semaphore và cửa sổ OpenCV.
   - Với `capture_clean_structures=True`, `capture_clean_pipe=True` hoặc `capture_structures=True`, chỉ cho `auto`; bỏ phân tích hư hại và pause, chọn frame từ route sau warmup mỗi `capture_every_ticks` tick. Chế độ structures lấy cả pipe scan và pier orbit, chế độ pipe chỉ lấy pipe scan. Output `clean_structures_...`, `clean_pipe_...` hoặc `capture_<role>_<state>_...`; report ghi nhóm ảnh, cadence, role/state và SHA256 map cho lượt mới. Không thay đổi map hoặc kiểm chứng nhãn ảnh.
   - Với `--preview-source` và `--preview-ticks`, chỉ mở map đã lưu và chụp vài pose camera chọn từ lượt cũ; tạo `output/preview_poses_*` có ảnh hiện tại, ảnh so sánh nguồn/hiện tại và report pose/hash. Không chạy toàn route, không dùng ảnh preview để hiệu chỉnh/đánh giá.
+  - Với `randomize`/`seed` (P1 phần 2): lấy `RunConditions` từ `robustness.conditions`, dùng `conditioned_route()` thay `ROUTE`, bật đèn theo intensity/pitch đã lấy mẫu, gọi `env.set_ocean_currents()` lúc đầu và mỗi giây mô phỏng, chọn tick chụp bằng `CaptureSchedule`; ghi `conditions.json` và khóa `conditions` trong `report.json`. Không truyền tùy chọn thì giữ nguyên hành vi: đọc `ROUTE` của module lúc gọi (harness QA vẫn patch được), lịch chụp `tick % capture_every_ticks`, đèn 2500/0°, không dòng chảy. Ngẫu nhiên hóa chỉ cho auto, không kết hợp preview.
 - `main() -> None`
-  - Parse `--editor`, `--steps`, `--headless`, `--mode`, `--move-speed`, `--yaw-speed`, ba chế độ capture và `--preview-source` loại trừ nhau, `--preview-ticks`, `--dataset-role`, `--scene-state`, `--capture-every-ticks`.
-  - Validate số dương, cấm `manual + headless` và yêu cầu `auto` khi thu ảnh sạch; sau đó cấu hình logging và gọi `run()`.
+  - Parse `--editor`, `--steps`, `--headless`, `--mode`, `--move-speed`, `--yaw-speed`, ba chế độ capture và `--preview-source` loại trừ nhau, `--preview-ticks`, `--dataset-role`, `--scene-state`, `--capture-every-ticks`, `--randomize {train,heldout}`, `--seed`.
+  - Validate số dương, cấm `manual + headless`, yêu cầu `auto` khi thu ảnh sạch, `--randomize` và `--seed` phải đi cùng nhau; sau đó cấu hình logging và gọi `run()`.
 
 ### `auv_inspection/patchcore_data/`
 
@@ -268,6 +275,23 @@ Thư viện suy giảm ảnh offline có seed cho P1 của `GENERALIZATION_PLAN.
 - `apply_degradations(frame, degradations, seed, depth_m=None)`: áp theo thứ tự vật lý `PIPELINE_ORDER` (môi trường, hạt, ánh sáng, quang học, chuyển động, cảm biến, nén); mỗi yếu tố một luồng ngẫu nhiên `[seed, index]`; từ chối yếu tố lạ hoặc lặp.
 - `degrade_folder(source, destination, degradations, seed)`: frame thứ i dùng `seed + i`, từ chối ghi đè, ghi `degradation.json` gồm nguồn, seed, yếu tố/mức và mô hình độ sâu; `main()` cung cấp CLI.
 
+### `auv_inspection/robustness/conditions.py`
+
+Điều kiện mô phỏng theo từng lượt chạy (P1 phần 2), import top-level từ thư mục `auv_inspection` như `run_inspection.py`.
+
+- `RunConditions`: profile, seed, khoảng cách tới trục ống, bán kính vòng trụ, biên độ lệch độ sâu/yaw, dòng chảy trung bình và biên độ dao động, cường độ và pitch đèn, khoảng tick chụp.
+- `NOMINAL`: đúng runtime đã validate (2,0 m, 2,8 m, không lệch, không dòng chảy, đèn 2500/0°, chụp mỗi 10 tick).
+- `PROFILES`: `train` dao động quanh nominal; `heldout` lấy mọi yếu tố **ngoài** khoảng train (ví dụ ống 1,6-1,75 hoặc 2,45-3,0 m, dòng chảy 0,25-0,45 m/s, đèn ×0,4-0,7 hoặc ×1,3-1,6). Bán kính trụ heldout tối thiểu 2,35 m vì góc hộp an toàn của trụ vuông cách trục khoảng 2,26 m; giá trị 2,2 m đã bị kiểm tra va chạm từ chối.
+- `draw()`: lấy mẫu đều trên hợp các khoảng; `sample_conditions(profile, seed)`: tái lập theo `profile:seed`.
+- `conditioned_route(conditions)`: dựng route theo khoảng cách, cộng lệch mượt, **từ chối** nếu `clearance_violations()` khác rỗng.
+- `current_at(conditions, tick, ticks_per_sec)`: dòng chảy trung bình cộng dao động ngang chu kỳ 60 s.
+- `CaptureSchedule(interval_ticks, seed).due(tick)`: khoảng cố định thì đúng `tick % N == 0`; khoảng ngẫu nhiên thì cách nhau `low..high` tick, tái lập theo seed.
+- `describe()`: dict để ghi `conditions.json`/report.
+- Độ đục không ngẫu nhiên hóa trong mô phỏng: lệnh `water_fog` của HoloOcean chỉ sửa PostProcessVolume có tag `WaterPPV` (đơn vị: giá trị nhập × 40000 = `Fog_Depth` cm), các map dự án không có tag này. Cần tag trên bản sao map nếu muốn dùng.
+- Giới hạn: tên station của route ngẫu nhiên khác số thứ tự (ví dụ `pier_0_level_1_orbit_02_002`), nên ROI PatchCore dựa trên station (P0) sẽ `reference_unavailable` ở các waypoint mới; P2 bỏ phụ thuộc này.
+
+`robustness/tests/test_conditions.py`: 9 test: nominal đúng route và đèn cũ; tái lập theo profile/seed; mẫu train nằm trong khoảng train; mẫu heldout nằm trong khoảng heldout và **không bao giờ** trong khoảng train (60 seed); route ngẫu nhiên giữ thứ tự đoạn, đủ 24 bước góc mỗi vòng trụ và qua kiểm tra va chạm (60 seed × 2 profile); lịch chụp cố định trùng quy tắc modulo cũ, lịch ngẫu nhiên giữ khoảng cách 3-17 tick; dòng chảy dao động trong biên độ; `run()` từ chối ngẫu nhiên hóa ở manual trước khi mở Unreal.
+
 `robustness/tests/test_degradation.py`: 9 test trên ảnh tổng hợp có vết nứt: tái lập theo seed, giữ kích thước/kiểu, từ chối yêu cầu sai, độ tương phản giảm đơn điệu theo độ đục và giảm theo khoảng cách, độ nét giảm theo mất nét/mờ chuyển động, độ sáng giảm theo đèn yếu, sai khác tăng theo nhiễu/hạt/JPEG, CLI ghi tham số và không ghi đè.
 
 ### `auv_inspection/test_inspection_route.py`
@@ -279,7 +303,9 @@ Thư viện suy giảm ảnh offline có seed cho P1 của `GENERALIZATION_PLAN.
 - `test_short_steps_and_unique_names()`
   - Xác nhận tên waypoint duy nhất và khoảng cách giữa hai điểm liên tiếp không quá `0.80001 m`.
 - `test_segments_clear_structure_bounds()`
-  - Lấy mẫu các đoạn tuyến và xác nhận không cắt AABB của ống/trụ/móng đã cộng biên an toàn `0.65 m`.
+  - Gọi `clearance_violations(ROUTE)`: không đoạn nào cắt AABB của ống/trụ/móng đã cộng biên an toàn `0.65 m`.
+- `test_default_build_matches_validated_route()`, `test_clearance_check_detects_a_route_through_the_pipe()`
+  - `build_route()` mặc định đúng bằng `ROUTE`; kiểm tra va chạm bắt được tuyến đi xuyên ống.
 - `test_camera_faces_pipe_and_piers()`
   - Kiểm tra camera quay đúng vào hai mặt ống và tâm trụ.
 - `test_both_pipe_ends_and_complete_pier_rings()`
@@ -568,6 +594,10 @@ Từ root `UnderwaterDemo`:
 # Regression ảnh tổng hợp + 14 frame InspectionCamera thật (chạy từ root)
 & "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_inspection.tests.test_crack_detection auv_inspection.tests.test_camera_regression -v
 
+# Capture có điều kiện ngẫu nhiên hóa (P1): train quanh nominal, heldout ngoài khoảng train
+& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\run_inspection.py --capture-structures --dataset-role train --scene-state clean --randomize train --seed 1 --headless --steps 60000
+& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_inspection.robustness.tests.test_conditions -v
+
 # Tạo bản suy giảm có seed của một thư mục PNG (P1); không ghi đè thư mục đích
 & "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m auv_inspection.robustness.degradation <thu_muc_png> <thu_muc_moi> --degradation turbidity:3 --degradation marine_snow:2 --seed 0
 & "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_inspection.robustness.tests.test_degradation -v
@@ -634,6 +664,8 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-10-08`: P1 phần 2: thêm `robustness/conditions.py` (profile `train`/`heldout`, route ngẫu nhiên có kiểm tra va chạm, dòng chảy, đèn, lịch chụp) và `--randomize`/`--seed` cho `run_inspection.py`; `inspection_route.py` thêm `build_route()` có tham số, `perturb_route()`, `clearance_violations()`, `STRUCTURE_BOXES`; `enable_inspection_lights()` nhận intensity/pitch. Mặc định không đổi hành vi. Kiểm tra va chạm đã từ chối bán kính trụ heldout 2,2 m, nâng cận dưới lên 2,35 m. Tìm thấy `water_fog` cần tag `WaterPPV` mà map dự án không có, nên chưa ngẫu nhiên hóa độ đục trong mô phỏng. Test offline 57/57 (18 robustness, 10 route/gate, 29 dashboard/runtime). **Chưa chạy capture ngẫu nhiên hóa với Unreal.**
 
 - `2026-10-08`: P1 phần 1: thêm package `auv_inspection/robustness/` với `degradation.py` (7 yếu tố × 5 mức, có seed, CLI) và 9 unit test (đạt ở `mainenv` và `.venv-patchcore`). Đã xem lưới mức nghiêm trọng trên frame thật của phiên P0 để QA trực quan; bản đầu dùng độ sâu theo ROI gây viền giả và marine snow dạng khối chữ nhật, mất 2,2 s ở mức 5, đã sửa trước khi commit. CLI chạy 14 fixture camera trong khoảng 2,8 s. Thử minh họa (không phải đánh giá) Classical từng frame trên 14 fixture × 3 seed: tỷ lệ bắt hư hại 67% ở độ đục mức 2 và 0% ở mức 5; marine snow mức 5 gây 21% frame sạch báo nhầm; nhiễu cảm biến và JPEG không ảnh hưởng. Không đổi detector, artifact hay map.
 
