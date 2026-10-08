@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-10-08** - P0 đã chạy live (3/3 vết map A, 1 báo nhầm); P1 phần 1-2: suy giảm ảnh offline và capture ngẫu nhiên hóa `--randomize`; chưa chạy capture ngẫu nhiên hóa với Unreal; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-08** - P0 đã chạy live (3/3 vết map A, 1 báo nhầm); P1 phần 1-2: suy giảm ảnh offline và capture ngẫu nhiên hóa `--randomize`; đã chạy 2 capture heldout với Unreal; không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -289,6 +289,7 @@ Thư viện suy giảm ảnh offline có seed cho P1 của `GENERALIZATION_PLAN.
 - `describe()`: dict để ghi `conditions.json`/report.
 - Độ đục không ngẫu nhiên hóa trong mô phỏng: lệnh `water_fog` của HoloOcean chỉ sửa PostProcessVolume có tag `WaterPPV` (đơn vị: giá trị nhập × 40000 = `Fog_Depth` cm), các map dự án không có tag này. Cần tag trên bản sao map nếu muốn dùng.
 - Giới hạn: tên station của route ngẫu nhiên khác số thứ tự (ví dụ `pier_0_level_1_orbit_02_002`), nên ROI PatchCore dựa trên station (P0) sẽ `reference_unavailable` ở các waypoint mới; P2 bỏ phụ thuộc này.
+- Dòng chảy gần như không làm lệch pose trong mô phỏng: bộ điều khiển `HoveringAUVControlPD` có `Kp = 100`, gia tốc tối đa 1 m/s², nên lực cản khoảng 24 N (0,35 m/s, `Cd = 0,8`, `A = 0,5 m²`) trên AUV 31,02 kg chỉ gây lệch khoảng 0,8 cm. Đo trên capture heldout: sai lệch ngang giống lượt không dòng chảy. Xem D14 trong `GENERALIZATION_PLAN.md`.
 
 `robustness/tests/test_conditions.py`: 9 test: nominal đúng route và đèn cũ; tái lập theo profile/seed; mẫu train nằm trong khoảng train; mẫu heldout nằm trong khoảng heldout và **không bao giờ** trong khoảng train (60 seed); route ngẫu nhiên giữ thứ tự đoạn, đủ 24 bước góc mỗi vòng trụ và qua kiểm tra va chạm (60 seed × 2 profile); lịch chụp cố định trùng quy tắc modulo cũ, lịch ngẫu nhiên giữ khoảng cách 3-17 tick; dòng chảy dao động trong biên độ; `run()` từ chối ngẫu nhiên hóa ở manual trước khi mở Unreal.
 
@@ -610,6 +611,12 @@ Không có lệnh rebuild map: `auv_inspection/rebuild.py` không có trong repo
 
 ## 8. Trạng thái đã xác minh và giới hạn
 
+### Capture ngẫu nhiên hóa với Unreal (P1 phần 2)
+
+- `auv_inspection/output/capture_test_mixed_20261008_190916_184618/`: map A (SHA256 `daba22ec...`), `--randomize heldout --seed 1` (ống 2,77 m, trụ 3,19 m, dòng chảy 0,35 m/s, đèn 3839, pitch -7,1°), 550/550 waypoint, 598 ảnh (104/104/189/201 theo pipe_front/pipe_back/pier_0/pier_1).
+- `auv_inspection/output/capture_test_clean_20261008_191432_831527/`: map `AUVInspection_PatchCoreClean_20260926_v3` (SHA256 `ea94a84f...`), `--randomize heldout --seed 2` (ống 1,62 m, trụ 3,36 m, dòng chảy 0,45 m/s, đèn 3446, pitch +8,7°), 551/551 waypoint, 635 ảnh (95/108/211/221).
+- Đã kiểm chứng trên telemetry và ảnh: y khi quét mặt trước ống 2,83 m và 1,68 m (nominal 2,06 m); lệnh độ sâu dao động -10,49..-10,19 m và yaw -92,8..-87,5° trên mặt trước ống, AUV bám theo; khoảng cách giữa hai lần chụp 3-17 tick (15 giá trị khác nhau); ảnh mẫu thấy cả 3 vết của map A và không vết nào trên map sạch, kích thước ống và vị trí vùng sáng khác rõ so với nominal. Dòng chảy không đo được tác dụng (sai lệch ngang p95 6,5 cm so với 7,2 cm nominal), giải thích ở mục `robustness/conditions.py`.
+
 ### PatchCore live sau P0 (baseline v1.1)
 
 - `auv_dashboard/output/session_20261008_174818_976289/` (2026-10-08, Tự động + PatchCore, map A, máy RTX 3050 4 GB): route 359/359, 4 cảnh báo, mỗi lần giữ 5 giây rồi tự tiếp tục. Đã xem ảnh từng event: event 001 (tick 405) và 002 (tick 651) đúng hai vết ống mặt trước (`mask_intersection`), event 004 (tick 3900) đúng vết trụ 0 (`nearest_mask` lệch 19 cm), event 003 (tick 1872, `pipe_back_scan_001`) là **báo nhầm** ở mép cuối ống do ROI `nearest_mask` lệch 27 cm lấn ra vùng nước. Kết quả: 3/3 vết của map A, 1 báo nhầm; Classical cùng map: 2/3, 0 báo nhầm.
@@ -664,6 +671,8 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-10-08`: Ghi kết quả 2 capture heldout với Unreal (P1 phần 2) vào mục 8: cả hai đi hết route, khoảng cách/độ sâu/yaw/đèn/lịch chụp có tác dụng; dòng chảy không đo được vì bộ điều khiển PD của HoveringAUV quá cứng (`Kp = 100`), thêm D14 vào `GENERALIZATION_PLAN.md`. Không đổi code.
 
 - `2026-10-08`: P1 phần 2: thêm `robustness/conditions.py` (profile `train`/`heldout`, route ngẫu nhiên có kiểm tra va chạm, dòng chảy, đèn, lịch chụp) và `--randomize`/`--seed` cho `run_inspection.py`; `inspection_route.py` thêm `build_route()` có tham số, `perturb_route()`, `clearance_violations()`, `STRUCTURE_BOXES`; `enable_inspection_lights()` nhận intensity/pitch. Mặc định không đổi hành vi. Kiểm tra va chạm đã từ chối bán kính trụ heldout 2,2 m, nâng cận dưới lên 2,35 m. Tìm thấy `water_fog` cần tag `WaterPPV` mà map dự án không có, nên chưa ngẫu nhiên hóa độ đục trong mô phỏng. Test offline 57/57 (18 robustness, 10 route/gate, 29 dashboard/runtime). **Chưa chạy capture ngẫu nhiên hóa với Unreal.**
 

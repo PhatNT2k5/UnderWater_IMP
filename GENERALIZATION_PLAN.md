@@ -13,7 +13,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | Phase | Nội dung | Trạng thái | Bằng chứng |
 |---|---|---|---|
 | P0 | Gỡ chặn live: tracker không reset khi frame không đủ điều kiện; ROI dùng mask gần nhất với dung sai | **Xong** (baseline v1.1) | Unit 15/15; replay pose: ROI có ở 99,1-100% frame (trước 28-49%). Live `session_20261008_174818_976289` map A: **3/3 vết** (2 ống, 1 trụ 0), **1 báo nhầm** ở đầu ống (`nearest_mask` lệch 27 cm), route 359/359, 12,2 tick/s |
-| P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | Đang làm: phần 2/3 code xong | Phần 1: `robustness/degradation.py`, 7 yếu tố × 5 mức, 9 unit test. Phần 2: `robustness/conditions.py` + `run_inspection.py --randomize train\|heldout --seed`, 9 unit test; **chờ chạy capture với Unreal**. Phần 3 (bộ chỉ số, đo baseline) chưa làm |
+| P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | Đang làm: phần 2/3 xong | Phần 1: `robustness/degradation.py`, 7 yếu tố × 5 mức, 9 unit test. Phần 2: `--randomize train\|heldout --seed`, 9 unit test; Unreal: `capture_test_mixed_20261008_190916_184618` (map A, heldout seed 1, 598 ảnh) và `capture_test_clean_20261008_191432_831527` (map sạch v3, heldout seed 2, 635 ảnh), cả hai đi hết route; khoảng cách ống, lệch độ sâu/yaw, đèn, lịch chụp có tác dụng; dòng chảy không đo được (D14). Phần 3 (bộ chỉ số, đo baseline) chưa làm |
 | P2 | ROI hình học + tọa độ bề mặt | Chưa làm | |
 | P3 | Cổng chất lượng ảnh | Chưa làm | |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng SPRT trên bề mặt | Chưa làm | |
@@ -41,6 +41,7 @@ Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 �
 |---|---|
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
+| 2026-10-08 | Giữ dòng chảy trong `RunConditions` (lực vật lý đúng, có tác dụng khi gần bão hòa bộ điều khiển) nhưng **không coi là nguồn sai lệch pose**. Sai số pose thực tế (DVL/INS) sẽ mô phỏng ở P2 bằng nhiễu trên pose đưa cho khối nhận thức, vì đó mới là cái detector thấy trên AUV thật |
 | 2026-10-08 | P1 phần 2: profile `heldout` lấy **mọi** yếu tố ngoài khoảng `train` (ngoại suy), có test bảo đảm không mẫu nào lọt vào khoảng train. Route ngẫu nhiên phải qua `clearance_violations()`; bán kính trụ heldout tối thiểu 2,35 m (2,2 m bị từ chối vì góc hộp an toàn trụ vuông ở khoảng 2,26 m) |
 | 2026-10-08 | Không ngẫu nhiên hóa độ đục trong mô phỏng ở P1: `water_fog` cần tag `WaterPPV` mà map dự án không có. Muốn bật cần thêm tag vào **bản sao** map (người dùng quyết định); trước mắt độ đục dùng suy giảm offline |
 | 2026-10-08 | P1 phần 1: suy giảm offline dùng **khoảng cách đồng nhất 2 m** cho tới P2. Mô hình tách công trình/nền theo ROI bị loại vì đáy gần nằm ngoài ROI, bị xóa trắng và tạo viền giả. Hệ số độ đục là bộ mức nghiêm trọng, chưa khớp với nước Jerlov thật |
@@ -67,6 +68,7 @@ Hệ thống hiện tại không hỏng ở model mà ở **cách đặt bài to
 | D10 | Đánh giá 5 vết, 1 bố trí, 1 seed, không khoảng tin cậy | `patchcore_evaluation_B_v1.json` | Không biết độ bất định |
 | D11 | Cổng hash không hash code | `approval_gate.py` | Sửa logic xong vẫn hiện "đã nghiệm thu" |
 | D13 | Suy luận PatchCore chạy đồng bộ trong vòng mô phỏng | Live P0: 130-243 ms/frame trên RTX 3050 dùng chung với Unreal; mô phỏng còn 12,2 tick/s (Classical 23,5) | Trên AUV thật, suy luận chậm sẽ chặn vòng điều khiển; cần tách bất đồng bộ (bỏ frame cũ). Xử lý ở P4 |
+| D14 | Bộ điều khiển vị trí HoveringAUV quá cứng: `Kp = 100 s⁻²`, gia tốc tối đa 1 m/s² | Capture heldout với dòng chảy 0,35-0,45 m/s: sai lệch ngang giống hệt lượt không dòng chảy (khoảng 6 cm, là độ lệch socket PoseSensor); lực cản khoảng 24 N trên AUV 31 kg chỉ gây lệch khoảng 0,8 cm | AUV thật giữ vị trí kém hơn nhiều và còn sai số định vị (ước lượng pose khác pose thật). Dòng chảy trong mô phỏng không đại diện được điều này; sai số pose sẽ được mô phỏng bằng cách làm nhiễu **pose đưa cho khối nhận thức** ở P2 |
 | D12 | Độ phân giải chưa gắn với yêu cầu kiểm định | 640×480, FOV 80° nên f ≈ 381 px; ở 2 m mỗi pixel ≈ 5,2 mm | Vết mảnh hơn vài mm không thể thấy về mặt vật lý |
 
 ## 2. Nguyên tắc thiết kế
