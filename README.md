@@ -89,6 +89,7 @@ python .\auv_dashboard\run_dashboard.py
 
 ## Tài liệu
 
+- [Kế hoạch tổng quát hóa và tiến độ](GENERALIZATION_PLAN.md)
 - [Hướng dẫn PatchCore](auv_inspection/PATCHCORE_GUIDE_VI.md)
 - [Backlog nhiễu môi trường](auv_inspection/NOISE_ROBUSTNESS_TODO.md)
 - [Bàn giao source và giới hạn](SOURCE_HANDOFF.md)

@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-09-27** - sửa `scripts/setup_project.ps1` không chép overlay/artifact; `find_editor()` thêm biến môi trường/registry, launcher dashboard nhận conda env; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-08** - P0 (ROI giao mask tham chiếu, tracker không reset) đã chạy live: 3/3 vết map A, 1 báo nhầm; không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -23,6 +23,7 @@ UnderwaterDemo/
 ├── AGENTS.md                         # Quy tắc cho AI/agent làm việc trong repo
 ├── SOURCE_HANDOFF.md                 # Tài liệu đang đọc; phải cập nhật cùng source
 ├── PROJECT_STATUS_AND_ROADMAP.md     # Báo cáo hiện trạng, kết quả và kế hoạch tiếp theo
+├── GENERALIZATION_PLAN.md            # Kế hoạch tổng quát hóa P0-P7, tiến độ, tiêu chí nghiệm thu
 ├── README.md                         # Setup repo chia sẻ, overlay HoloOcean và chạy dashboard
 ├── scripts/setup_project.ps1         # Clone/pin HoloOcean và cài overlay/artifact trên máy mới
 ├── holoocean_overlay/                # Map/asset/C++/plugin riêng để áp dụng lên HoloOcean upstream
@@ -218,8 +219,8 @@ Pipeline PatchCore riêng, dùng Python 3.11 trong `.venv-patchcore`; `mainenv` 
 - `roi_propagate.py`: `transform_polygon()` ghép ORB/RANSAC giữa ảnh đại diện và frame lân cận; `propose()` tạo mask nháp, dùng gợi ý hình học khi ORB lỗi hoặc lệch, có thể lấy polygon từ dataset sạch khác, chỉ tự duyệt keyframe trong chính dataset; `main()` cung cấp CLI. Mask nháp phải duyệt trong `roi_review.py`.
 - `roi_audit.py`: `create_sheets()` tạo ảnh ghép overlay toàn bộ mask theo nhóm để QA hàng loạt; `main()` cung cấp CLI.
 - `roi_review.py`: `review()` chồng mask lên ảnh thật để duyệt/loại/để sau từng frame, lưu `roi_approved.json`; `main()` mở GUI. Frame thiếu mask hoặc căn chỉnh thất bại không tự thành ảnh sạch hợp lệ.
-- `live_roi.py`: `load_references()` chỉ nạp mask sạch đã duyệt; `nearest_reference()` đối chiếu đúng nhóm/station/pose; `aligned_mask()` chuyển mask qua ORB affine có giới hạn inlier/scale/dịch chuyển; `match_roi()` trả trạng thái rõ khi tham chiếu/mask/căn chỉnh lỗi, dùng trực tiếp mask với pose rất gần; `audit()` đo độ phủ và IoU so với dataset đã duyệt; `main()` cung cấp CLI audit. Dashboard gọi qua service khi có ngưỡng PatchCore.
-- `live_service.py`: `create_session()` kiểm tra ngưỡng cùng model, nạp backbone chung và bốn bank trong môi trường PatchCore; `analyze_request()` nhận PNG/tick/nhóm/station/pose, tìm ROI, chấm điểm, xác nhận cảnh báo ba frame và trả ROI/heatmap/mask/annotation cùng trạng thái lỗi rõ; ma trận score nén chỉ gửi khi có alert hoặc yêu cầu chẩn đoán; `serve()` xử lý JSON-lines stdin/stdout; `main()` cung cấp CLI. Dashboard đã có nhánh chọn đã có ngưỡng hiệu chỉnh, chưa test UI live.
+- `live_roi.py`: `load_references()` chỉ nạp mask sạch đã duyệt (không cần ảnh camera gốc); `nearest_references()` trả tối đa hai tham chiếu cùng nhóm/station gần nhất theo pose; `within_reference_range()` giới hạn 0,5 m/8°; `read_mask()` đọc mask đúng kích thước; `match_roi()` dùng thẳng mask khi pose ≤7 cm/1° (`pose_match`), giữa hai pose tham chiếu thì lấy **giao** hai mask gần nhất (`mask_intersection`, chỉ một tham chiếu thì `nearest_mask`), ROI dưới 1000 pixel trả `roi_too_small`; nhánh căn ORB đã bỏ (P0, 2026-10-08) vì chưa từng được đánh giá và cần ảnh gốc không có trong repo; `audit()` đo độ phủ và IoU so với dataset đã duyệt; `main()` cung cấp CLI audit. Dashboard gọi qua service khi có ngưỡng PatchCore.
+- `live_service.py`: `create_session()` kiểm tra ngưỡng cùng model, nạp backbone chung và bốn bank trong môi trường PatchCore; `analyze_request()` nhận PNG/tick/nhóm/station/pose, tìm ROI, chấm điểm, xác nhận cảnh báo ba frame và trả ROI/heatmap/mask/annotation cùng trạng thái lỗi rõ; frame `analysis_unavailable` **không reset tracker** (từ P0), track cũ chỉ bị bỏ theo `max_gap_ticks`; ma trận score nén chỉ gửi khi có alert hoặc yêu cầu chẩn đoán; `serve()` xử lý JSON-lines stdin/stdout; `main()` cung cấp CLI. Dashboard đã có nhánh chọn đã có ngưỡng hiệu chỉnh, chưa test UI live.
 - `model.py`: `tile_starts()` phủ mép ảnh; `iter_tiles()` chọn ô 256×256 bước 128 có bề mặt; `to_tensor()` dùng RGB/ImageNet normalization; `make_model()` tạo Anomalib PatchcoreModel Wide ResNet50-2 layer2+layer3; `extract_embeddings()` lấy đặc trưng; `surface_grid()` chọn tâm đặc trưng thuộc ROI; `predict_map()` ghép khoảng cách nearest-neighbor theo tọa độ frame gốc; `load_roi()` bắt buộc mask đã duyệt.
 - `train.py`: `load_manifest()` từ chối calibration/test/mixed; `frame_embeddings()` chỉ lấy đặc trưng trong ROI; `fit()` dùng reservoir có giới hạn, K-center greedy coreset và lưu bốn memory bank, backbone, cấu hình/phiên bản/hash nguồn; `main()` cung cấp CLI. Frame loại bỏ không tham gia, frame chưa duyệt làm fit dừng rõ lỗi.
 - `predict.py`: `load_model()` nạp backbone/bank đúng nhóm; `predict()` ghi camera/ROI/heatmap/ma trận score và metadata không ngưỡng; `main()` cung cấp CLI. Đây là score bất thường chưa hiệu chỉnh, không phải xác suất hư hại.
@@ -236,6 +237,8 @@ Pipeline PatchCore riêng, dùng Python 3.11 trong `.venv-patchcore`; `mainenv` 
 - `evaluate.py`: `classical_events()` replay detector Classical trên hai mặt ống; `evaluate()` xác minh hai score test và ngưỡng cùng model, dùng ngưỡng đã chốt trên tập test sạch/B có nhãn khóa, báo recall theo vết nhìn thấy, vết không đủ quan sát, báo nhầm, độ trễ và so sánh Classical; `acceptance.passed` cũng yêu cầu mọi ID trong inventory nhìn thấy được. Report ghi SHA256 ngưỡng và fingerprint model/tham chiếu cho cổng mặc định dashboard; `main()` cung cấp CLI. Đã chạy trên B khóa nhãn: 5/5 ID, 4/4 nhỏ/mảnh, 0 báo nhầm sạch; xem PATCHCORE_HANDOFF.md về giới hạn.
 - `tests/test_approval_gate.py`: Tạo artifact thử và xác nhận cổng mặc định từ chối khi ngưỡng, bank model, ROI mask hoặc điều kiện nghiệm thu bị đổi sau đánh giá.
 - `tests/test_label_integrity.py`: Kiểm tra nhãn visible thiếu hình bị từ chối và nhãn test thay đổi sau khóa bị phát hiện.
+- `tests/test_live_roi.py`: Dataset mask giả trong thư mục tạm; kiểm tra `pose_match`, giao hai mask khi ở giữa hai tham chiếu, `nearest_mask` khi chỉ có một tham chiếu, `reference_unavailable` khi lệch quá 0,5 m và `roi_too_small` khi hai mask không giao. Không cần ảnh camera.
+- `tests/test_live_service_unavailable.py`: `analyze_request()` với frame không có ROI không đổi trạng thái tracker; tracker vẫn xác nhận vết khi frame tốt xen kẽ frame bị bỏ (mẫu phiên live 2026-09-27) và vẫn bỏ track sau khoảng trống quá `max_gap_ticks`.
 - `tests/test_calibration_budget.py`: Dữ liệu tổng hợp bốn nhóm xác minh đúng giới hạn hai cảnh báo nhầm cho toàn route, ưu tiên vết mảnh và từ chối vết A không nhìn thấy; thêm trường hợp vết mảnh có score thấp hơn trung vị đỉnh ảnh sạch nhưng vẫn được tracker xác nhận mà không báo nhầm; không thay thế hiệu chỉnh trên ảnh thật.
 
 Ảnh train hiện có: `auv_inspection/output/patchcore_dataset_clean_20260925/`, 552 frame được xác nhận sạch từ capture 25/09, 60 keyframe, bốn nhóm. Tất cả 552 mask đã được duyệt qua ảnh ghép theo nhóm và lưu `roi_approved.json`; 398 mask dùng dự phòng hình học, 154 qua ORB. Baseline `auv_inspection/output/patchcore_model_v1/` fit thành công trên GPU với bank 678/684/800/800 theo bốn nhóm; thử offline một ảnh sạch ở `output/patchcore_smoke_20260926/`. Capture cũ không có map SHA256 vì tạo trước thay đổi CLI.
@@ -556,7 +559,13 @@ Không có lệnh rebuild map: `auv_inspection/rebuild.py` không có trong repo
 
 ## 8. Trạng thái đã xác minh và giới hạn
 
-### PatchCore (chỉ offline, chưa live Unreal)
+### PatchCore live sau P0 (baseline v1.1)
+
+- `auv_dashboard/output/session_20261008_174818_976289/` (2026-10-08, Tự động + PatchCore, map A, máy RTX 3050 4 GB): route 359/359, 4 cảnh báo, mỗi lần giữ 5 giây rồi tự tiếp tục. Đã xem ảnh từng event: event 001 (tick 405) và 002 (tick 651) đúng hai vết ống mặt trước (`mask_intersection`), event 004 (tick 3900) đúng vết trụ 0 (`nearest_mask` lệch 19 cm), event 003 (tick 1872, `pipe_back_scan_001`) là **báo nhầm** ở mép cuối ống do ROI `nearest_mask` lệch 27 cm lấn ra vùng nước. Kết quả: 3/3 vết của map A, 1 báo nhầm; Classical cùng map: 2/3, 0 báo nhầm.
+- Suy luận 130-243 ms/frame khi dùng chung GPU với Unreal; mô phỏng còn 12,2 tick/s (Classical 23,5). Kết quả phát hiện không phụ thuộc tốc độ vì vòng mô phỏng khóa theo tick, nhưng đây là giới hạn vận hành (D13 trong `GENERALIZATION_PLAN.md`).
+- Đây là một lượt trên map A tất định, không phải nghiệm thu tổng quát; báo cáo B offline cũ không mô tả hệ thống sau P0.
+
+### PatchCore (offline, trước P0)
 
 - Hiệu chỉnh trên A3 + lượt sạch calibration độc lập: 3/3 ID, 0 sự kiện sạch; ngưỡng front/back/pier0/pier1 = `61.55155/53.06446/58.91152/54.33251` trong `patchcore_thresholds_v1.json`.
 - Nghiệm thu B với nhãn đã khóa trước khi score (`patchcore_evaluation_B_v1.json`): 5/5 vết, 4/4 vết nhỏ/mảnh, 0 báo nhầm trên lượt sạch test. Classical trên cùng B: 1/4 vết ống, không hỗ trợ trụ.
@@ -604,6 +613,12 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-10-08`: Ghi kết quả live P0 (`session_20261008_174818_976289`) vào mục 8 và bảng tiến độ của `GENERALIZATION_PLAN.md`: 3/3 vết map A, 1 báo nhầm ở đầu ống, 12,2 tick/s; thêm D13 (suy luận đồng bộ chặn vòng mô phỏng). Không đổi code.
+
+- `2026-10-08`: P0 của `GENERALIZATION_PLAN.md`. `live_roi.match_roi()` bỏ nhánh ORB, giữa hai pose tham chiếu dùng giao hai mask gần nhất (thêm `nearest_references()`, `within_reference_range()`, `read_mask()`, trạng thái `roi_too_small`; `ReferenceFrame` bỏ trường `source_image`). Lựa chọn dựa trên đo 552 mask đã duyệt: co mask chỉ nâng tỷ lệ ROI nằm trên bề mặt (p10) từ 0,883 lên 0,908 với ống, còn giao hai mask lân cận nâng từ 0,79-0,97 lên 0,89-1,00, đổi lại độ phủ trụ giảm (p10 0,58-0,62). `live_service.analyze_request()` không reset tracker khi frame không đủ điều kiện. Replay chuỗi pose của phiên `session_20260927_191813_365317`: tỷ lệ frame có ROI tăng từ 28-49% lên 99,1-100%; trên trụ khoảng 40% frame chỉ có một tham chiếu cùng station (`nearest_mask`), để P2 xử lý. Unit PatchCore 15/15 (7 cũ, 8 mới) trong `.venv-patchcore`. **Chưa chạy live Unreal sau P0**; kết quả B offline cũ không còn mô tả hệ thống này (cổng hash vẫn khớp vì không hash code, xem D11).
+
+- `2026-10-08`: Thêm `GENERALIZATION_PLAN.md`: chẩn đoán các điểm tất định (D1-D12, gồm phiên live PatchCore 2026-09-27 bỏ 47-72% frame vì thiếu ảnh tham chiếu và tracker reset), kiến trúc mới (cổng chất lượng, ROI hình học, DINOv2/Mahalanobis/loại nhiễu, ngưỡng conformal, SPRT trên bề mặt, quay lại chụp gần), ngẫu nhiên hóa điều kiện, giao thức đánh giá, lộ trình P0-P7 và tiêu chí nghiệm thu bản đầu. README gốc liên kết tới file này. Chỉ thêm tài liệu, không đổi code, artifact hay map.
 
 - `2026-09-27`: `scripts/setup_project.ps1` thêm `Write-JsonNoBom()` để ghi `patchcore_thresholds_v1.json`/`patchcore_evaluation_B_v1.json` bằng UTF-8 không BOM. Trước đó `Set-Content -Encoding utf8` của Windows PowerShell 5.1 thêm BOM, khiến `approval_gate.approval_matches()` trả sai (dashboard mặc định Classical) và `live_service.create_session()` lỗi `JSONDecodeError` khi đọc ngưỡng. Đã chạy lại đoạn cài artifact trên máy người dùng: cổng trả PatchCore, `PatchCoreClient` khởi động service tới `ready` trên RTX 3050 trong khoảng 22 giây. Chưa chạy PatchCore live cùng Unreal. Không đổi nội dung ngưỡng, model hay map.
 

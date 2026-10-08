@@ -111,14 +111,14 @@ def analyze_request(session: Session, request: dict) -> dict:
                 "position_m": position_m.tolist(), "yaw_deg": yaw_deg,
                 "model_dir": str(session.model_dir),
                 "threshold": session.thresholds[category], "roi_status": roi_status}
+    # Unusable frames neither confirm nor erase evidence; the tracker's own
+    # max_gap_ticks drops tracks that go unobserved for too long.
     if roi is None:
-        session.tracker.reset()
         return {**identity, "status": "analysis_unavailable", "candidates": [],
                 "alerts": [], "processing_ms": (time.perf_counter() - start) * 1000}
     session.model.memory_bank = session.banks[category]
     scores = predict_map(session.model, frame, roi, session.device)
     if not np.isfinite(scores).any():
-        session.tracker.reset()
         return {**identity, "status": "analysis_unavailable", "reason": "no_surface_scores",
                 "candidates": [], "alerts": [],
                 "processing_ms": (time.perf_counter() - start) * 1000}

@@ -9,11 +9,16 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+POSE_MATCH_MAX_DISTANCE_M = 0.07
+POSE_MATCH_MAX_YAW_DEG = 1.0
+REFERENCE_MAX_DISTANCE_M = 0.5
+REFERENCE_MAX_YAW_DEG = 8.0
+MIN_ROI_PIXELS = 1000
+
 
 @dataclass(frozen=True)
 class ReferenceFrame:
     image: str
-    source_image: Path
     mask: Path
     category: str
     station: str
@@ -31,8 +36,7 @@ def load_references(dataset: Path) -> list[ReferenceFrame]:
         if entry is None or entry.get("status") != "approved":
             continue
         references.append(ReferenceFrame(
-            image=row["image"], source_image=Path(row["source_image"]),
-            mask=dataset / entry["mask"], category=row["category"],
+            image=row["image"], mask=dataset / entry["mask"], category=row["category"],
             station=row["station"], position_m=np.asarray(row["position_m"], np.float32),
             yaw_deg=float(row["yaw_deg"]),
         ))
@@ -45,79 +49,59 @@ def angular_distance(first: float, second: float) -> float:
     return abs((first - second + 180.0) % 360.0 - 180.0)
 
 
-def nearest_reference(references: list[ReferenceFrame], category: str,
-                      station: str, position_m: np.ndarray,
-                      yaw_deg: float) -> tuple[ReferenceFrame | None, float, float]:
+def nearest_references(references: list[ReferenceFrame], category: str,
+                       station: str, position_m: np.ndarray, yaw_deg: float,
+                       count: int = 2) -> list[tuple[ReferenceFrame, float, float]]:
+    """Return up to `count` same-station references ordered by pose distance."""
     candidates = [item for item in references if item.category == category
                   and item.station == station]
-    if not candidates:
-        return None, float("inf"), float("inf")
-    selected = min(candidates, key=lambda item: (
+    ranked = sorted(candidates, key=lambda item: (
         float(np.linalg.norm(item.position_m - position_m))
         + 0.02 * angular_distance(item.yaw_deg, yaw_deg)))
-    return (selected, float(np.linalg.norm(selected.position_m - position_m)),
-            angular_distance(selected.yaw_deg, yaw_deg))
+    return [(item, float(np.linalg.norm(item.position_m - position_m)),
+             angular_distance(item.yaw_deg, yaw_deg)) for item in ranked[:count]]
 
 
-def aligned_mask(source: np.ndarray, target: np.ndarray,
-                 mask: np.ndarray) -> tuple[np.ndarray | None, int]:
-    detector = cv2.ORB_create(nfeatures=1500)
-    source_points, source_descriptors = detector.detectAndCompute(source, None)
-    target_points, target_descriptors = detector.detectAndCompute(target, None)
-    if source_descriptors is None or target_descriptors is None:
-        return None, 0
-    pairs = cv2.BFMatcher(cv2.NORM_HAMMING).knnMatch(source_descriptors,
-                                                       target_descriptors, k=2)
-    good = [first for first, second in pairs if first.distance < 0.7 * second.distance]
-    if len(good) < 20:
-        return None, len(good)
-    src = np.float32([source_points[match.queryIdx].pt for match in good])
-    dst = np.float32([target_points[match.trainIdx].pt for match in good])
-    matrix, inliers = cv2.estimateAffinePartial2D(src, dst, method=cv2.RANSAC,
-                                                    ransacReprojThreshold=3.0)
-    count = 0 if inliers is None else int(inliers.sum())
-    if matrix is None or count < 15:
-        return None, count
-    scale = float(np.hypot(matrix[0, 0], matrix[1, 0]))
-    if not 0.9 <= scale <= 1.1 or np.linalg.norm(matrix[:, 2]) > 80:
-        return None, count
-    warped = cv2.warpAffine(mask, matrix, (target.shape[1], target.shape[0]),
-                            flags=cv2.INTER_NEAREST, borderValue=0)
-    if np.count_nonzero(warped) < 1000:
-        return None, count
-    return warped, count
+def within_reference_range(distance_m: float, yaw_error_deg: float) -> bool:
+    return distance_m <= REFERENCE_MAX_DISTANCE_M and yaw_error_deg <= REFERENCE_MAX_YAW_DEG
+
+
+def read_mask(reference: ReferenceFrame, shape: tuple[int, int]) -> np.ndarray | None:
+    mask = cv2.imread(str(reference.mask), cv2.IMREAD_GRAYSCALE)
+    return mask if mask is not None and mask.shape == shape else None
 
 
 def match_roi(frame: np.ndarray, references: list[ReferenceFrame],
               category: str, station: str, position_m: np.ndarray,
               yaw_deg: float) -> tuple[np.ndarray | None, dict]:
-    reference, distance_m, yaw_error_deg = nearest_reference(
-        references, category, station, position_m, yaw_deg)
-    if reference is None:
+    matches = nearest_references(references, category, station, position_m, yaw_deg)
+    if not matches:
         return None, {"status": "reference_unavailable", "distance_m": None,
                       "yaw_error_deg": None}
-    if distance_m > 0.5 or yaw_error_deg > 8.0:
-        return None, {"status": "reference_unavailable", "distance_m": distance_m,
-                      "yaw_error_deg": yaw_error_deg}
-    mask = cv2.imread(str(reference.mask), cv2.IMREAD_GRAYSCALE)
-    if mask is None or mask.shape != frame.shape[:2]:
+    reference, distance_m, yaw_error_deg = matches[0]
+    pose = {"distance_m": distance_m, "yaw_error_deg": yaw_error_deg}
+    if not within_reference_range(distance_m, yaw_error_deg):
+        return None, {"status": "reference_unavailable", **pose}
+    mask = read_mask(reference, frame.shape[:2])
+    if mask is None:
         return None, {"status": "reference_mask_invalid", "reference": reference.image}
-    if distance_m <= 0.07 and yaw_error_deg <= 1.0:
+    if distance_m <= POSE_MATCH_MAX_DISTANCE_M and yaw_error_deg <= POSE_MATCH_MAX_YAW_DEG:
         return mask, {"status": "ready", "method": "pose_match",
-                      "reference": reference.image, "distance_m": distance_m,
-                      "yaw_error_deg": yaw_error_deg}
-    source = cv2.imread(str(reference.source_image), cv2.IMREAD_GRAYSCALE)
-    if source is None or source.shape != mask.shape:
-        return None, {"status": "reference_image_invalid", "reference": reference.image}
-    target = cv2.cvtColor(frame[:, :, :3], cv2.COLOR_BGR2GRAY)
-    warped, inliers = aligned_mask(source, target, mask)
-    if warped is None:
-        return None, {"status": "registration_failed", "reference": reference.image,
-                      "distance_m": distance_m, "yaw_error_deg": yaw_error_deg,
-                      "inliers": inliers}
-    return warped, {"status": "ready", "method": "orb_affine",
-                    "reference": reference.image, "distance_m": distance_m,
-                    "yaw_error_deg": yaw_error_deg, "inliers": inliers}
+                      "reference": reference.image, **pose}
+    # Between reference poses, intersect the nearest reviewed masks: on the clean
+    # dataset this keeps >= 89% (p10) of the ROI on the surface without needing
+    # the reference camera images that ORB alignment required.
+    used = [reference.image]
+    for other, other_distance, other_yaw in matches[1:]:
+        other_mask = read_mask(other, frame.shape[:2])
+        if other_mask is not None and within_reference_range(other_distance, other_yaw):
+            mask = cv2.bitwise_and(mask, other_mask)
+            used.append(other.image)
+    if np.count_nonzero(mask) < MIN_ROI_PIXELS:
+        return None, {"status": "roi_too_small", "references": used, **pose}
+    method = "mask_intersection" if len(used) > 1 else "nearest_mask"
+    return mask, {"status": "ready", "method": method, "reference": reference.image,
+                  "references": used, **pose}
 
 
 def audit(reference_dataset: Path, target_dataset: Path, destination: Path) -> dict:
