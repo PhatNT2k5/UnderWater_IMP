@@ -12,7 +12,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 
 | Phase | Nội dung | Trạng thái | Bằng chứng |
 |---|---|---|---|
-| P0 | Gỡ chặn live: tracker không reset khi frame không đủ điều kiện; ROI dùng mask gần nhất với dung sai | Chưa làm | |
+| P0 | Gỡ chặn live: tracker không reset khi frame không đủ điều kiện; ROI dùng mask gần nhất với dung sai | Code xong, chờ chạy live | Unit 15/15; replay pose phiên 2026-09-27: ROI có ở 99,1-100% frame (trước 28-49%) |
 | P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | Chưa làm | |
 | P2 | ROI hình học + tọa độ bề mặt | Chưa làm | |
 | P3 | Cổng chất lượng ảnh | Chưa làm | |
@@ -41,6 +41,7 @@ Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 �
 |---|---|
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
+| 2026-10-08 | P0: ROI giữa hai pose tham chiếu dùng **giao hai mask** thay vì co mask hay ORB. Lý do: trên 552 mask đã duyệt, co mask gần như không cải thiện tỷ lệ ROI nằm trên bề mặt, còn giao hai mask nâng p10 lên 0,89-1,00 (đổi lại độ phủ trụ giảm); ORB chưa từng được đánh giá và cần ảnh gốc không có trong repo |
 
 ---
 
