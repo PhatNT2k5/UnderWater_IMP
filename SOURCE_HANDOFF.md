@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-10-08** - thêm `GENERALIZATION_PLAN.md`; P0: ROI PatchCore không cần ảnh gốc (giao mask tham chiếu), tracker không reset khi frame không đủ điều kiện; chưa chạy live sau P0; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-08** - P0 (ROI giao mask tham chiếu, tracker không reset) đã chạy live: 3/3 vết map A, 1 báo nhầm; không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -559,7 +559,13 @@ Không có lệnh rebuild map: `auv_inspection/rebuild.py` không có trong repo
 
 ## 8. Trạng thái đã xác minh và giới hạn
 
-### PatchCore (chỉ offline, chưa live Unreal)
+### PatchCore live sau P0 (baseline v1.1)
+
+- `auv_dashboard/output/session_20261008_174818_976289/` (2026-10-08, Tự động + PatchCore, map A, máy RTX 3050 4 GB): route 359/359, 4 cảnh báo, mỗi lần giữ 5 giây rồi tự tiếp tục. Đã xem ảnh từng event: event 001 (tick 405) và 002 (tick 651) đúng hai vết ống mặt trước (`mask_intersection`), event 004 (tick 3900) đúng vết trụ 0 (`nearest_mask` lệch 19 cm), event 003 (tick 1872, `pipe_back_scan_001`) là **báo nhầm** ở mép cuối ống do ROI `nearest_mask` lệch 27 cm lấn ra vùng nước. Kết quả: 3/3 vết của map A, 1 báo nhầm; Classical cùng map: 2/3, 0 báo nhầm.
+- Suy luận 130-243 ms/frame khi dùng chung GPU với Unreal; mô phỏng còn 12,2 tick/s (Classical 23,5). Kết quả phát hiện không phụ thuộc tốc độ vì vòng mô phỏng khóa theo tick, nhưng đây là giới hạn vận hành (D13 trong `GENERALIZATION_PLAN.md`).
+- Đây là một lượt trên map A tất định, không phải nghiệm thu tổng quát; báo cáo B offline cũ không mô tả hệ thống sau P0.
+
+### PatchCore (offline, trước P0)
 
 - Hiệu chỉnh trên A3 + lượt sạch calibration độc lập: 3/3 ID, 0 sự kiện sạch; ngưỡng front/back/pier0/pier1 = `61.55155/53.06446/58.91152/54.33251` trong `patchcore_thresholds_v1.json`.
 - Nghiệm thu B với nhãn đã khóa trước khi score (`patchcore_evaluation_B_v1.json`): 5/5 vết, 4/4 vết nhỏ/mảnh, 0 báo nhầm trên lượt sạch test. Classical trên cùng B: 1/4 vết ống, không hỗ trợ trụ.
@@ -607,6 +613,8 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-10-08`: Ghi kết quả live P0 (`session_20261008_174818_976289`) vào mục 8 và bảng tiến độ của `GENERALIZATION_PLAN.md`: 3/3 vết map A, 1 báo nhầm ở đầu ống, 12,2 tick/s; thêm D13 (suy luận đồng bộ chặn vòng mô phỏng). Không đổi code.
 
 - `2026-10-08`: P0 của `GENERALIZATION_PLAN.md`. `live_roi.match_roi()` bỏ nhánh ORB, giữa hai pose tham chiếu dùng giao hai mask gần nhất (thêm `nearest_references()`, `within_reference_range()`, `read_mask()`, trạng thái `roi_too_small`; `ReferenceFrame` bỏ trường `source_image`). Lựa chọn dựa trên đo 552 mask đã duyệt: co mask chỉ nâng tỷ lệ ROI nằm trên bề mặt (p10) từ 0,883 lên 0,908 với ống, còn giao hai mask lân cận nâng từ 0,79-0,97 lên 0,89-1,00, đổi lại độ phủ trụ giảm (p10 0,58-0,62). `live_service.analyze_request()` không reset tracker khi frame không đủ điều kiện. Replay chuỗi pose của phiên `session_20260927_191813_365317`: tỷ lệ frame có ROI tăng từ 28-49% lên 99,1-100%; trên trụ khoảng 40% frame chỉ có một tham chiếu cùng station (`nearest_mask`), để P2 xử lý. Unit PatchCore 15/15 (7 cũ, 8 mới) trong `.venv-patchcore`. **Chưa chạy live Unreal sau P0**; kết quả B offline cũ không còn mô tả hệ thống này (cổng hash vẫn khớp vì không hash code, xem D11).
 

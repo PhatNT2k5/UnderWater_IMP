@@ -12,7 +12,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 
 | Phase | Nội dung | Trạng thái | Bằng chứng |
 |---|---|---|---|
-| P0 | Gỡ chặn live: tracker không reset khi frame không đủ điều kiện; ROI dùng mask gần nhất với dung sai | Code xong, chờ chạy live | Unit 15/15; replay pose phiên 2026-09-27: ROI có ở 99,1-100% frame (trước 28-49%) |
+| P0 | Gỡ chặn live: tracker không reset khi frame không đủ điều kiện; ROI dùng mask gần nhất với dung sai | **Xong** (baseline v1.1) | Unit 15/15; replay pose: ROI có ở 99,1-100% frame (trước 28-49%). Live `session_20261008_174818_976289` map A: **3/3 vết** (2 ống, 1 trụ 0), **1 báo nhầm** ở đầu ống (`nearest_mask` lệch 27 cm), route 359/359, 12,2 tick/s |
 | P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | Chưa làm | |
 | P2 | ROI hình học + tọa độ bề mặt | Chưa làm | |
 | P3 | Cổng chất lượng ảnh | Chưa làm | |
@@ -41,6 +41,7 @@ Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 �
 |---|---|
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
+| 2026-10-08 | Chốt baseline v1.1 từ live P0: 3/3 vết map A, 1 báo nhầm ở đầu ống. Không vá riêng báo nhầm này (ví dụ siết dung sai `nearest_mask`) vì sẽ làm mất cả vết trụ (lệch 19 cm); nguyên nhân là ROI không biết ống kết thúc ở đâu, P2 xử lý tận gốc |
 | 2026-10-08 | P0: ROI giữa hai pose tham chiếu dùng **giao hai mask** thay vì co mask hay ORB. Lý do: trên 552 mask đã duyệt, co mask gần như không cải thiện tỷ lệ ROI nằm trên bề mặt, còn giao hai mask nâng p10 lên 0,89-1,00 (đổi lại độ phủ trụ giảm); ORB chưa từng được đánh giá và cần ảnh gốc không có trong repo |
 
 ---
@@ -62,6 +63,7 @@ Hệ thống hiện tại không hỏng ở model mà ở **cách đặt bài to
 | D9 | Pose lấy đúng tuyệt đối từ mô phỏng | `PoseSensor` | AUV thật có sai số DVL/INS và trôi theo thời gian |
 | D10 | Đánh giá 5 vết, 1 bố trí, 1 seed, không khoảng tin cậy | `patchcore_evaluation_B_v1.json` | Không biết độ bất định |
 | D11 | Cổng hash không hash code | `approval_gate.py` | Sửa logic xong vẫn hiện "đã nghiệm thu" |
+| D13 | Suy luận PatchCore chạy đồng bộ trong vòng mô phỏng | Live P0: 130-243 ms/frame trên RTX 3050 dùng chung với Unreal; mô phỏng còn 12,2 tick/s (Classical 23,5) | Trên AUV thật, suy luận chậm sẽ chặn vòng điều khiển; cần tách bất đồng bộ (bỏ frame cũ). Xử lý ở P4 |
 | D12 | Độ phân giải chưa gắn với yêu cầu kiểm định | 640×480, FOV 80° nên f ≈ 381 px; ở 2 m mỗi pixel ≈ 5,2 mm | Vết mảnh hơn vài mm không thể thấy về mặt vật lý |
 
 ## 2. Nguyên tắc thiết kế
