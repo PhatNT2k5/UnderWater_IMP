@@ -13,8 +13,8 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | Phase | Nội dung | Trạng thái | Bằng chứng |
 |---|---|---|---|
 | P0 | Gỡ chặn live: tracker không reset khi frame không đủ điều kiện; ROI dùng mask gần nhất với dung sai | **Xong** (baseline v1.1) | Unit 15/15; replay pose: ROI có ở 99,1-100% frame (trước 28-49%). Live `session_20261008_174818_976289` map A: **3/3 vết** (2 ống, 1 trụ 0), **1 báo nhầm** ở đầu ống (`nearest_mask` lệch 27 cm), route 359/359, 12,2 tick/s |
-| P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | Chưa làm | |
-| P2 | ROI hình học + tọa độ bề mặt | Chưa làm | |
+| P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | **Xong** (xem mục Baseline v1.1). Phần 3: `geometry.py`, `defect_inventory.py` + `inventories/map_A.json`, `metrics.py`, `evaluate_capture.py`, `benchmark.py`, 16 unit test; benchmark 28 tổ hợp | Phần 1: `robustness/degradation.py`, 7 yếu tố × 5 mức, 9 unit test. Phần 2: `--randomize train\|heldout --seed`, 9 unit test; Unreal: `capture_test_mixed_20261008_190916_184618` (map A, heldout seed 1, 598 ảnh) và `capture_test_clean_20261008_191432_831527` (map sạch v3, heldout seed 2, 635 ảnh), cả hai đi hết route; khoảng cách ống, lệch độ sâu/yaw, đèn, lịch chụp có tác dụng; dòng chảy không đo được (D14). Phần 3 (bộ chỉ số, đo baseline) chưa làm |
+| P2 | ROI hình học + tọa độ bề mặt | **Xong** (live `session_20261009_103800_863732`: 3/3 vết, 2 báo nhầm ở biên ROI, 1 báo trùng) | Hiệu chỉnh hình học IoU kiểm tra 0,89-1,00; ROI hình học + lọc góc tới; frame được phân tích 100%; xem mục Kết quả P2. Tọa độ bề mặt (`surface_coordinates`) đã có, dùng ở P5 |
 | P3 | Cổng chất lượng ảnh | Chưa làm | |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng SPRT trên bề mặt | Chưa làm | |
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | Chưa làm | |
@@ -22,6 +22,48 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | Chưa làm | |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
+
+## Baseline v1.1 trên điều kiện chưa thấy (P1, 2026-10-08)
+
+Hai capture heldout (mục 4): map A có 3 vết (`capture_test_mixed_20261008_190916_184618`, cách ống 2,77 m, bán kính trụ 3,19 m) và map sạch (`capture_test_clean_20261008_191432_831527`, 1,62 m, 3,36 m). Chấm theo vết vật lý bằng `auv_inspection/robustness/benchmark.py`; kết quả đầy đủ ở `auv_inspection/output/benchmark_p1_baseline_v1_1/summary.md`.
+
+| Điều kiện | Classical: vết map A | Classical: báo nhầm/100 m (sạch) | PatchCore: vết map A | PatchCore: báo nhầm/100 m (sạch) | PatchCore: frame sạch có ứng viên |
+|---|---|---|---|---|---|
+| Gốc | 0/3 | 0 | 1/3 | 1,42 | 12% |
+| Độ đục 2 | 0/3 | 0 | 1/3 | 1,89 | 28% |
+| Độ đục 4 | 0/3 | 0 | 1/3 | 4,73 | 46% |
+| Marine snow 3 | 0/3 | 0 | 0/3 | 11,35 | 99% |
+| Marine snow 5 | 0/3 | 0 | 0/3 | 13,25 | 100% |
+| Đèn yếu 4 | 0/3 | 0 | 1/3 | 0,95 | 10% |
+| Mờ chuyển động 3 | 0/3 | 0 | 1/3 | 6,62 | 61% |
+
+- **So với tiêu chí:** recall 0-33% (mục tiêu ≥ 90%); PatchCore báo nhầm 1,42/100 m ngay ở điều kiện gốc (mục tiêu ≤ 1); tỷ lệ frame sạch có ứng viên 12% (mục tiêu FPR ≤ 5%). **Chưa đạt tiêu chí nào.**
+- **Classical** không tạo ứng viên nào trên các frame thấy rõ vết nứt ở khoảng cách 2,77 m: ngưỡng chỉnh tay cho 2 m không ngoại suy được. Giữ làm baseline, không đầu tư thêm.
+- **PatchCore** mất khả năng phân tích khi pose xa ảnh tham chiếu: ống 0% frame ở 2,77 m, trụ 1% ở bán kính 3,36 m (ROI theo station/pose, D2/D5) → **P2**. Vết duy nhất bắt được là vết trụ (tick 3478).
+- Marine snow làm gần như mọi frame sạch vượt ngưỡng (bank chỉ học bề mặt không có hạt); độ đục và mờ chuyển động tăng báo nhầm; 3 báo nhầm gốc nằm ở mặt sau ống khi AUV gần hơn train (1,62 m so với 2,06 m) → **P3** (cổng chất lượng), **P5** (bằng chứng trên bề mặt lọc hạt di chuyển), **P4** (bank nhiều điều kiện, loại không gian nhiễu).
+- PatchCore khoảng 200-250 ms/frame trên RTX 3050 khi chạy offline một mình (D13).
+- Lưu ý: 1 lượt mỗi loại map, 3 vết; khả năng quan sát vết tính theo hình học, không theo ánh sáng; frame liên tiếp tương quan. Đây là baseline để so sánh, không phải ước lượng chính xác hiệu năng.
+
+## Kết quả P2: ROI hình học (v1.2, 2026-10-09)
+
+Cùng hai capture (nay là **tập phát triển**, xem nhật ký quyết định), cùng hình học đã hiệu chỉnh cho mọi detector. Kết quả: `auv_inspection/output/benchmark_p2_geometry/` (v1.2 có lọc góc tới 70°), `.../pose_noise/`, và `benchmark_p2_geometry_no_incidence/` (v1.2 chưa lọc, để so sánh).
+
+| Điều kiện | v1.1: vết map A | v1.2: vết map A | v1.1: báo nhầm/100 m (A / sạch) | v1.2: báo nhầm/100 m (A / sạch) |
+|---|---|---|---|---|
+| Gốc | 1/3 | 2/3 | 0 / 1,42 | 3,94 / **0** |
+| Độ đục 2 | 1/3 | **3/3** | 0 / 1,89 | 5,42 / 0,95 |
+| Độ đục 4 | 1/3 | 2/3 | 0 / 4,73 | 8,37 / 2,84 |
+| Marine snow 5 | 0/3 | 2/3 | 5,42 / 13,25 | 39,88 / 40,22 |
+| Đèn yếu 4 | 1/3 | 2/3 | 0 / 0,95 | 2,46 / **0** |
+| Mờ chuyển động 3 | 1/3 | 2/3 | 0 / 6,62 | 13,29 / 7,10 |
+| Nhiễu pose 0,1 m/2° | | 2/3 | | 0,98 / 0 |
+| Nhiễu pose 0,25 m/5° | | 1/3 | | 0 / 0 |
+
+- **Tỷ lệ frame được phân tích 28-33% → 100%**; recall vết vật lý tăng ở mọi điều kiện; trên map sạch báo nhầm giảm ở gốc, độ đục và đèn yếu. Đạt tiêu chí P2: IoU ≥ 0,85 (kiểm tra 0,89-1,00) và chịu được sai số pose.
+- **Báo nhầm v1.2 trên map A** nằm ở dải mép ống/vòng bích (đã xem ảnh). Lọc góc tới 70° giảm 4,92 → 3,94/100 m ở điều kiện gốc; nhiễu pose 0,1 m/2° làm ROI co thêm và còn 0,98/100 m. Nguồn báo nhầm chính là **vùng biên ROI**, cần P3/P5.
+- **Nhiễu pose 0,25 m/5°:** ROI co khoảng 70 px; ở 2,77 m dải ống còn quá mỏng nên 93-96% frame ống trả `no_surface_tiles` (không kết luận) thay vì báo nhầm. Suy giảm an toàn nhưng mất recall ống: trên AUV thật cần định vị tốt hơn hoặc lại gần (P6).
+- **Marine snow** vẫn gần 100% frame vượt ngưỡng; v1.2 phân tích nhiều frame hơn nên báo nhầm còn tăng. Đây là việc của P3 (cổng chất lượng) và P5 (bằng chứng trên bề mặt).
+- Vẫn chưa đạt tiêu chí nghiệm thu (recall ≥ 90%, ≤ 1 báo nhầm/100 m). Chưa chạy dashboard live với v1.2.
 
 ## Tiêu chí nghiệm thu (bản đầu)
 
@@ -41,6 +83,15 @@ Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 �
 |---|---|
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
+| 2026-10-09 | Live P2 xác nhận nguồn báo nhầm chính là **biên ROI** (đầu ống, mép ống khi nhìn xiên): ROI giới hạn tâm đặc trưng nhưng trường nhìn của đặc trưng rộng hơn. Thêm vào **P3** một lề chấm điểm bên trong ROI theo trường nhìn của đặc trưng, đánh giá trên tập phát triển trước. Báo trùng cùng một vết (hai vị trí cách 2,08 m) để **P5** gộp theo tọa độ bề mặt |
+| 2026-10-09 | **Hai capture heldout P1 (`capture_test_mixed_20261008_190916_184618`, `capture_test_clean_20261008_191432_831527`) chuyển thành tập phát triển.** Đã dùng ảnh và kết quả của chúng để tìm lỗi (nhãn trụ, báo nhầm ở mép ống), nên không còn là bằng chứng "chưa thấy". Nghiệm thu P7 phải dùng capture heldout mới với seed khác, chưa ai xem trước |
+| 2026-10-09 | P2: ROI hình học bỏ pixel có góc tới > 70°. Lý do vật lý (diện tích mỗi pixel gấp 1/cos θ, khoảng 3 lần; thiếu sáng; lẫn nền và mép vòng bích) chọn trước khi đo; nhu cầu phát hiện khi xem các báo nhầm v1.2 nằm trên dải mép ống ở `capture_test_mixed` (tập phát triển). Giữ kết quả không lọc ở `benchmark_p2_geometry_no_incidence` để so sánh |
+| 2026-10-09 | P2: hiệu chỉnh hình học khớp 5 tham số (bán kính ống, độ cao trục, nửa cạnh trụ, offset ngang, pitch); offset tiến/đứng giữ 0 vì không xác định được với một khoảng cách duy nhất. Nhãn map A chuyển `reviewed` theo xác nhận của người dùng |
+| 2026-10-08 | P1 phần 3: chấm theo **vết vật lý**, định vị cảnh báo bằng hình học camera chưa hiệu chỉnh (IoU 0,81-0,87 so với 552 mask đã duyệt), dung sai khớp 0,6 m (vết ống) và đoạn thẳng + 0,35 m (vết nứt dài trên trụ). Nhãn trụ được đổi từ điểm sang đoạn sau khi ảnh cho thấy một cảnh báo PatchCore nằm trên vết nhưng ngoài bán kính điểm; sửa theo ảnh, không theo kết quả detector, ghi trong `revisions` của `map_A.json`. Nhãn map A vẫn ở trạng thái `proposed` chờ người dùng xác nhận |
+| 2026-10-08 | Giữ dòng chảy trong `RunConditions` (lực vật lý đúng, có tác dụng khi gần bão hòa bộ điều khiển) nhưng **không coi là nguồn sai lệch pose**. Sai số pose thực tế (DVL/INS) sẽ mô phỏng ở P2 bằng nhiễu trên pose đưa cho khối nhận thức, vì đó mới là cái detector thấy trên AUV thật |
+| 2026-10-08 | P1 phần 2: profile `heldout` lấy **mọi** yếu tố ngoài khoảng `train` (ngoại suy), có test bảo đảm không mẫu nào lọt vào khoảng train. Route ngẫu nhiên phải qua `clearance_violations()`; bán kính trụ heldout tối thiểu 2,35 m (2,2 m bị từ chối vì góc hộp an toàn trụ vuông ở khoảng 2,26 m) |
+| 2026-10-08 | Không ngẫu nhiên hóa độ đục trong mô phỏng ở P1: `water_fog` cần tag `WaterPPV` mà map dự án không có. Muốn bật cần thêm tag vào **bản sao** map (người dùng quyết định); trước mắt độ đục dùng suy giảm offline |
+| 2026-10-08 | P1 phần 1: suy giảm offline dùng **khoảng cách đồng nhất 2 m** cho tới P2. Mô hình tách công trình/nền theo ROI bị loại vì đáy gần nằm ngoài ROI, bị xóa trắng và tạo viền giả. Hệ số độ đục là bộ mức nghiêm trọng, chưa khớp với nước Jerlov thật |
 | 2026-10-08 | Chốt baseline v1.1 từ live P0: 3/3 vết map A, 1 báo nhầm ở đầu ống. Không vá riêng báo nhầm này (ví dụ siết dung sai `nearest_mask`) vì sẽ làm mất cả vết trụ (lệch 19 cm); nguyên nhân là ROI không biết ống kết thúc ở đâu, P2 xử lý tận gốc |
 | 2026-10-08 | P0: ROI giữa hai pose tham chiếu dùng **giao hai mask** thay vì co mask hay ORB. Lý do: trên 552 mask đã duyệt, co mask gần như không cải thiện tỷ lệ ROI nằm trên bề mặt, còn giao hai mask nâng p10 lên 0,89-1,00 (đổi lại độ phủ trụ giảm); ORB chưa từng được đánh giá và cần ảnh gốc không có trong repo |
 
@@ -64,6 +115,7 @@ Hệ thống hiện tại không hỏng ở model mà ở **cách đặt bài to
 | D10 | Đánh giá 5 vết, 1 bố trí, 1 seed, không khoảng tin cậy | `patchcore_evaluation_B_v1.json` | Không biết độ bất định |
 | D11 | Cổng hash không hash code | `approval_gate.py` | Sửa logic xong vẫn hiện "đã nghiệm thu" |
 | D13 | Suy luận PatchCore chạy đồng bộ trong vòng mô phỏng | Live P0: 130-243 ms/frame trên RTX 3050 dùng chung với Unreal; mô phỏng còn 12,2 tick/s (Classical 23,5) | Trên AUV thật, suy luận chậm sẽ chặn vòng điều khiển; cần tách bất đồng bộ (bỏ frame cũ). Xử lý ở P4 |
+| D14 | Bộ điều khiển vị trí HoveringAUV quá cứng: `Kp = 100 s⁻²`, gia tốc tối đa 1 m/s² | Capture heldout với dòng chảy 0,35-0,45 m/s: sai lệch ngang giống hệt lượt không dòng chảy (khoảng 6 cm, là độ lệch socket PoseSensor); lực cản khoảng 24 N trên AUV 31 kg chỉ gây lệch khoảng 0,8 cm | AUV thật giữ vị trí kém hơn nhiều và còn sai số định vị (ước lượng pose khác pose thật). Dòng chảy trong mô phỏng không đại diện được điều này; sai số pose sẽ được mô phỏng bằng cách làm nhiễu **pose đưa cho khối nhận thức** ở P2 |
 | D12 | Độ phân giải chưa gắn với yêu cầu kiểm định | 640×480, FOV 80° nên f ≈ 381 px; ở 2 m mỗi pixel ≈ 5,2 mm | Vết mảnh hơn vài mm không thể thấy về mặt vật lý |
 
 ## 2. Nguyên tắc thiết kế

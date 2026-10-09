@@ -21,6 +21,10 @@ from crack_detection import (
     draw_detections,
 )
 from inspection_route import PIPE_X_MAX, PIPE_X_MIN, ROUTE, advance_station, angle_delta
+from robustness.conditions import (
+    NOMINAL, PROFILES, CaptureSchedule, conditioned_route, current_at, describe,
+    sample_conditions,
+)
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
@@ -158,12 +162,14 @@ def update_manual_target(
     return updated
 
 
-def enable_inspection_lights(env: HoloOceanEnvironment) -> None:
+def enable_inspection_lights(env: HoloOceanEnvironment,
+                             intensity: float = NOMINAL.light_intensity,
+                             pitch_deg: float = NOMINAL.light_pitch_deg) -> None:
     """Illuminate the camera view with the AUV's two upper headlights."""
     for name in ("flashlight1", "flashlight2"):
         env.turn_on_flashlight(
-            name, intensity=2500, beam_width=1000,
-            angle_pitch=0, angle_yaw=0,
+            name, intensity=intensity, beam_width=1000,
+            angle_pitch=pitch_deg, angle_yaw=0,
         )
 
 
@@ -395,6 +401,16 @@ def run(args: argparse.Namespace) -> None:
         raise ValueError("Neutral capture requires dataset role and scene state")
     if capture_every_ticks < 1:
         raise ValueError("Capture interval must be positive")
+    randomize_profile = getattr(args, "randomize", None)
+    if randomize_profile and (args.mode != "auto" or preview_source):
+        raise ValueError("Randomized conditions require an auto route run")
+    conditions = (sample_conditions(randomize_profile, int(args.seed))
+                  if randomize_profile else NOMINAL)
+    # Nominal runs read the module ROUTE at call time so QA harness patches still apply.
+    route = conditioned_route(conditions) if randomize_profile else ROUTE
+    capture_schedule = CaptureSchedule(
+        conditions.capture_interval_ticks if randomize_profile
+        else (capture_every_ticks, capture_every_ticks), conditions.seed)
     scenario = json.loads((HERE / "scenario.json").read_text(encoding="utf-8"))
     project = ROOT / "holoocean/engine/Holodeck.uproject"
     world_override = getattr(args, "world", None)
@@ -419,6 +435,10 @@ def run(args: argparse.Namespace) -> None:
         f"{output_prefix}_%Y%m%d_%H%M%S_%f"
     )
     output.mkdir(parents=True)
+    if randomize_profile:
+        (output / "conditions.json").write_text(json.dumps(describe(conditions), indent=2),
+                                                encoding="utf-8")
+        LOG.info("Randomized conditions: %s", json.dumps(describe(conditions)))
     ticks_per_sec = int(scenario.get("ticks_per_sec", 30))
     key = str(uuid.uuid4())
     semaphore = win32event.CreateSemaphore(None, 0, 1, "Global\\HOLODECK_LOADING_SEM" + key)
@@ -455,8 +475,11 @@ def run(args: argparse.Namespace) -> None:
         env = EditorEnvironment(start_world=False, uuid=key, scenario=scenario,
                                 ticks_per_sec=30, frames_per_sec=False)
         state = env.reset()
-        enable_inspection_lights(env)
+        enable_inspection_lights(env, conditions.light_intensity, conditions.light_pitch_deg)
         LOG.info("Two onboard inspection lights enabled")
+        current_enabled = any(conditions.current_mps) or bool(conditions.current_variation_mps)
+        if current_enabled:
+            env.set_ocean_currents(scenario["main_agent"], current_at(conditions, 0, ticks_per_sec))
         if preview_rows is not None:
             capture_pose_previews(
                 env, preview_rows, preview_source, output,
@@ -492,10 +515,10 @@ def run(args: argparse.Namespace) -> None:
                 if pose is None:
                     raise RuntimeError("PoseSensor missing")
                 station, passed = advance_station(
-                    ROUTE, station, np.asarray(pose[:3, 3]).tolist()
+                    route, station, np.asarray(pose[:3, 3]).tolist()
                 )
                 reached.extend(passed)
-                station_name, target_values = ROUTE[station]
+                station_name, target_values = route[station]
                 target = np.asarray(target_values, dtype=np.float32)
             else:
                 manual_target = update_manual_target(
@@ -509,6 +532,9 @@ def run(args: argparse.Namespace) -> None:
                 station_name = "manual"
                 target = manual_target.copy()
 
+            if current_enabled and tick > 0 and tick % ticks_per_sec == 0:
+                env.set_ocean_currents(scenario["main_agent"],
+                                       current_at(conditions, tick, ticks_per_sec))
             state = env.step(target)
             pose = state.get("PoseSensor")
             if pose is None:
@@ -517,7 +543,7 @@ def run(args: argparse.Namespace) -> None:
             distance = float(np.linalg.norm(location - target[:3]))
             yaw = float(np.degrees(np.arctan2(pose[1, 0], pose[0, 0])))
             yaw_error = abs(angle_delta(float(target[5]), yaw))
-            if paused_pose is None and args.mode == "auto" and station == len(ROUTE) - 1:
+            if paused_pose is None and args.mode == "auto" and station == len(route) - 1:
                 if distance < FINAL_POSITION_TOLERANCE_M and yaw_error < FINAL_YAW_TOLERANCE_DEG:
                     final_hold += 1
                 else:
@@ -542,7 +568,7 @@ def run(args: argparse.Namespace) -> None:
                     category = clean_capture_category(station_name, location)
                     if capture_clean_pipe and category not in {"pipe_front", "pipe_back"}:
                         category = None
-                    if category is not None and tick % capture_every_ticks == 0:
+                    if category is not None and capture_schedule.due(tick):
                         save_clean_structure_frame(
                             output, frame, tick, station_name, location, yaw, category,
                             rotation_rpy_from_pose(pose),
@@ -626,13 +652,15 @@ def run(args: argparse.Namespace) -> None:
             "mode": args.mode,
             "route_completed": completed if args.mode == "auto" else None,
             "reached_stations": reached,
-            "total_stations": len(ROUTE) if args.mode == "auto" else None,
+            "total_stations": len(route) if args.mode == "auto" else None,
             "telemetry_samples": len(telemetry),
             "stopped_by_user": stopped_by_user,
             "stopped_for_damage": stopped_for_damage,
             "damage_event_count": len(damage_events),
             "damage_events": damage_events,
         }
+        if randomize_profile:
+            report["conditions"] = describe(conditions)
         if capture_enabled:
             report.update({
                 "capture_clean_pipe": capture_clean_pipe,
@@ -722,6 +750,12 @@ def main() -> None:
         help="Capture one eligible frame every N simulation ticks (default: 10)",
     )
     parser.add_argument(
+        "--randomize", choices=sorted(PROFILES),
+        help="Sample standoff, route jitter, current, lights and capture timing for this run "
+             "(train: around nominal; heldout: outside the train ranges). Requires --seed",
+    )
+    parser.add_argument("--seed", type=int, help="Seed for --randomize; recorded in conditions.json")
+    parser.add_argument(
         "--mode", choices=("auto", "manual"), default="auto", help="AUV control mode"
     )
     parser.add_argument(
@@ -750,6 +784,10 @@ def main() -> None:
         parser.error("--dataset-role and --scene-state require --capture-structures")
     if args.capture_every_ticks < 1:
         parser.error("--capture-every-ticks must be positive")
+    if bool(args.randomize) != (args.seed is not None):
+        parser.error("--randomize and --seed must be used together")
+    if args.randomize and (args.mode != "auto" or args.preview_source):
+        parser.error("--randomize requires an auto route run")
     if bool(args.preview_source) != bool(args.preview_ticks):
         parser.error("--preview-source and --preview-ticks must be used together")
     if args.preview_source:

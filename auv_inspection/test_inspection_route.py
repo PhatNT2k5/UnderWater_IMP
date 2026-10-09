@@ -2,7 +2,7 @@
 import unittest
 from math import cos, dist, radians, sin
 
-from inspection_route import ROUTE, advance_station, angle_delta
+from inspection_route import ROUTE, advance_station, angle_delta, build_route, clearance_violations
 
 
 class InspectionRouteTests(unittest.TestCase):
@@ -26,20 +26,16 @@ class InspectionRouteTests(unittest.TestCase):
             self.assertLessEqual(dist(a[:3], b[:3]), 0.80001)
 
     def test_segments_clear_structure_bounds(self) -> None:
-        # Conservative axis-aligned bounds include flanges and pier footings.
-        # Expand by 0.65 m for the AUV body and position tolerance.
-        boxes = [((-18.01, -0.8, -12.4), (15.11, 0.8, -9.74))]
-        for x in (-10.0, 10.0):
-            boxes.extend([
-                ((x - 0.95, -7.45, -10.4), (x + 0.95, -5.55, 1.6)),
-                ((x - 2.0, -8.5, -12.0), (x + 2.0, -4.5, -10.4)),
-            ])
-        for (_, a), (name, b) in zip(ROUTE, ROUTE[1:]):
-            for step in range(21):
-                p = [a[i] + (b[i] - a[i]) * step / 20 for i in range(3)]
-                for low, high in boxes:
-                    intersects = all(low[i] - 0.65 <= p[i] <= high[i] + 0.65 for i in range(3))
-                    self.assertFalse(intersects, (name, p))
+        # Conservative axis-aligned bounds include flanges and pier footings,
+        # expanded by 0.65 m for the AUV body and position tolerance.
+        self.assertEqual(clearance_violations(ROUTE), [])
+
+    def test_default_build_matches_validated_route(self) -> None:
+        self.assertEqual(build_route(), ROUTE)
+
+    def test_clearance_check_detects_a_route_through_the_pipe(self) -> None:
+        route = [("a", [0.0, 2.0, -10.3, 0, 0, 0]), ("b", [0.0, -2.0, -10.3, 0, 0, 0])]
+        self.assertTrue(clearance_violations(route))
 
     def test_camera_faces_pipe_and_piers(self) -> None:
         for name, pose in ROUTE:

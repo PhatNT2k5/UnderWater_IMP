@@ -16,7 +16,7 @@ import numpy as np
 class PatchCoreClient:
     def __init__(self, root: Path, session: Path, model_dir: Path,
                  reference_dataset: Path, thresholds_file: Path,
-                 python_executable: Path | None = None) -> None:
+                 python_executable: Path | None = None, roi_mode: str = "geometry") -> None:
         executable = python_executable or root / ".venv-patchcore/Scripts/python.exe"
         if not executable.is_file():
             raise FileNotFoundError(f"PatchCore Python not found: {executable}")
@@ -25,7 +25,8 @@ class PatchCoreClient:
         self._stderr: TextIO = (session / "patchcore_worker.log").open("w", encoding="utf-8")
         self._responses: Queue[dict | BaseException] = Queue()
         command = [str(executable), "-u", "-m", "auv_inspection.patchcore_data.live_service",
-                   str(model_dir), str(reference_dataset), str(thresholds_file)]
+                   str(model_dir), str(reference_dataset), str(thresholds_file),
+                   "--roi-mode", roi_mode]
         try:
             self.process = subprocess.Popen(
                 command, cwd=root, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
