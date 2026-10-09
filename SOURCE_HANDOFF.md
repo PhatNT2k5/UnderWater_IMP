@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-10-09** - P3 xong offline: lề chấm điểm 24 px và cổng `diffuse_anomaly` trong PatchCore service, mặc định ở dashboard (chưa chạy live); số đo chất lượng ảnh chỉ để chẩn đoán; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-09** - P3 xong và đã chạy live: lề chấm điểm 24 px + cổng `diffuse_anomaly` (v1.3) cho 3/3 vết, 0 báo nhầm trên map A ở điều kiện gốc; không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -670,11 +670,17 @@ Không có lệnh rebuild map: `auv_inspection/rebuild.py` không có trong repo
 
 ## 8. Trạng thái đã xác minh và giới hạn
 
+### PatchCore v1.3 live trên dashboard (P3)
+
+- `auv_dashboard/output/session_20261009_150224_114943/` (2026-10-09, Tự động + PatchCore, ROI hình học + lề 24 px + cổng lan tỏa, map A, điều kiện gốc): route 359/359, 4 cảnh báo, mỗi lần giữ 5 giây rồi tự tiếp tục.
+- Khớp `inventories/map_A.json` bằng `locate_box()` với hình học đã hiệu chỉnh, đã xem ảnh annotated/heatmap: tick 405 → `A_pipe_front_1` (0,31 m), 654 → `A_pipe_front_2` (0,39 m), 3657 và 3888 → `A_pier_0_1` (0,22 m và 0,10 m, cùng vết nhìn từ hai pose). **3/3 vết, 0 báo nhầm, 1 báo trùng** (live P2: 3/3, 2 báo nhầm, 1 trùng).
+- Session không ghi các frame `diffuse_anomaly` (trạng thái chỉ hiện trên UI); chưa biết lượt này có frame nào bị abstain. Một lượt ở điều kiện gốc trên map phát triển, không phải nghiệm thu.
+
 ### PatchCore v1.3: lề chấm điểm + cổng `diffuse_anomaly` (P3, offline)
 
 - Benchmark `auv_inspection/output/benchmark_p3_quality/` trên tập phát triển (2 capture × 7 điều kiện, `patchcore_geo_m` và `patchcore_geo_md`; v1.2 so sánh lấy từ `benchmark_p2_geometry/`). Tổng báo nhầm 410 (v1.2) → 354 (lề) → 97 (lề + cổng); map A gốc 3,94 → 0,49/100 m, map sạch gốc 0; marine snow 5 abstain 99,7-100% frame thay vì khoảng 40/100 m báo nhầm.
 - Còn lại: báo nhầm trên vòng bích `pipe_back` khi nước đục (lệch miền đặc trưng, P4/P5) và marine snow mức vừa 15-17/100 m (P5). Giới hạn 5%/6 vùng chọn trên tập phát triển, P7 phải kiểm lại trên heldout mới.
-- Đây là bằng chứng offline; **dashboard live chưa chạy với v1.3** (mặc định mới của `PatchCoreClient`).
+- Đây là bằng chứng offline; lượt live v1.3 ở mục ngay trên.
 
 ### PatchCore v1.2 live trên dashboard (P2)
 
@@ -756,6 +762,7 @@ Checklist trước khi bàn giao:
 
 ## 10. Nhật ký cập nhật tài liệu
 
+- `2026-10-09`: Ghi kết quả live v1.3 (`session_20261009_150224_114943`): 3/3 vết map A, 0 báo nhầm, 1 báo trùng vết trụ; session chưa lưu frame `diffuse_anomaly`. Chỉ đổi tài liệu, không đổi code, model, ngưỡng hay map.
 - `2026-10-09`: P3. `live_service.py` thêm `interior()`, `is_diffuse()`, `DEFAULT_SCORE_MARGIN_PX` = 24, `DIFFUSE_MAX_SHARE` = 5%, `DIFFUSE_MAX_CANDIDATES` = 6; `Session`/`create_session()` có `score_margin_px`, `diffuse_gate` (mặc định giữ hành vi v1.2), CLI `--score-margin-px`, `--diffuse-gate`; trạng thái `analysis_unavailable` + `reason: diffuse_anomaly` không bước tracker; response có `quality`. Thêm `robustness/quality.py` (`measure()`, chỉ chẩn đoán; cổng theo phân vị đã thử và bỏ). Harness: `FrameResult.reason`, detector `patchcore_geo_m`/`patchcore_geo_md`, cột `diffuse_share` trong benchmark. Dashboard: `PatchCoreClient` mặc định lề 24 px + cổng, bridge gửi `analysis_reason`, app hiện "Bất thường lan rộng trên bề mặt". Benchmark tập phát triển `benchmark_p3_quality`: tổng báo nhầm 410 → 97, recall giữ ở điều kiện có nghĩa (chi tiết trong `GENERALIZATION_PLAN.md`). Test: service P3 6, quality 4 (unit PatchCore + robustness liên quan 33/33), dashboard 7/7 trong `mainenv`. **Chưa chạy dashboard live với v1.3.**
 - `2026-10-09`: Ghi kết quả live P2 (`session_20261009_103800_863732`): 3/3 vết map A, 2 báo nhầm ở biên ROI (đầu ống, mép ống khi nhìn xiên lúc chuyển tiếp), 1 báo trùng vết trụ. Không đổi code.
 
