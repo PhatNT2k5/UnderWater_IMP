@@ -9,7 +9,10 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from robustness.geometry import (  # noqa: E402
-    FOCAL_PX, PIPE_RADIUS_M, in_view, pixel_to_surface, project, surface_coordinates)
+    DEFAULT_PARAMS, FOCAL_PX, GeometryParams, in_view, load_params, pixel_to_surface, project,
+    render_hits, surface_coordinates)
+
+PIPE_RADIUS_M = DEFAULT_PARAMS.pipe_radius_m
 
 FRONT_CAMERA = np.array([0.0, 2.0, -10.3])
 FRONT_YAW = -90.0
@@ -52,6 +55,27 @@ class GeometryTests(unittest.TestCase):
 
     def test_rays_missing_the_structure_return_none(self) -> None:
         self.assertIsNone(pixel_to_surface(320, 5, FRONT_CAMERA, FRONT_YAW, "pipe_front"))
+
+    def test_vectorized_render_matches_single_pixel_queries(self) -> None:
+        params = GeometryParams(camera_lateral_m=0.1, camera_pitch_deg=3.0, pipe_radius_m=0.45)
+        hits = render_hits(FRONT_CAMERA, FRONT_YAW, "pipe_front", params, step=40)
+        for row, v in enumerate(range(20, 480, 40)):
+            for col, u in enumerate(range(20, 640, 40)):
+                single = pixel_to_surface(u, v, FRONT_CAMERA, FRONT_YAW, "pipe_front", params)
+                if single is None:
+                    self.assertTrue(np.isinf(hits[row, col]), (u, v))
+                else:
+                    self.assertAlmostEqual(hits[row, col], single.distance_m, places=6)
+
+    def test_pitch_down_moves_the_pipe_up_in_the_image(self) -> None:
+        level = render_hits(FRONT_CAMERA, FRONT_YAW, "pipe_front", step=4)
+        pitched = render_hits(FRONT_CAMERA, FRONT_YAW, "pipe_front",
+                              GeometryParams(camera_pitch_deg=5.0), step=4)
+        rows = lambda hits: np.mean(np.nonzero(np.isfinite(hits))[0])  # noqa: E731
+        self.assertLess(rows(pitched), rows(level))
+
+    def test_missing_calibration_file_falls_back_to_defaults(self) -> None:
+        self.assertEqual(load_params(Path("does/not/exist.json")), DEFAULT_PARAMS)
 
 
 if __name__ == "__main__":

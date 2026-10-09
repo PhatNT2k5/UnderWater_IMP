@@ -15,7 +15,7 @@ import numpy as np
 
 from auv_dashboard import bridge
 from auv_dashboard.bridge import (
-    damage_pause_remaining, encode_frame, patchcore_category, publish_latest, viewport_pose,
+    damage_pause_remaining, encode_frame, publish_latest, viewport_pose,
 )
 from auv_dashboard.widgets import project_3d
 
@@ -27,11 +27,14 @@ class DashboardBridgeTests(unittest.TestCase):
 
         requested: list[int] = []
         frame = np.zeros((480, 640, 3), np.uint8)
+        # Facing the pipe front (yaw -90 deg) so the geometric gate finds a structure.
+        pose = np.array([[0.0, 1.0, 0.0, 0.0], [-1.0, 0.0, 0.0, 2.0],
+                         [0.0, 0.0, 1.0, -10.3], [0.0, 0.0, 0.0, 1.0]])
 
         class FakeEnvironment:
             def step(self, _action: np.ndarray, ticks: int = 1,
                      publish: bool = True) -> dict:
-                return {"PoseSensor": np.eye(4), "InspectionCamera": frame,
+                return {"PoseSensor": pose, "InspectionCamera": frame,
                         "VelocitySensor": np.zeros(3)}
 
         class FakeClient:
@@ -59,7 +62,7 @@ class DashboardBridgeTests(unittest.TestCase):
                 inspection.is_key_pressed(inspection.KEY_CODES["escape"])
                 observation = environment.step(np.zeros(6))
                 self.assertTrue(inspection.is_pipe_view("auto", "pipe_front_scan_004",
-                                                        np.zeros(3)))
+                                                        pose[:3, 3]))
                 analysis = inspection.analyze_frame(observation["InspectionCamera"])
                 self.assertIsNone(tracker.update(analysis))
 
@@ -85,13 +88,6 @@ class DashboardBridgeTests(unittest.TestCase):
         self.assertAlmostEqual(damage_pause_remaining(10.0, 12.25), 2.75)
         self.assertEqual(damage_pause_remaining(10.0, 15.0), 0.0)
         self.assertEqual(damage_pause_remaining(10.0, 16.0), 0.0)
-
-    def test_patchcore_covers_scan_stations_and_skips_transitions(self) -> None:
-        self.assertEqual(patchcore_category("pipe_front_scan_004"), "pipe_front")
-        self.assertEqual(patchcore_category("pipe_back_scan_019"), "pipe_back")
-        self.assertEqual(patchcore_category("pier_0_level_2_orbit_003"), "pier_0")
-        self.assertEqual(patchcore_category("pier_1_level_0_orbit_008"), "pier_1")
-        self.assertIsNone(patchcore_category("pier_0_approach"))
 
     def test_route_projection_preserves_depth_and_height(self) -> None:
         center, origin = (0.0, 0.0, 0.0), (100.0, 100.0)

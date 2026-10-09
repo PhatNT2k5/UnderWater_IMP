@@ -1,17 +1,91 @@
 {
   "map": "/Game/AUVInspection/Maps/AUVInspection",
   "map_sha256": "daba22ece60400aa19e5e2676a0005af51d19d105f5e03f6bce611948dc361d2",
-  "status": "proposed",
+  "status": "reviewed",
   "method": "Positions from robustness.geometry (uncalibrated camera at PoseSensor, see geometry.py). Pipe defects: centres of confirmed true-alert boxes averaged over PatchCore session_20261008_174818_976289 and Classical session_20260927_170823_870627 / run_20260927_165753_811149; radius_m covers crack length plus about 0.3 m localization error. Pier defect: a segment from crack end points traced on held-out frame tick 3478 of capture_test_mixed_20261008_190916_184618 (pixels (300,478) and (495,362) projected on the pier face).",
   "revisions": [
-    "2026-10-08: A_pier_0_1 changed from a point (-10.0, -5.55, -8.4) r 0.6 m to a segment. The P1 baseline counted a PatchCore alert at tick 3478 as false although its box lies on the visible crack (0.71 m from the old point); the segment follows the crack seen in the image, not the detector output."
+    "2026-10-08: A_pier_0_1 changed from a point (-10.0, -5.55, -8.4) r 0.6 m to a segment. The P1 baseline counted a PatchCore alert at tick 3478 as false although its box lies on the visible crack (0.71 m from the old point); the segment follows the crack seen in the image, not the detector output.",
+    "2026-10-09: status proposed -> reviewed; the user approved the labels after reviewing the held-out overlay sheet and the tick 3478 pier alert image."
   ],
   "defects": [
-    {"id": "A_pipe_front_1", "category": "pipe_front", "world_m": [-10.25, 0.5, -10.35], "radius_m": 0.6,
-     "sources": {"patchcore_P0_event_001": [-10.17, 0.49, -10.38], "classical_0927_event_001": [-10.33, 0.5, -10.33]}},
-    {"id": "A_pipe_front_2", "category": "pipe_front", "world_m": [-7.66, 0.5, -10.30], "radius_m": 0.6,
-     "sources": {"patchcore_P0_event_002": [-7.53, 0.5, -10.32], "classical_0927_event_002": [-7.8, 0.5, -10.28]}},
-    {"id": "A_pier_0_1", "category": "pier_0", "world_m": [-9.81, -5.55, -8.74], "end_m": [-10.88, -5.55, -8.01], "radius_m": 0.35,
-     "sources": {"heldout_tick_3478_crack_trace": [[-9.81, -5.55, -8.74], [-10.88, -5.55, -8.01]], "patchcore_P0_event_004": [-10.0, -5.55, -8.59], "editor_note_2026_09_26_z": -8.2}}
+    {
+      "id": "A_pipe_front_1",
+      "category": "pipe_front",
+      "world_m": [
+        -10.25,
+        0.5,
+        -10.35
+      ],
+      "radius_m": 0.6,
+      "sources": {
+        "patchcore_P0_event_001": [
+          -10.17,
+          0.49,
+          -10.38
+        ],
+        "classical_0927_event_001": [
+          -10.33,
+          0.5,
+          -10.33
+        ]
+      }
+    },
+    {
+      "id": "A_pipe_front_2",
+      "category": "pipe_front",
+      "world_m": [
+        -7.66,
+        0.5,
+        -10.3
+      ],
+      "radius_m": 0.6,
+      "sources": {
+        "patchcore_P0_event_002": [
+          -7.53,
+          0.5,
+          -10.32
+        ],
+        "classical_0927_event_002": [
+          -7.8,
+          0.5,
+          -10.28
+        ]
+      }
+    },
+    {
+      "id": "A_pier_0_1",
+      "category": "pier_0",
+      "world_m": [
+        -9.81,
+        -5.55,
+        -8.74
+      ],
+      "end_m": [
+        -10.88,
+        -5.55,
+        -8.01
+      ],
+      "radius_m": 0.35,
+      "sources": {
+        "heldout_tick_3478_crack_trace": [
+          [
+            -9.81,
+            -5.55,
+            -8.74
+          ],
+          [
+            -10.88,
+            -5.55,
+            -8.01
+          ]
+        ],
+        "patchcore_P0_event_004": [
+          -10.0,
+          -5.55,
+          -8.59
+        ],
+        "editor_note_2026_09_26_z": -8.2
+      }
+    }
   ]
 }

@@ -1,0 +1,123 @@
+{
+  "created": "2026-10-09",
+  "dataset": "patchcore_dataset_clean_20260925",
+  "dataset_sha256": "955019a54bc76ef0c87acc5b602dc24c1cf000158684122a38d292c904fd079b",
+  "grid_step_px": 4,
+  "fitted": [
+    "pipe_radius_m",
+    "pipe_axis_z",
+    "pier_half_width_m",
+    "camera_lateral_m",
+    "camera_pitch_deg"
+  ],
+  "fixed": {
+    "camera_forward_m": 0.0,
+    "camera_up_m": 0.0
+  },
+  "params": {
+    "pipe_radius_m": 0.5344,
+    "pipe_axis_z": -10.5639,
+    "pier_half_width_m": 0.9847,
+    "camera_lateral_m": -0.205,
+    "camera_forward_m": 0.0,
+    "camera_up_m": 0.0,
+    "camera_pitch_deg": 3.9187
+  },
+  "optimizer": {
+    "method": "Powell",
+    "loss": 0.06356,
+    "evaluations": 265
+  },
+  "before": {
+    "fit": {
+      "pipe_front": {
+        "frames": 61,
+        "iou_median": 0.7818,
+        "iou_p10": 0.7252
+      },
+      "pipe_back": {
+        "frames": 56,
+        "iou_median": 0.7845,
+        "iou_p10": 0.7315
+      },
+      "pier_0": {
+        "frames": 83,
+        "iou_median": 0.8305,
+        "iou_p10": 0.7437
+      },
+      "pier_1": {
+        "frames": 83,
+        "iou_median": 0.8692,
+        "iou_p10": 0.8026
+      }
+    },
+    "validate": {
+      "pipe_front": {
+        "frames": 45,
+        "iou_median": 0.7818,
+        "iou_p10": 0.7318
+      },
+      "pipe_back": {
+        "frames": 51,
+        "iou_median": 0.7844,
+        "iou_p10": 0.6935
+      },
+      "pier_0": {
+        "frames": 85,
+        "iou_median": 0.8534,
+        "iou_p10": 0.8124
+      },
+      "pier_1": {
+        "frames": 88,
+        "iou_median": 0.8871,
+        "iou_p10": 0.7857
+      }
+    }
+  },
+  "after": {
+    "fit": {
+      "pipe_front": {
+        "frames": 61,
+        "iou_median": 1.0,
+        "iou_p10": 0.9707
+      },
+      "pipe_back": {
+        "frames": 56,
+        "iou_median": 0.9989,
+        "iou_p10": 0.8828
+      },
+      "pier_0": {
+        "frames": 83,
+        "iou_median": 0.8796,
+        "iou_p10": 0.7788
+      },
+      "pier_1": {
+        "frames": 83,
+        "iou_median": 0.901,
+        "iou_p10": 0.8453
+      }
+    },
+    "validate": {
+      "pipe_front": {
+        "frames": 45,
+        "iou_median": 1.0,
+        "iou_p10": 0.8959
+      },
+      "pipe_back": {
+        "frames": 51,
+        "iou_median": 0.9974,
+        "iou_p10": 0.9191
+      },
+      "pier_0": {
+        "frames": 85,
+        "iou_median": 0.8861,
+        "iou_p10": 0.8287
+      },
+      "pier_1": {
+        "frames": 88,
+        "iou_median": 0.9224,
+        "iou_p10": 0.7879
+      }
+    }
+  }
+}

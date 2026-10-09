@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
-from robustness.geometry import in_view, pixel_to_surface
+from robustness.geometry import DEFAULT_PARAMS, GeometryParams, in_view, pixel_to_surface
 
 
 @dataclass(frozen=True)
@@ -61,11 +61,11 @@ def event_category(event: dict) -> str:
     raise ValueError(f"Cannot infer structure category from station {station!r}")
 
 
-def locate_box(bbox_xywh: list[int], camera: np.ndarray, yaw_deg: float,
-               category: str) -> np.ndarray | None:
+def locate_box(bbox_xywh: list[int], camera: np.ndarray, yaw_deg: float, category: str,
+               params: GeometryParams = DEFAULT_PARAMS) -> np.ndarray | None:
     """World point under the centre of an alert box, or None if the ray misses the structure."""
     x, y, width, height = bbox_xywh
-    hit = pixel_to_surface(x + width / 2, y + height / 2, camera, yaw_deg, category)
+    hit = pixel_to_surface(x + width / 2, y + height / 2, camera, yaw_deg, category, params)
     return None if hit is None else hit.world
 
 
@@ -90,6 +90,6 @@ def match_defect(point: np.ndarray | None, category: str,
 
 
 def defects_in_view(defects: tuple[Defect, ...], camera: np.ndarray, yaw_deg: float,
-                    category: str) -> list[str]:
-    return [defect.defect_id for defect in defects
-            if defect.category == category and in_view(defect.centre(), camera, yaw_deg, category)]
+                    category: str, params: GeometryParams = DEFAULT_PARAMS) -> list[str]:
+    return [defect.defect_id for defect in defects if defect.category == category
+            and in_view(defect.centre(), camera, yaw_deg, category, params=params)]

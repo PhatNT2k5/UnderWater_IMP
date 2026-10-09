@@ -39,18 +39,6 @@ def damage_pause_remaining(started_at: float | None, now: float,
     return max(0.0, hold_seconds - (now - started_at))
 
 
-def patchcore_category(station: str) -> str | None:
-    if station.startswith("pipe_front_scan"):
-        return "pipe_front"
-    if station.startswith("pipe_back_scan"):
-        return "pipe_back"
-    if station.startswith("pier_0_level_") and "_orbit_" in station:
-        return "pier_0"
-    if station.startswith("pier_1_level_") and "_orbit_" in station:
-        return "pier_1"
-    return None
-
-
 def source_hashes() -> dict[str, str]:
     return {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in PROTECTED_FILES}
 
@@ -119,6 +107,10 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
     sys.path.insert(0, str(INSPECTION))
     import run_inspection as inspection
     from crack_detection import preprocess_image
+    from robustness.geometric_roi import category_from_pose
+    from robustness.geometry import load_params
+
+    geometry_params = load_params()
 
     session = Path(str(options["session"]))
     session.mkdir(parents=True, exist_ok=True)
@@ -145,6 +137,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
         "pause": False, "stop": False, "continue": False, "follow": bool(options.get("follow", True)), "keys": set(),
         "evidence": None, "viewport_enabled": False,
         "analysis_status": "idle", "analysis_tick": None, "runtime_tick": -1,
+        "position": [0.0, 0.0, 0.0], "yaw": 0.0, "category": None,
     }
     last_publish = 0.0
     last_pipeline_publish = 0.0
@@ -215,8 +208,14 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
 
     def gate(mode: str, station: str, position: np.ndarray) -> bool:
         state["station"] = station
-        result = (patchcore_category(station) is not None and mode == "auto"
-                  if detector == "PatchCore" else original_gate(mode, station, position))
+        if detector == "PatchCore":
+            # P2: the structure in view comes from pose and geometry, not the station name.
+            category = (category_from_pose(np.asarray(position), float(state["yaw"]), geometry_params)
+                        if mode == "auto" else None)
+            state["category"] = category
+            result = category is not None
+        else:
+            result = original_gate(mode, station, position)
         state["active"] = result
         return result
 
@@ -249,7 +248,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
                     analysis = SimpleNamespace(**{**vars(previous), "alerts": [],
                                                    "analyzed": False})
             else:
-                category = patchcore_category(str(state["station"]))
+                category = state.get("category")
                 if category is None:
                     raise RuntimeError("PatchCore group could not be determined")
                 response = patchcore_client.analyze(

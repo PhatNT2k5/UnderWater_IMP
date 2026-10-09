@@ -16,8 +16,16 @@ import torch
 
 from .alerts import AlertTracker, Candidate, extract_candidates
 from .live_roi import ReferenceFrame, load_references, match_roi
-from .model import CATEGORIES, predict_map
+from .model import CATEGORIES, iter_tiles, predict_map
 from .predict import load_model
+
+# The geometric ROI lives with the route geometry in auv_inspection (top-level imports).
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from robustness.geometric_roi import (  # noqa: E402
+    DEFAULT_POSE_SIGMA_M, DEFAULT_POSE_SIGMA_YAW_DEG, geometric_roi)
+from robustness.geometry import GeometryParams, load_params  # noqa: E402
+
+ROI_MODES = ("geometry", "reference")
 
 
 @dataclass
@@ -29,10 +37,14 @@ class Session:
     tracker: AlertTracker
     device: torch.device
     model_dir: Path
+    roi_mode: str = "geometry"
+    geometry: GeometryParams | None = None
 
 
 def create_session(model_dir: Path, reference_dataset: Path,
-                   thresholds_file: Path) -> Session:
+                   thresholds_file: Path, roi_mode: str = "geometry") -> Session:
+    if roi_mode not in ROI_MODES:
+        raise ValueError(f"roi_mode must be one of {ROI_MODES}")
     calibration = json.loads(thresholds_file.read_text(encoding="utf-8"))
     if Path(calibration["model_dir"]).resolve() != model_dir.resolve():
         raise ValueError("Thresholds refer to a different model")
@@ -45,9 +57,23 @@ def create_session(model_dir: Path, reference_dataset: Path,
     banks = {category: torch.load(model_dir / f"{category}_bank.pt",
                                   map_location=device, weights_only=True)
              for category in CATEGORIES}
-    return Session(model=model, banks=banks, references=load_references(reference_dataset),
+    # The reference dataset stays required: the approval gate fingerprints it.
+    references = load_references(reference_dataset) if roi_mode == "reference" else []
+    return Session(model=model, banks=banks, references=references,
                    thresholds=thresholds, tracker=AlertTracker(), device=device,
-                   model_dir=model_dir.resolve())
+                   model_dir=model_dir.resolve(), roi_mode=roi_mode,
+                   geometry=load_params() if roi_mode == "geometry" else None)
+
+
+def select_roi(session: Session, frame: np.ndarray, request: dict, category: str,
+               station: str, position_m: np.ndarray, yaw_deg: float) -> tuple[np.ndarray | None, dict]:
+    if session.roi_mode == "reference":
+        return match_roi(frame, session.references, category, station, position_m, yaw_deg)
+    if session.geometry is None:
+        raise ValueError("Geometry ROI mode needs GeometryParams (create_session loads them)")
+    return geometric_roi(position_m, yaw_deg, category, session.geometry,
+                         float(request.get("pose_sigma_m", DEFAULT_POSE_SIGMA_M)),
+                         float(request.get("pose_sigma_yaw_deg", DEFAULT_POSE_SIGMA_YAW_DEG)))
 
 
 def encode_png(image: np.ndarray) -> str:
@@ -104,8 +130,7 @@ def analyze_request(session: Session, request: dict) -> dict:
         raise ValueError("yaw_deg must be finite")
     frame = decode_frame(request["camera_png_b64"])
     start = time.perf_counter()
-    roi, roi_status = match_roi(frame, session.references, category, station,
-                                position_m, yaw_deg)
+    roi, roi_status = select_roi(session, frame, request, category, station, position_m, yaw_deg)
     identity = {"type": "result", "detector": "PatchCore", "tick": tick,
                 "category": category, "station": station,
                 "position_m": position_m.tolist(), "yaw_deg": yaw_deg,
@@ -116,6 +141,11 @@ def analyze_request(session: Session, request: dict) -> dict:
     if roi is None:
         return {**identity, "status": "analysis_unavailable", "candidates": [],
                 "alerts": [], "processing_ms": (time.perf_counter() - start) * 1000}
+    # A heavily eroded ROI (large pose uncertainty) can pass the pixel minimum yet cover no
+    # 256 px tile enough to score; report it instead of failing inside predict_map.
+    if next(iter_tiles(frame, roi), None) is None:
+        return {**identity, "status": "analysis_unavailable", "reason": "no_surface_tiles",
+                "candidates": [], "alerts": [], "processing_ms": (time.perf_counter() - start) * 1000}
     session.model.memory_bank = session.banks[category]
     scores = predict_map(session.model, frame, roi, session.device)
     if not np.isfinite(scores).any():
@@ -140,7 +170,7 @@ def analyze_request(session: Session, request: dict) -> dict:
 
 
 def serve(session: Session) -> None:
-    print(json.dumps({"type": "ready", "detector": "PatchCore",
+    print(json.dumps({"type": "ready", "detector": "PatchCore", "roi_mode": session.roi_mode,
                       "model_dir": str(session.model_dir)}), flush=True)
     for line in sys.stdin:
         request: dict = {}
@@ -162,8 +192,12 @@ def main() -> None:
     parser.add_argument("model_dir", type=Path)
     parser.add_argument("reference_dataset", type=Path)
     parser.add_argument("thresholds_file", type=Path)
+    parser.add_argument("--roi-mode", choices=ROI_MODES, default="geometry",
+                        help="geometry: ROI from pose and structure geometry (P2); "
+                             "reference: nearest reviewed clean-frame masks (P0 baseline)")
     args = parser.parse_args()
-    serve(create_session(args.model_dir, args.reference_dataset, args.thresholds_file))
+    serve(create_session(args.model_dir, args.reference_dataset, args.thresholds_file,
+                         args.roi_mode))
 
 
 if __name__ == "__main__":
