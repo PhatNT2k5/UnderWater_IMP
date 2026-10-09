@@ -398,6 +398,9 @@ class Dashboard:
             )
         if packet["evidence_tick"] is not None:
             text = f"Ảnh cảnh báo · tick {packet['evidence_tick']} · Camera robot vẫn trực tiếp"
+        elif active and packet.get("analysis_reason") == "diffuse_anomaly":
+            # Widespread anomaly: environment change or large-area damage, never "clean".
+            text = "Bất thường lan rộng trên bề mặt · cần kiểm tra thủ công"
         elif active and packet.get("analysis_status") == "analysis_unavailable":
             text = "Chưa đủ điều kiện phân tích · thiếu ROI/căn chỉnh"
         elif packet.get("detector") == "PatchCore" and active:

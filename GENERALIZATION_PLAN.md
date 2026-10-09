@@ -15,7 +15,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P0 | Gỡ chặn live: tracker không reset khi frame không đủ điều kiện; ROI dùng mask gần nhất với dung sai | **Xong** (baseline v1.1) | Unit 15/15; replay pose: ROI có ở 99,1-100% frame (trước 28-49%). Live `session_20261008_174818_976289` map A: **3/3 vết** (2 ống, 1 trụ 0), **1 báo nhầm** ở đầu ống (`nearest_mask` lệch 27 cm), route 359/359, 12,2 tick/s |
 | P1 | Hạ tầng đánh giá + ngẫu nhiên hóa điều kiện; đo lại baseline v1 trên điều kiện chưa thấy | **Xong** (xem mục Baseline v1.1). Phần 3: `geometry.py`, `defect_inventory.py` + `inventories/map_A.json`, `metrics.py`, `evaluate_capture.py`, `benchmark.py`, 16 unit test; benchmark 28 tổ hợp | Phần 1: `robustness/degradation.py`, 7 yếu tố × 5 mức, 9 unit test. Phần 2: `--randomize train\|heldout --seed`, 9 unit test; Unreal: `capture_test_mixed_20261008_190916_184618` (map A, heldout seed 1, 598 ảnh) và `capture_test_clean_20261008_191432_831527` (map sạch v3, heldout seed 2, 635 ảnh), cả hai đi hết route; khoảng cách ống, lệch độ sâu/yaw, đèn, lịch chụp có tác dụng; dòng chảy không đo được (D14). Phần 3 (bộ chỉ số, đo baseline) chưa làm |
 | P2 | ROI hình học + tọa độ bề mặt | **Xong** (live `session_20261009_103800_863732`: 3/3 vết, 2 báo nhầm ở biên ROI, 1 báo trùng) | Hiệu chỉnh hình học IoU kiểm tra 0,89-1,00; ROI hình học + lọc góc tới; frame được phân tích 100%; xem mục Kết quả P2. Tọa độ bề mặt (`surface_coordinates`) đã có, dùng ở P5 |
-| P3 | Cổng chất lượng ảnh | Chưa làm | |
+| P3 | Cổng chất lượng ảnh | **Xong offline** (chưa chạy live) | Lề chấm điểm 24 px + cổng `diffuse_anomaly`; số đo chất lượng chỉ để chẩn đoán (cổng theo phân vị bị loại). Tập phát triển: tổng báo nhầm 14 lượt chạy 410 → 97, recall giữ ở điều kiện có nghĩa; xem mục Kết quả P3 |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng SPRT trên bề mặt | Chưa làm | |
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | Chưa làm | |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | Chưa làm | |
@@ -65,6 +65,28 @@ Cùng hai capture (nay là **tập phát triển**, xem nhật ký quyết đị
 - **Marine snow** vẫn gần 100% frame vượt ngưỡng; v1.2 phân tích nhiều frame hơn nên báo nhầm còn tăng. Đây là việc của P3 (cổng chất lượng) và P5 (bằng chứng trên bề mặt).
 - Vẫn chưa đạt tiêu chí nghiệm thu (recall ≥ 90%, ≤ 1 báo nhầm/100 m). Chưa chạy dashboard live với v1.2.
 
+## Kết quả P3: lề chấm điểm và cổng bất thường lan tỏa (v1.3, 2026-10-09)
+
+Cùng tập phát triển và điều kiện như P2. Kết quả: `auv_inspection/output/benchmark_p3_quality/` (`patchcore_geo_m` = v1.2 + lề 24 px, `patchcore_geo_md` = lề + cổng). Cột v1.2 lấy từ `benchmark_p2_geometry/`.
+
+| Điều kiện | Vết map A (v1.2 / lề / lề + cổng) | Báo nhầm/100 m map A (v1.2 / lề / lề + cổng) | Báo nhầm/100 m map sạch (v1.2 / lề / lề + cổng) | Frame bị cổng abstain (A / sạch) |
+|---|---|---|---|---|
+| Gốc | 2/3 / 2/3 / 2/3 | 3,94 / 0,49 / **0,49** | 0 / 0 / **0** | 0 / 0 |
+| Độ đục 2 | 3/3 / 3/3 / 3/3 | 5,42 / 5,42 / 4,43 | 0,95 / 0,95 / 0,95 | 0,5% / 0,3% |
+| Độ đục 4 | 2/3 / 2/3 / 2/3 | 8,37 / 4,92 / **1,48** | 2,84 / 2,84 / 1,42 | 7,7% / 1,1% |
+| Marine snow 3 | 2/3 / 1/3 / 1/3 | 36,43 / 30,03 / 16,74 | 37,38 / 27,91 / 15,61 | 32% / 28% |
+| Marine snow 5 | 2/3 / 2/3 / 0/3 | 39,88 / 39,39 / **0** | 40,22 / 40,22 / **0** | 100% / 99,7% |
+| Đèn yếu 4 | 2/3 / 2/3 / 2/3 | 2,46 / 0,49 / **0,49** | 0 / 0 / 0 | 0 / 0 |
+| Mờ chuyển động 3 | 2/3 / 2/3 / 2/3 | 13,29 / 11,82 / **4,43** | 7,10 / 6,62 / **0,95** | 19% / 14% |
+
+- **Lề 24 px** loại gần hết báo nhầm ở biên ROI: map A gốc 8 → 1, đèn yếu 5 → 1, không mất vết nào ở điều kiện gốc.
+- **Cổng lan tỏa** giảm mạnh báo nhầm ở độ đục 4, mờ chuyển động và marine snow; ở marine snow 5 hệ thống abstain gần như mọi frame thay vì phát khoảng 80 cảnh báo sai. Abstain không được tính là "sạch" (P5 không được dùng các frame này làm bằng chứng bề mặt sạch) và hiển thị cho operator.
+- Tổng báo nhầm 14 lượt chạy: v1.2 **410**, lề 354, lề + cổng **97**. Recall theo vết giữ nguyên ở mọi điều kiện mà frame sạch không bị đánh dấu gần hết.
+- **Recall marine snow 3 (2/3 → 1/3) không phải hồi quy có ý nghĩa:** ở điều kiện này 92-99% frame không có vết vẫn có ứng viên, nên cảnh báo "trúng" vết là trùng hợp. Cảnh báo trúng `A_pipe_front_2` của v1.2 nằm ở mép trên ống (y ≈ 211 px), vùng hạt tuyết bị lề loại.
+- **Báo nhầm còn lại khi nước đục nằm trên vòng bích** (`pipe_back`, cách nhau khoảng 3 m, đúng chỗ đèn sáng nhất; đã xem ảnh tick 1741 và 2056). Vòng bích nằm sâu trong ROI và bất thường chỉ ở một chỗ, nên cả lề lẫn cổng đều không áp dụng được. Đây là lệch miền của đặc trưng → **P4** (bank nhiều điều kiện, chuẩn hóa đặc trưng); P5 có thể giảm nhờ đòi bằng chứng lặp trên cùng tọa độ bề mặt.
+- **Marine snow mức vừa** (15-17/100 m) vẫn là nguồn báo nhầm lớn nhất: hạt rời rạc chưa đủ dày để vượt 5% ROI. Hạt di chuyển giữa các frame còn vết cố định trên bề mặt → **P5** (bằng chứng theo tọa độ bề mặt) là cơ chế đúng.
+- Vẫn chưa đạt tiêu chí nghiệm thu. Chưa chạy dashboard live với v1.3.
+
 ## Tiêu chí nghiệm thu (bản đầu)
 
 Đo trên **điều kiện môi trường chưa từng dùng** để train hay chọn ngưỡng:
@@ -84,6 +106,7 @@ Cùng hai capture (nay là **tập phát triển**, xem nhật ký quyết đị
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
 | 2026-10-09 | Live P2 xác nhận nguồn báo nhầm chính là **biên ROI** (đầu ống, mép ống khi nhìn xiên): ROI giới hạn tâm đặc trưng nhưng trường nhìn của đặc trưng rộng hơn. Thêm vào **P3** một lề chấm điểm bên trong ROI theo trường nhìn của đặc trưng, đánh giá trên tập phát triển trước. Báo trùng cùng một vết (hai vị trí cách 2,08 m) để **P5** gộp theo tọa độ bề mặt |
+| 2026-10-09 | P3: **bỏ cổng chất lượng theo phân vị** (mục 3.1 ban đầu). Ngưỡng phân vị 1/99 của frame sạch mô phỏng loại 65-100% frame ngay ở mức suy giảm nhẹ nhất (độ đục, đèn yếu, mờ), vì frame sạch gần như tất định nên khoảng "bình thường" rất hẹp; cổng biến thành bộ phát hiện ngoài phân phối. Nhiễu cảm biến còn kích hoạt bộ đếm hạt trong khi marine snow 3 phần lớn không. Thay bằng: (a) **lề chấm điểm 24 px** theo trường nhìn của descriptor (lân cận 3×3 layer2 stride 8 + layer3 stride 16), chọn trước khi đo; (b) **cổng `diffuse_anomaly`**: abstain khi hơn 5% ROI vượt ngưỡng hoặc hơn 6 vùng ứng viên. Giới hạn chọn từ đo trên 160 frame tập phát triển (33 có vết trong tầm nhìn): frame có vết tối đa 3,1% ROI và 5 vùng, frame sạch 0,3% và 1 vùng. Vì chọn trên tập phát triển, P7 phải kiểm lại trên heldout mới. Số đo chất lượng (`robustness/quality.py`) giữ làm chẩn đoán, để P5 quyết định frame nào đủ tốt làm bằng chứng sạch. Mặc định dashboard: lề + cổng |
 | 2026-10-09 | **Hai capture heldout P1 (`capture_test_mixed_20261008_190916_184618`, `capture_test_clean_20261008_191432_831527`) chuyển thành tập phát triển.** Đã dùng ảnh và kết quả của chúng để tìm lỗi (nhãn trụ, báo nhầm ở mép ống), nên không còn là bằng chứng "chưa thấy". Nghiệm thu P7 phải dùng capture heldout mới với seed khác, chưa ai xem trước |
 | 2026-10-09 | P2: ROI hình học bỏ pixel có góc tới > 70°. Lý do vật lý (diện tích mỗi pixel gấp 1/cos θ, khoảng 3 lần; thiếu sáng; lẫn nền và mép vòng bích) chọn trước khi đo; nhu cầu phát hiện khi xem các báo nhầm v1.2 nằm trên dải mép ống ở `capture_test_mixed` (tập phát triển). Giữ kết quả không lọc ở `benchmark_p2_geometry_no_incidence` để so sánh |
 | 2026-10-09 | P2: hiệu chỉnh hình học khớp 5 tham số (bán kính ống, độ cao trục, nửa cạnh trụ, offset ngang, pitch); offset tiến/đứng giữ 0 vì không xác định được với một khoảng cách duy nhất. Nhãn map A chuyển `reviewed` theo xác nhận của người dùng |
@@ -141,6 +164,8 @@ Camera + pose (có sai số)
 ```
 
 ### 3.1 Cổng chất lượng ảnh
+
+> **Sửa đổi 2026-10-09 (P3):** cổng theo phân vị dưới đây đã thử và bị loại; xem nhật ký quyết định và mục Kết quả P3. Bản thực hiện: lề chấm điểm + cổng `diffuse_anomaly`; các chỉ số dưới đây chỉ được đo và báo cáo.
 
 Chỉ số mỗi frame: phương sai Laplacian (độ nét), RMS contrast trong ROI, tỷ lệ pixel cháy sáng hoặc quá tối, mật độ đốm sáng nhỏ sau top-hat (marine snow), độ phủ ROI, độ bất định pose. Ngưỡng lấy theo phân vị trên dữ liệu sạch nhiều điều kiện rồi kiểm trên tập calibration, không chỉnh tay. Đầu ra là mã lý do: `blurred`, `low_visibility`, `occluded`, `particles`, `pose_uncertain`.
 
@@ -297,7 +322,7 @@ Quy tắc chung: map gốc không đổi (chỉ tạo bản sao); artifact v1 gi
 | P0 | Tracker bỏ qua frame không đủ điều kiện thay vì reset; ROI dùng mask gần nhất với dung sai 0,5 m/3° | Chạy live có số liệu baseline v1.1 (chỉ là baseline, không phải nghiệm thu) | 0,5 ngày |
 | P1 | Capture có `--seed` và các yếu tố mục 4; thư viện mô hình 3.8 + marine snow; chia dữ liệu theo điều kiện; bộ chỉ số mục 5 | Đo lại baseline v1 trên điều kiện chưa thấy | 2 ngày |
 | P2 | ROI hình học, tọa độ bề mặt; thay `live_roi` và `patchcore_category` | IoU ≥ 0,85 so với 552 mask đã duyệt; chịu được sai số pose mô phỏng | 1-1,5 ngày |
-| P3 | Cổng chất lượng 3.1 với mã lý do | Frame xấu không tạo báo nhầm; tỷ lệ từ chối báo cáo theo yếu tố | 1 ngày |
+| P3 | Cổng chất lượng 3.1 với mã lý do (thực hiện: lề chấm điểm + cổng `diffuse_anomaly`, xem nhật ký quyết định) | Frame xấu không tạo báo nhầm; tỷ lệ từ chối báo cáo theo yếu tố | 1 ngày |
 | P5 | Ngưỡng conformal + SPRT trên bề mặt; thay `calibrate.py`, `alerts.py` | FPR thực tế ≤ α (Wilson); đường PoD được báo cáo | 1,5-2 ngày |
 | P4 | DINOv2 + bank nhiều điều kiện + Mahalanobis; NFAD và SPARC có gate bằng ablation | v2 hơn v1 có ý nghĩa thống kê trên điều kiện chưa thấy | 2-3 ngày |
 | P6 | Lập lại kế hoạch quay lại chụp gần | Giảm bỏ sót ở mức nhiễu cao; báo cáo chi phí quãng đường | 1-2 ngày |

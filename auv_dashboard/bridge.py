@@ -136,7 +136,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
         "active": False, "damage_pause": False, "damage_pause_started_at": None,
         "pause": False, "stop": False, "continue": False, "follow": bool(options.get("follow", True)), "keys": set(),
         "evidence": None, "viewport_enabled": False,
-        "analysis_status": "idle", "analysis_tick": None, "runtime_tick": -1,
+        "analysis_status": "idle", "analysis_reason": None, "analysis_tick": None, "runtime_tick": -1,
         "position": [0.0, 0.0, 0.0], "yaw": 0.0, "category": None,
     }
     last_publish = 0.0
@@ -274,6 +274,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
                                            status=response["status"])
                 state["last_patchcore_analysis"] = analysis
                 state["analysis_status"] = response["status"]
+                state["analysis_reason"] = response.get("reason")
                 state["analysis_tick"] = runtime_tick
         state["analysis"] = analysis
         return analysis
@@ -400,6 +401,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
             "candidate_count": len(analysis.candidates) if analysis is not None else 0,
             "detector": detector, "analysis_tick": state["analysis_tick"],
             "analysis_status": state["analysis_status"],
+            "analysis_reason": state["analysis_reason"],
         }
         publish_latest(frames, packet)
 

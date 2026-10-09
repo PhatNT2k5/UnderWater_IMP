@@ -42,6 +42,8 @@ def summary_row(result: dict) -> dict:
         "false_alerts_per_100m": round(result["false_alerts_per_100m"] or 0.0, 2),
         "frame_flag_rate": None if flags["rate"] is None else round(flags["rate"], 3),
         "analysed_share": round(analysed / total, 3) if total else None,
+        "diffuse_share": round(sum(group.get("diffuse_anomaly", 0) for group in
+                                   result["availability"].values()) / total, 3) if total else None,
         # Results written before the timing fix averaged in skipped frames (~0 ms); hide them.
         "ms_per_frame": (round(result["processing_ms_median"], 1)
                          if result.get("timing_basis") == "analysed_frames_only"

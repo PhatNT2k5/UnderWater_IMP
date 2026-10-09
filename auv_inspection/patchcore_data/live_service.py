@@ -24,8 +24,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from robustness.geometric_roi import (  # noqa: E402
     DEFAULT_POSE_SIGMA_M, DEFAULT_POSE_SIGMA_YAW_DEG, geometric_roi)
 from robustness.geometry import GeometryParams, load_params  # noqa: E402
+from robustness.quality import measure  # noqa: E402
 
 ROI_MODES = ("geometry", "reference")
+# A patch descriptor mixes a 3x3 neighbourhood of layer2 cells (8 px stride) with layer3 cells
+# (16 px), so it sees about +/-24 px around its centre; patches closer than that to the ROI edge
+# score water, flange rims or the pipe end cap (P2 live false alerts). Chosen before measuring.
+DEFAULT_SCORE_MARGIN_PX = 24
+# Defects are sparse and local; environmental change spreads anomalies over the surface (NFAD,
+# ShiftSplit-AD). Development-set defect frames reached at most 3.1% of the ROI above threshold
+# and 5 candidate regions; clean frames 0.3% and 1. Above these limits the frame is reported as
+# a diffuse anomaly instead of being scored for alerts.
+DIFFUSE_MAX_SHARE = 0.05
+DIFFUSE_MAX_CANDIDATES = 6
 
 
 @dataclass
@@ -39,10 +50,15 @@ class Session:
     model_dir: Path
     roi_mode: str = "geometry"
     geometry: GeometryParams | None = None
+    score_margin_px: int = 0
+    diffuse_gate: bool = False
 
 
 def create_session(model_dir: Path, reference_dataset: Path,
-                   thresholds_file: Path, roi_mode: str = "geometry") -> Session:
+                   thresholds_file: Path, roi_mode: str = "geometry",
+                   score_margin_px: int = 0, diffuse_gate: bool = False) -> Session:
+    if score_margin_px < 0:
+        raise ValueError("score_margin_px must be non-negative")
     if roi_mode not in ROI_MODES:
         raise ValueError(f"roi_mode must be one of {ROI_MODES}")
     calibration = json.loads(thresholds_file.read_text(encoding="utf-8"))
@@ -62,7 +78,21 @@ def create_session(model_dir: Path, reference_dataset: Path,
     return Session(model=model, banks=banks, references=references,
                    thresholds=thresholds, tracker=AlertTracker(), device=device,
                    model_dir=model_dir.resolve(), roi_mode=roi_mode,
-                   geometry=load_params() if roi_mode == "geometry" else None)
+                   geometry=load_params() if roi_mode == "geometry" else None,
+                   score_margin_px=score_margin_px, diffuse_gate=diffuse_gate)
+
+
+def interior(roi: np.ndarray, margin_px: int) -> np.ndarray:
+    """ROI pixels at least margin_px from the ROI edge; the image border is not an edge."""
+    padded = cv2.copyMakeBorder((roi > 0).astype(np.uint8), 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=1)
+    distance = cv2.distanceTransform(padded, cv2.DIST_L2, 5)[1:-1, 1:-1]
+    return distance >= margin_px
+
+
+def is_diffuse(scores: np.ndarray, threshold: float, candidates: list) -> tuple[bool, float]:
+    finite = np.isfinite(scores)
+    share = float(np.count_nonzero(finite & (scores >= threshold)) / max(np.count_nonzero(finite), 1))
+    return share > DIFFUSE_MAX_SHARE or len(candidates) > DIFFUSE_MAX_CANDIDATES, share
 
 
 def select_roi(session: Session, frame: np.ndarray, request: dict, category: str,
@@ -146,13 +176,25 @@ def analyze_request(session: Session, request: dict) -> dict:
     if next(iter_tiles(frame, roi), None) is None:
         return {**identity, "status": "analysis_unavailable", "reason": "no_surface_tiles",
                 "candidates": [], "alerts": [], "processing_ms": (time.perf_counter() - start) * 1000}
+    identity["quality"] = measure(frame, roi)
     session.model.memory_bank = session.banks[category]
     scores = predict_map(session.model, frame, roi, session.device)
+    if session.score_margin_px:
+        scores[~interior(roi, session.score_margin_px)] = np.nan
     if not np.isfinite(scores).any():
         return {**identity, "status": "analysis_unavailable", "reason": "no_surface_scores",
                 "candidates": [], "alerts": [],
                 "processing_ms": (time.perf_counter() - start) * 1000}
     candidates = extract_candidates(scores, session.thresholds[category])
+    if session.diffuse_gate:
+        diffuse, share = is_diffuse(scores, session.thresholds[category], candidates)
+        if diffuse:
+            # Not "clean" and not a defect: widespread anomaly (environment or large-area damage)
+            # is reported for the operator and leaves the tracker untouched.
+            return {**identity, "status": "analysis_unavailable", "reason": "diffuse_anomaly",
+                    "anomaly_share": round(share, 4), "candidate_count": len(candidates),
+                    "candidates": [], "alerts": [],
+                    "processing_ms": (time.perf_counter() - start) * 1000}
     alerts = session.tracker.step(category, tick, candidates)
     heatmap, annotated = visualize(frame, roi, scores, candidates, alerts)
     binary_mask = (np.isfinite(scores) & (scores >= session.thresholds[category])).astype(np.uint8) * 255
@@ -195,9 +237,13 @@ def main() -> None:
     parser.add_argument("--roi-mode", choices=ROI_MODES, default="geometry",
                         help="geometry: ROI from pose and structure geometry (P2); "
                              "reference: nearest reviewed clean-frame masks (P0 baseline)")
+    parser.add_argument("--score-margin-px", type=int, default=0,
+                        help=f"ignore scores this close to the ROI edge (P3 uses {DEFAULT_SCORE_MARGIN_PX})")
+    parser.add_argument("--diffuse-gate", action="store_true",
+                        help="report frames with widespread above-threshold scores as diffuse_anomaly")
     args = parser.parse_args()
     serve(create_session(args.model_dir, args.reference_dataset, args.thresholds_file,
-                         args.roi_mode))
+                         args.roi_mode, args.score_margin_px, args.diffuse_gate))
 
 
 if __name__ == "__main__":

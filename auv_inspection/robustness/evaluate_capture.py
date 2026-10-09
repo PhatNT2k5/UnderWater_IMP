@@ -51,6 +51,7 @@ class FrameResult:
     flagged: bool                    # at least one above-threshold candidate (before tracking)
     alert_bbox: list[int] | None     # confirmed alert box in this frame
     category: str | None = None      # structure group the detector used, if it chose one
+    reason: str | None = None        # why an unavailable frame was not analysed, if known
 
 
 Detector = Callable[[np.ndarray, dict], FrameResult]
@@ -79,11 +80,12 @@ def classical_detector() -> Detector:
 
 
 def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
-                       roi_mode: str = "reference") -> Detector:
+                       roi_mode: str = "reference", score_margin_px: int = 0,
+                       diffuse_gate: bool = False) -> Detector:
     """reference: P0/v1.1 ROI and capture categories; geometry: P2 ROI and pose-derived groups."""
     from auv_inspection.patchcore_data.live_service import (
         analyze_request, create_session, encode_png)
-    session = create_session(model_dir, reference, thresholds, roi_mode)
+    session = create_session(model_dir, reference, thresholds, roi_mode, score_margin_px, diffuse_gate)
 
     def step(frame: np.ndarray, row: dict) -> FrameResult:
         category = row["category"]
@@ -99,7 +101,7 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
                 request[key] = row[key]
         response = analyze_request(session, request)
         if response["status"] != "ready":
-            return FrameResult(False, False, None, category)
+            return FrameResult(False, False, None, category, response.get("reason"))
         alerts = response["alerts"]
         return FrameResult(True, bool(response["candidates"]),
                            alerts[0]["bbox_xywh"] if alerts else None, category)
@@ -107,16 +109,21 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
     return step
 
 
-DETECTORS = ("classical", "patchcore", "patchcore_geo")
+DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md")
 
 
 def make_detector(name: str) -> Detector:
-    """classical; patchcore = v1.1 reference ROI; patchcore_geo = P2 geometric ROI."""
+    """classical; patchcore = v1.1 reference ROI; patchcore_geo = P2 geometric ROI;
+    _m adds the P3 scoring margin; _md adds the margin and the diffuse-anomaly gate."""
     if name == "classical":
         return classical_detector()
-    if name in ("patchcore", "patchcore_geo"):
-        return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS,
-                                  "geometry" if name == "patchcore_geo" else "reference")
+    if name == "patchcore":
+        return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "reference")
+    if name.startswith("patchcore_geo") and name in DETECTORS:
+        from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
+        return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "geometry",
+                                  DEFAULT_SCORE_MARGIN_PX if name.endswith(("_m", "_md")) else 0,
+                                  name.endswith("_md"))
     raise ValueError(f"Unknown detector {name!r}; choose from {DETECTORS}")
 
 
@@ -160,7 +167,10 @@ def record(score: Score, result: FrameResult, row: dict, perceived: dict, visibl
     category = row["category"]
     if result.available:  # skipped frames cost ~0 ms and would hide the real latency
         score.elapsed.append(elapsed_ms)
-    score.status[category]["analysed" if result.available else "unavailable"] += 1
+    status = "analysed" if result.available else "unavailable"
+    if not result.available and result.reason == "diffuse_anomaly":
+        status = "diffuse_anomaly"  # an abstention the operator sees, unlike missing geometry
+    score.status[category][status] += 1
     if result.available and not visible:
         score.negatives += 1
         score.flagged_negatives += result.flagged
