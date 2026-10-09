@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-10-09** - P3 xong và đã chạy live: lề chấm điểm 24 px + cổng `diffuse_anomaly` (v1.3) cho 3/3 vết, 0 báo nhầm trên map A ở điều kiện gốc; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-09** - Lệnh mục 7 dùng `python` sau `conda activate mainenv` thay cho đường dẫn conda ghi cứng; P3 xong và đã chạy live (v1.3: 3/3 vết, 0 báo nhầm trên map A); không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -620,50 +620,50 @@ Plugin dùng `PythonScriptPlugin` và `EditorScriptingUtilities`, tự mở MCP 
 
 ## 7. Lệnh thường dùng
 
-Từ root `UnderwaterDemo`:
+Từ root repo, sau `conda activate mainenv` (`python` là Python của `mainenv`, dù conda cài ở `%USERPROFILE%\.conda` hay nơi khác như `D:\Anaconda`; lệnh `.venv-patchcore` giữ nguyên):
 
 ```powershell
 # Chạy tuyến tự động có camera preview
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\run_inspection.py
+python .\auv_inspection\run_inspection.py
 
 # Dashboard Tkinter hiện hành; cũng có thể nhấp đúp auv_dashboard/start_dashboard.cmd
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_dashboard\run_dashboard.py --autostart
+python .\auv_dashboard\run_dashboard.py --autostart
 
 # Test adapter không mở Unreal / kiểm thử dashboard với Unreal thật
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_dashboard.test_dashboard -v
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_dashboard\run_dashboard.py --smoke-test
+python -m unittest auv_dashboard.test_dashboard -v
+python .\auv_dashboard\run_dashboard.py --smoke-test
 
 # Chạy headless với giới hạn tick
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\run_inspection.py --headless --steps 60000
+python .\auv_inspection\run_inspection.py --headless --steps 60000
 
 # Sau khi người dùng tự chuẩn bị map sạch: thu PNG camera gốc của ống và trụ
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\run_inspection.py --capture-clean-structures --headless --steps 60000
+python .\auv_inspection\run_inspection.py --capture-clean-structures --headless --steps 60000
 
 # Điều khiển thủ công
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\run_inspection.py --mode manual
+python .\auv_inspection\run_inspection.py --mode manual
 
 # Khi hiện cảnh báo vết nứt trong cửa sổ camera: Space để tiếp tục, Esc để thoát
 
 # Unit test hình học (không mở Unreal)
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\test_inspection_route.py
+python .\auv_inspection\test_inspection_route.py
 
 # Regression ảnh tổng hợp + 14 frame InspectionCamera thật (chạy từ root)
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_inspection.tests.test_crack_detection auv_inspection.tests.test_camera_regression -v
+python -m unittest auv_inspection.tests.test_crack_detection auv_inspection.tests.test_camera_regression -v
 
 # Capture có điều kiện ngẫu nhiên hóa (P1): train quanh nominal, heldout ngoài khoảng train
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\run_inspection.py --capture-structures --dataset-role train --scene-state clean --randomize train --seed 1 --headless --steps 60000
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_inspection.robustness.tests.test_conditions -v
+python .\auv_inspection\run_inspection.py --capture-structures --dataset-role train --scene-state clean --randomize train --seed 1 --headless --steps 60000
+python -m unittest auv_inspection.robustness.tests.test_conditions -v
 
 # Đánh giá theo vết vật lý trên capture (P1), chạy trong .venv-patchcore; benchmark lưới detector × điều kiện
 & .\.venv-patchcore\Scripts\python.exe -m auv_inspection.robustness.evaluate_capture <capture_mixed> --detector patchcore --inventory .\auv_inspection\robustness\inventories\map_A.json --output <ket_qua.json>
 & .\.venv-patchcore\Scripts\python.exe -m auv_inspection.robustness.benchmark <thu_muc_ket_qua> --mixed <capture_mixed> .\auv_inspection\robustness\inventories\map_A.json --clean <capture_clean>
 
 # Tạo bản suy giảm có seed của một thư mục PNG (P1); không ghi đè thư mục đích
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m auv_inspection.robustness.degradation <thu_muc_png> <thu_muc_moi> --degradation turbidity:3 --degradation marine_snow:2 --seed 0
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" -m unittest auv_inspection.robustness.tests.test_degradation -v
+python -m auv_inspection.robustness.degradation <thu_muc_png> <thu_muc_moi> --degradation turbidity:3 --degradation marine_snow:2 --seed 0
+python -m unittest auv_inspection.robustness.tests.test_degradation -v
 
 # QA live cả hai mặt ống, tự tiếp tục cảnh báo, không mở cửa sổ
-& "$env:USERPROFILE\.conda\envs\mainenv\python.exe" .\auv_inspection\check_detection_runtime.py
+python .\auv_inspection\check_detection_runtime.py
 ```
 
 Không có lệnh rebuild map: `auv_inspection/rebuild.py` không có trong repo (xem mục 4).
@@ -762,6 +762,7 @@ Checklist trước khi bàn giao:
 
 ## 10. Nhật ký cập nhật tài liệu
 
+- `2026-10-09`: Mục 7 bỏ đường dẫn ghi cứng `$env:USERPROFILE\.conda\envs\mainenv\python.exe` (14 lệnh), dùng `python` sau `conda activate mainenv`; người dùng gặp lỗi khi conda cài ở `D:\Anaconda` (và `"$env:D:\..."` bị PowerShell hiểu là biến môi trường `D`). Chỉ đổi tài liệu.
 - `2026-10-09`: Ghi kết quả live v1.3 (`session_20261009_150224_114943`): 3/3 vết map A, 0 báo nhầm, 1 báo trùng vết trụ; session chưa lưu frame `diffuse_anomaly`. Chỉ đổi tài liệu, không đổi code, model, ngưỡng hay map.
 - `2026-10-09`: P3. `live_service.py` thêm `interior()`, `is_diffuse()`, `DEFAULT_SCORE_MARGIN_PX` = 24, `DIFFUSE_MAX_SHARE` = 5%, `DIFFUSE_MAX_CANDIDATES` = 6; `Session`/`create_session()` có `score_margin_px`, `diffuse_gate` (mặc định giữ hành vi v1.2), CLI `--score-margin-px`, `--diffuse-gate`; trạng thái `analysis_unavailable` + `reason: diffuse_anomaly` không bước tracker; response có `quality`. Thêm `robustness/quality.py` (`measure()`, chỉ chẩn đoán; cổng theo phân vị đã thử và bỏ). Harness: `FrameResult.reason`, detector `patchcore_geo_m`/`patchcore_geo_md`, cột `diffuse_share` trong benchmark. Dashboard: `PatchCoreClient` mặc định lề 24 px + cổng, bridge gửi `analysis_reason`, app hiện "Bất thường lan rộng trên bề mặt". Benchmark tập phát triển `benchmark_p3_quality`: tổng báo nhầm 410 → 97, recall giữ ở điều kiện có nghĩa (chi tiết trong `GENERALIZATION_PLAN.md`). Test: service P3 6, quality 4 (unit PatchCore + robustness liên quan 33/33), dashboard 7/7 trong `mainenv`. **Chưa chạy dashboard live với v1.3.**
 - `2026-10-09`: Ghi kết quả live P2 (`session_20261009_103800_863732`): 3/3 vết map A, 2 báo nhầm ở biên ROI (đầu ống, mép ống khi nhìn xiên lúc chuyển tiếp), 1 báo trùng vết trụ. Không đổi code.
