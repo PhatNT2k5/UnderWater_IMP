@@ -662,6 +662,12 @@ Không có lệnh rebuild map: `auv_inspection/rebuild.py` không có trong repo
 
 ## 8. Trạng thái đã xác minh và giới hạn
 
+### PatchCore v1.2 live trên dashboard (P2)
+
+- `auv_dashboard/output/session_20261009_103800_863732/` (2026-10-09, Tự động + PatchCore, ROI hình học, map A): route 359/359, 6 cảnh báo, mỗi lần giữ 5 giây rồi tự tiếp tục. Khớp bằng hình học đã hiệu chỉnh và xem ảnh từng event: event 001/002 đúng hai vết ống mặt trước; event 005 (tick 3942, lúc vào tầng 1 trụ 0) và 006 (tick 4119, trên vòng) đều là vết trụ `A_pier_0_1`, tức **báo trùng** vì hai vị trí cách nhau 2,08 m, vừa vượt khoảng khóa 2 m; event 003 (đầu ống x 15,1, `pipe_back_scan_002`) và 004 (`transit_pier_front_003`, nhìn xiên mép trên ống) là **báo nhầm ở biên ROI**. Kết quả 3/3 vết, 2 báo nhầm (P0: 3/3, 1 báo nhầm).
+- Event 004 xảy ra khi đang chuyển tiếp: cổng hình học mở phân tích khi thấy công trình trong tầm 4 m, kể cả ngoài đoạn quét theo route (cố ý, phù hợp AUV thật, nhưng góc nhìn xiên).
+- Nguyên nhân báo nhầm biên: ROI chỉ giới hạn tâm đặc trưng, còn trường nhìn của đặc trưng `layer3` rộng hàng chục pixel nên patch sát biên vẫn chứa nước, mép vòng bích hoặc nắp đầu ống. Ghi thành việc cần xử lý ở P3; báo trùng để P5 gộp theo tọa độ bề mặt.
+
 ### PatchCore v1.2: ROI hình học (P2, offline)
 
 - Benchmark `auv_inspection/output/benchmark_p2_geometry/` (v1.2 lọc góc tới 70°; Classical và v1.1 chép từ lượt cùng hình học đã hiệu chỉnh), `.../pose_noise/` (nhiễu pose 0,1 m/2° và 0,25 m/5°), `benchmark_p2_geometry_no_incidence/` (v1.2 chưa lọc). Hai capture P1 nay là tập phát triển.
@@ -735,6 +741,8 @@ Checklist trước khi bàn giao:
 5. Không xóa cảnh báo về map thủ công, backup và ranh giới giữa static test với live Unreal.
 
 ## 10. Nhật ký cập nhật tài liệu
+
+- `2026-10-09`: Ghi kết quả live P2 (`session_20261009_103800_863732`): 3/3 vết map A, 2 báo nhầm ở biên ROI (đầu ống, mép ống khi nhìn xiên lúc chuyển tiếp), 1 báo trùng vết trụ. Không đổi code.
 
 - `2026-10-09`: P2 (ROI hình học). `geometry.py` tham số hóa (`GeometryParams`, `load_params()`, chiếu theo lô, pháp tuyến/góc tới); thêm `calibrate_geometry.py` + `calibration/geometry_v1.json` (IoU kiểm tra 0,89-1,00; mask ORB 0,87-0,97), `geometric_roi.py` (nhóm theo pose, co theo sai số pose, lọc góc tới 70°). `live_service.py` thêm `roi_mode` (mặc định `geometry`), `select_roi()`, trạng thái `no_surface_tiles`; `patchcore_client.py` truyền `--roi-mode`; `bridge.py` mở cổng PatchCore bằng `category_from_pose()` và bỏ `patchcore_category()` (test dashboard đặt AUV trước ống). Harness: `evaluate_many()` dùng chung một lần suy giảm cho mọi detector, `perceived_pose()` mô phỏng sai số định vị (D14), detector `patchcore_geo`; `benchmark.py` có `--pose-noise`. `map_A.json` chuyển `reviewed`. Hai capture P1 chuyển thành tập phát triển; P7 cần capture heldout mới. Test: geometry 10, geometric ROI 8, harness 5, service 5 (thêm 2), dashboard 7. **Chưa chạy dashboard live với ROI hình học.**
 
