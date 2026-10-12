@@ -126,22 +126,32 @@ def interior(roi: np.ndarray, margin_px: int) -> np.ndarray:
     return distance >= margin_px
 
 
-def above_threshold_shape(scores: np.ndarray, threshold: float) -> dict[str, float]:
-    """Shares of the scored ROI above threshold: in total, outside the largest region, largest region."""
+def above_threshold_shape(scores: np.ndarray, threshold: float,
+                          relative_threshold: float | None = None) -> dict[str, float]:
+    """Shares of the scored ROI above threshold: in total, outside the largest region, largest region.
+
+    With `relative_threshold` a pixel must also reach that multiple of the frame's median score,
+    i.e. count as a surface-rule hit, so a global score shift does not read as a diffuse anomaly.
+    """
     finite = np.isfinite(scores)
-    above = (finite & (scores >= threshold)).astype(np.uint8)
-    _, _, stats, _ = cv2.connectedComponentsWithStats(above, connectivity=8)
+    above = finite & (scores >= threshold)
+    if relative_threshold is not None:
+        above &= scores >= relative_threshold * float(np.median(scores[finite]))
+    _, _, stats, _ = cv2.connectedComponentsWithStats(above.astype(np.uint8), connectivity=8)
     areas = stats[1:, cv2.CC_STAT_AREA]
     largest = int(areas.max()) if len(areas) else 0
     scored = max(int(np.count_nonzero(finite)), 1)
     total = int(np.count_nonzero(above))
     return {"anomaly_share": total / scored, "anomaly_spread": (total - largest) / scored,
-            "largest_region_share": largest / scored}
+            "largest_region_share": largest / scored,
+            "regions": int(np.count_nonzero(areas >= 2))}  # extract_candidates' minimum area
 
 
-def is_diffuse(scores: np.ndarray, threshold: float, candidates: list) -> tuple[bool, dict[str, float]]:
-    shape = above_threshold_shape(scores, threshold)
-    diffuse = (shape["anomaly_spread"] > DIFFUSE_MAX_SHARE or len(candidates) > DIFFUSE_MAX_CANDIDATES
+def is_diffuse(scores: np.ndarray, threshold: float, candidates: list,
+               relative_threshold: float | None = None) -> tuple[bool, dict[str, float]]:
+    shape = above_threshold_shape(scores, threshold, relative_threshold)
+    regions = len(candidates) if relative_threshold is None else shape["regions"]
+    diffuse = (shape["anomaly_spread"] > DIFFUSE_MAX_SHARE or regions > DIFFUSE_MAX_CANDIDATES
                or shape["largest_region_share"] > DIFFUSE_MAX_REGION_SHARE)
     return diffuse, shape
 
@@ -246,7 +256,11 @@ def score_request(session: Session, request: dict, frame: np.ndarray,
         return unavailable(reason="no_surface_scores")
     candidates = extract_candidates(scores, session.thresholds[category])
     if session.diffuse_gate:
-        diffuse, shape = is_diffuse(scores, session.thresholds[category], candidates)
+        # With the surface rule the gate counts surface-rule hits (absolute AND relative), as the
+        # evidence does; v2's absolute threshold alone abstained on half the frames at turbidity 2.
+        relative = (session.evidence.calibration.lowest_threshold(category)
+                    if session.evidence is not None else None)
+        diffuse, shape = is_diffuse(scores, session.thresholds[category], candidates, relative)
         if diffuse:
             # Not "clean" and not a defect: widespread anomaly (environment or large-area damage)
             # is reported for the operator and leaves the tracker untouched.

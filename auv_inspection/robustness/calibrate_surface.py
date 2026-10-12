@@ -1,7 +1,7 @@
 """Calibrate the surface alert rule (P5) from clean calibration captures.
 
 For every calibration capture the frames are scored exactly as in the live service (geometric
-ROI, 24 px margin, diffuse-anomaly abstention) and folded into surface cells with the runtime
+ROI, 24 px margin; no diffuse-anomaly gate, see `calibrate`) and folded into surface cells with the runtime
 view rule. Each clean cell with at least VIEWS_REQUIRED views contributes its k-th highest
 normalised view value, i.e. the stratum threshold at which that clean cell would alert on the
 normalised statistic alone.
@@ -117,7 +117,9 @@ def calibrate(captures: list[Path], destination: Path, model_dir: Path = MODEL_D
     from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX, create_session
     if destination.exists():
         raise FileExistsError(f"Refusing to overwrite {destination}")
-    session = create_session(model_dir, REFERENCE, thresholds, "geometry", DEFAULT_SCORE_MARGIN_PX, True)
+    # No diffuse gate: the gate depends on the thresholds calibrated here, and scoring every clean
+    # frame can only raise them (the runtime adds evidence from non-abstained frames only).
+    session = create_session(model_dir, REFERENCE, thresholds, "geometry", DEFAULT_SCORE_MARGIN_PX, False)
     per_stratum: dict[str, list[float]] = defaultdict(list)
     evaluated, length, sources = 0, 0.0, []
     for capture in captures:
@@ -155,7 +157,7 @@ def calibrate(captures: list[Path], destination: Path, model_dir: Path = MODEL_D
         "cells_per_100m": round(cells_per_100m, 1), "alpha_per_cell": alpha,
         "model_dir": str(model_dir),
         "pixel_thresholds_sha256": hashlib.sha256(thresholds.read_bytes()).hexdigest(),
-        "score_margin_px": DEFAULT_SCORE_MARGIN_PX, "diffuse_gate": True,
+        "score_margin_px": DEFAULT_SCORE_MARGIN_PX, "diffuse_gate": False,
         "sources": sources, "strata": strata,
         "caveats": ["cells of one run are spatially correlated; runs are the independent units",
                     "conformal level holds only for conditions exchangeable with the calibration runs"],

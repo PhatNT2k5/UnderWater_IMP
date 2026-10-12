@@ -43,6 +43,9 @@ MIN_VIEWS_OBSERVABLE = 3
 PATCHCORE_MODEL = INSPECTION / "output/patchcore_model_v1"
 PATCHCORE_REFERENCE = INSPECTION / "output/patchcore_dataset_clean_20260925"
 PATCHCORE_THRESHOLDS = INSPECTION / "output/patchcore_thresholds_v1.json"
+# Detector v2 (P4): each model directory holds its banks, pixel thresholds and surface calibration.
+V2_MODELS = {"dino_surface": INSPECTION / "output/detector_v2_dino_s2_aug",
+             "dino_surface_noaug": INSPECTION / "output/detector_v2_dino_s2_noaug"}
 
 
 @dataclass(frozen=True)
@@ -116,17 +119,23 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
 
 
 DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md",
-             "patchcore_surface")
+             "patchcore_surface", *V2_MODELS)
 
 
 def make_detector(name: str) -> Detector:
     """classical; patchcore = v1.1 reference ROI; patchcore_geo = P2 geometric ROI;
     _m adds the P3 scoring margin; _md adds the margin and the diffuse-anomaly gate;
-    patchcore_surface = _md with the P5 surface alert rule (calibration/surface_v1.json)."""
+    patchcore_surface = _md with the P5 surface alert rule (calibration/surface_v1.json);
+    dino_surface(_noaug) = detector v2 with the same ROI, margin, gate and surface rule."""
     if name == "classical":
         return classical_detector()
     if name == "patchcore":
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "reference")
+    if name in V2_MODELS:
+        from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
+        model = V2_MODELS[name]
+        return patchcore_detector(model, PATCHCORE_REFERENCE, model / "pixel_thresholds.json", "geometry",
+                                  DEFAULT_SCORE_MARGIN_PX, True, "surface", model / "surface_calibration.json")
     if name == "patchcore_surface":
         from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "geometry",

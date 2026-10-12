@@ -97,6 +97,13 @@ class SurfaceRuleTests(unittest.TestCase):
                          [("pier_0", 10), ("pier_0", 40), ("pier_1", 10)])
         self.assertEqual(state.coverage(), {"pier_0": 3, "pier_1": 1})
 
+    def test_lowest_threshold_per_group(self) -> None:
+        calibration = SurfaceCalibration({"pipe_front/pipe_body": 1.2, "pipe_front/pipe_joint": 1.4,
+                                          "pier_0/pier_face": 1.3})
+        self.assertEqual(calibration.lowest_threshold("pipe_front"), 1.2)
+        with self.assertRaises(KeyError):
+            calibration.lowest_threshold("pier_1")
+
     def test_calibration_constants_must_match_runtime(self) -> None:
         with TemporaryDirectory() as folder:
             path = Path(folder) / "surface.json"

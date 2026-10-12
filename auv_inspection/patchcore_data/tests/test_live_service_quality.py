@@ -74,6 +74,16 @@ class DiffuseTests(unittest.TestCase):
         self.assertTrue(diffuse)
         self.assertAlmostEqual(shape["largest_region_share"], 0.30)
 
+    def test_global_shift_is_not_diffuse_with_the_relative_test(self) -> None:
+        rng = np.random.default_rng(0)
+        scores = (65.0 + rng.normal(0, 1, (100, 100))).astype(np.float32)  # all above 60, no outlier
+        self.assertTrue(live_service.is_diffuse(scores, 60.0, [])[0])
+        diffuse, shape = live_service.is_diffuse(scores, 60.0, [], relative_threshold=1.5)
+        self.assertFalse(diffuse)
+        self.assertEqual(shape["anomaly_share"], 0.0)
+        scores[::4, ::4] = 120.0                # scattered spots well above 1.5 x median
+        self.assertTrue(live_service.is_diffuse(scores, 60.0, [], relative_threshold=1.5)[0])
+
     def test_many_candidate_regions_are_diffuse(self) -> None:
         many = [Candidate((0, 0, 1, 1), (0.0, 0.0), 70.0, 1)] * 7
         self.assertTrue(live_service.is_diffuse(np.zeros((10, 10)), 60.0, many)[0])

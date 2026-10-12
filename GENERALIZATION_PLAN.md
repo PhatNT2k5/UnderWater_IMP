@@ -17,7 +17,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P2 | ROI hình học + tọa độ bề mặt | **Xong** (live `session_20261009_103800_863732`: 3/3 vết, 2 báo nhầm ở biên ROI, 1 báo trùng) | Hiệu chỉnh hình học IoU kiểm tra 0,89-1,00; ROI hình học + lọc góc tới; frame được phân tích 100%; xem mục Kết quả P2. Tọa độ bề mặt (`surface_coordinates`) đã có, dùng ở P5 |
 | P3 | Cổng chất lượng ảnh | **Xong** (live `session_20261009_150224_114943`: 3/3 vết, **0 báo nhầm**, 1 báo trùng vết trụ) | Lề chấm điểm 24 px + cổng `diffuse_anomaly`; số đo chất lượng chỉ để chẩn đoán (cổng theo phân vị bị loại). Tập phát triển: tổng báo nhầm 14 lượt chạy 410 → 97, recall giữ ở điều kiện có nghĩa; xem mục Kết quả P3 |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng trên bề mặt | **Xong** (live `session_20261012_164927_783087`: **3/3 vết, 0 báo nhầm, 0 báo trùng**) | Quy tắc k = 3 lượt nhìn trên ô 10 cm, hit = ngưỡng pixel AND ngưỡng tương đối theo tầng (thân ống / mối nối / mặt trụ), calibrate conformal trên 3 capture sạch train mới. Tập phát triển: 0 báo nhầm ở 12/14 lượt (v1.3: 30), marine snow 3 vẫn 19-21/100 m; xem mục Kết quả P5 |
-| P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Đang làm** (phần 1: khung code, chờ capture bank) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
+| P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Đang làm** (phần 2: bank thật và benchmark xong; xem Kết quả P4 phần 2) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | Chưa làm | |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | Chưa làm | |
 
@@ -111,6 +111,34 @@ Calibration (`robustness/calibration/surface_v1.json`) từ 3 capture **calibrat
 - **Live v1.4** (`auv_dashboard/output/session_20261012_164927_783087/`, map A, Tự động + PatchCore, điều kiện gốc): route 359/359, 3 cảnh báo, đã xem ảnh: tick 429 `A_pipe_front_1` (cách nhãn 0,12 m), 705 `A_pipe_front_2` (0,37 m), 3666 `A_pier_0_1` (0,29 m). So với live v1.3: 3/3 vết, báo nhầm 0 → 0, **báo trùng 1 → 0** (vết trụ chỉ báo một lần). `patchcore_frames.jsonl`: 2.155 frame phân tích, median 219 ms (p90 281 ms), 18 frame không có ROI (vòng qua đầu ống), 12 frame `diffuse_anomaly`.
 - **Phát hiện live: cổng `diffuse_anomaly` che vết lớn ở gần.** 12 frame abstain (tick 657-690) đều là lúc `A_pipe_front_2` trong tầm nhìn ngay trước cảnh báo ở tick 705: 5,6-8,3% ROI vượt ngưỡng nhưng chỉ 1-3 vùng. Giới hạn 5% chọn từ tập phát triển (vết tối đa 3,1% ở khoảng cách 2,77 m); live ở khoảng cách danh định gần hơn nên vết chiếm nhiều diện tích hơn. Lượt này vẫn báo được, nhưng cổng đang bỏ bằng chứng của đúng loại hư hại quan trọng nhất (vết lớn). Đã sửa ngày 2026-10-12, xem nhật ký quyết định: cổng đo độ phân tán. Benchmark tập phát triển `benchmark_p5b_diffuse_spread/`: giống v1.4 ở 12/14 lượt; tỷ lệ abstain giảm (độ đục 4 map A 7,7% → 0,3%, mờ chuyển động 19% → 14%); marine snow 3 map A 42 → 45 báo nhầm; độ đục 2 map A chuyển từ 3/3, 0 báo nhầm sang 2/3, 1 báo nhầm, nhưng đã xem ảnh: cảnh báo "nhầm" ở tick 463 (x = -7,05) nằm trên đầu trái của chính vết nứt dài `A_pipe_front_2`, cách điểm nhãn (-7,66) 0,61 m, ngay ngoài bán kính 0,6 m, và cảnh báo khớp nhãn sau đó bị gộp vào nó. Nhãn điểm không phủ hết vết dài khoảng 1 m; đề xuất đổi nhãn sang đoạn thẳng như vết trụ, chờ người dùng duyệt.
 
+## Kết quả P4 phần 2: DINOv2 với bank nhiều điều kiện (2026-10-12, tập phát triển)
+
+Bank: 4 capture train sạch mới (seed 21-24, khoảng cách ống 2,08-2,34 m, bán kính trụ 2,55-3,02 m), mỗi nhóm 15.000 token coreset từ 60.000 ứng viên (v1: 678-800 patch). `detector_v2_dino_s2_aug` thêm một bản suy giảm mức 1 mỗi frame, `..._noaug` không thêm. Ngưỡng pixel và ngưỡng tầng v2 calibrate trên 3 capture calibration (seed 11-13). Cả ba detector chạy với nhãn `A_pipe_front_2` mới và cổng lan tỏa đếm hit của quy tắc bề mặt (xem nhật ký quyết định). Kết quả: `auv_inspection/output/benchmark_p4_dino/`.
+
+| Map | Điều kiện | v1.4 (`patchcore_surface`) | v2 + suy giảm mức 1 (`dino_surface`) | v2 không suy giảm |
+|---|---|---|---|---|
+| A | Gốc | 2/3, 0 | 2/3, 1 (*) | 2/3, 1 |
+| A | Độ đục 2 | 3/3, 0 | 2/3, 4 | 3/3, 0 |
+| A | Độ đục 4 | 2/3, 0 | 3/3, 0 | 3/3, 3 |
+| A | Marine snow 3 | 1/3, **45** | 1/3, **0** (abstain 57%) | 0/3, 0 (abstain 100%) |
+| A | Marine snow 5 | 0/3, 0 (abstain 98%) | 0/3, 0 (abstain 80%) | 0/3, 0 (abstain 100%) |
+| A | Đèn yếu 4 | 2/3, 0 | 2/3, 4 | 3/3, 0 |
+| A | Mờ chuyển động 3 | 1/3, 3 | **3/3**, 1 | **3/3**, 0 |
+| sạch | Gốc | 0 | **7** | 5 |
+| sạch | Độ đục 2 / 4 | 0 / 0 | 1 / 1 | 1 / 0 |
+| sạch | Marine snow 3 | **41** | **0** (abstain 41%) | 0 (abstain 100%) |
+| sạch | Marine snow 5, đèn yếu, mờ | 0 | 0 | 0 |
+| | **Tổng** | 11/21 vết, 89 báo nhầm | 13/21 vết, 19 báo nhầm | 14/21 vết, 10 báo nhầm |
+
+(*) Đã xem ảnh: cảnh báo trụ tick 2963 nằm trên vết nứt nhìn thấy, nhưng cách đoạn nhãn khoảng 0,4 m (xem phát hiện hình học bên dưới).
+
+- **v2 xử lý được marine snow mức vừa:** 0 báo nhầm ở marine snow 3 trên cả hai map, trong khi vẫn phân tích 43-59% frame (v1.4: 41-45 báo nhầm). Bank không suy giảm thì abstain toàn bộ: an toàn nhưng không kiểm tra được gì. Đây là lợi ích rõ nhất của suy giảm mức 1 trong bank.
+- **v2 tăng recall** (13-14/21 so với 11/21), rõ nhất ở mờ chuyển động (3/3 so với 1/3).
+- **v2 có báo nhầm mới ở điều kiện không suy giảm:** 19 báo nhầm với bank có suy giảm, theo vùng: mặt trụ gần mặt nước (z > -2,5 m) 7, mối nối ống 5, giữa mặt trụ 5, chân trụ 1, thân ống 1. Trên map sạch gốc, 6/7 báo nhầm nằm ở z ≈ -1,0 đến -1,16 m quanh cả hai trụ: capture này có bán kính vòng trụ 3,36 m (ngoài khoảng train 2,5-3,1 m) nên nhìn thấy trụ gần mặt nước nhiều hơn dữ liệu bank.
+- **Chưa đạt tiêu chí nghiệm thu** với v2 (≤ 1/100 m): map sạch gốc 3,31/100 m, map A độ đục 2 và đèn yếu 1,97/100 m.
+- **Phát hiện hình học:** cùng vết nứt trụ chiếu từ tick 2963 (AUV z -9,0, yaw -58°) và tick 3478 (z -7,4, yaw -81°) cho hai đường song song lệch khoảng 0,35 m theo chiều đứng. Đây là sai số hình học giữa các tầng quan sát trụ (offset đứng của camera hoặc pitch, không xác định được ở P2 vì chỉ có một khoảng cách), làm ô bề mặt của các lượt nhìn khác tầng lệch khoảng 3 ô và làm định vị cảnh báo trụ lệch. Có thể calibrate lại bằng các capture nhiều độ sâu hiện có.
+- **Độ nhiễu của phép đo:** khác biệt giữa các biến thể ở từng lượt chỉ là 1-4 cảnh báo trên 2 capture, nên nhiều so sánh nằm trong dao động ngẫu nhiên; tập phát triển nhỏ và đã được dùng cho nhiều quyết định.
+
 ## Tiêu chí nghiệm thu (bản đầu)
 
 Đo trên **điều kiện môi trường chưa từng dùng** để train hay chọn ngưỡng:
@@ -130,6 +158,7 @@ Calibration (`robustness/calibration/surface_v1.json`) từ 3 capture **calibrat
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
 | 2026-10-09 | Live P2 xác nhận nguồn báo nhầm chính là **biên ROI** (đầu ống, mép ống khi nhìn xiên): ROI giới hạn tâm đặc trưng nhưng trường nhìn của đặc trưng rộng hơn. Thêm vào **P3** một lề chấm điểm bên trong ROI theo trường nhìn của đặc trưng, đánh giá trên tập phát triển trước. Báo trùng cùng một vết (hai vị trí cách 2,08 m) để **P5** gộp theo tọa độ bề mặt |
+| 2026-10-12 | P4: **cổng lan tỏa đếm hit của quy tắc bề mặt** (điểm ≥ ngưỡng pixel AND điểm ≥ ngưỡng tầng thấp nhất của nhóm × median frame) khi có quy tắc bề mặt. Lý do: ngưỡng pixel v2 (calibrate theo ô) thấp ở mức pixel, cổng chỉ dùng ngưỡng tuyệt đối abstain 19-52% frame của v2 ở điều kiện gốc và độ đục 2 (lưu `benchmark_p4_dino_abs_gate_superseded/`). Hệ quả với v1.4: ở mờ chuyển động 3 abstain 14% → 0,5% và có 3 báo nhầm (trước là 0). `calibrate_surface.py` từ nay chấm mọi frame sạch, không qua cổng (cổng phụ thuộc chính ngưỡng được calibrate; thêm dữ liệu chỉ làm ngưỡng cao hơn hoặc bằng); `surface_v1.json` của v1 không đổi vì không frame calibration nào bị abstain |
 | 2026-10-12 | P4 bắt đầu, người dùng duyệt: (1) tải trọng số `timm/vit_small_patch14_dinov2.lvd142m` (85 MB, Hugging Face); (2) 4 capture **bank** sạch mới, profile train, seed 21-24 (`--dataset-role train`); (3) **ranh giới suy giảm chốt trước**: bank chỉ thêm suy giảm offline mức 1 (mỗi frame một bản, một yếu tố ngẫu nhiên), benchmark dùng mức 2-5 nên vẫn là điều kiện chưa thấy; (4) nhãn `A_pipe_front_2` đổi từ điểm sang đoạn. Phân chia dữ liệu: bank = seed 21-24 train; calibration ngưỡng = seed 11-13; phát triển = heldout seed 1-2; nghiệm thu P7 = heldout mới + map B. v2 có ngưỡng pixel riêng (conformal trên capture calibration, cùng thống kê với quy tắc bề mặt) vì không gian đặc trưng mới; model, ngưỡng v1 và `patchcore_artifacts/` giữ nguyên |
 | 2026-10-12 | Sửa nhãn `A_pipe_front_2` (người dùng duyệt): từ điểm (-7,66; 0,5; -10,3) bán kính 0,6 m sang đoạn (-7,07; 0,533; -10,6) → (-7,93; 0,50; -10,375) bán kính 0,35 m, vẽ theo hai đầu mút vết nứt ở frame tick 463 và 478 của capture phát triển map A (hai lượt nhìn lệch ≤ 0,07 m). Nguyên nhân: vết dài khoảng 0,9 m, cảnh báo trên đầu trái vết bị tính là báo nhầm. Benchmark trước ngày này dùng nhãn cũ; so sánh P4 chạy lại baseline với nhãn mới |
 | 2026-10-12 | Sửa cổng `diffuse_anomaly` (P3) sau live P5: "lan tỏa" đo bằng **độ phân tán** = tỷ lệ ROI vượt ngưỡng **ngoài vùng liên thông lớn nhất** > 5%, hoặc > 6 vùng ứng viên, hoặc **một vùng > 25% ROI** (bất thường diện rộng, vẫn báo operator). Lý do: live P5 abstain 12 frame khi vết `A_pipe_front_2` lớn ở gần (5,6-8,3% ROI trong 1-3 vùng). Đo trên tập phát triển trước khi đổi: frame có vết ≤ 2,4% ngoài vùng lớn nhất (tổng tới 5,0% vì lề 24 px làm ROI nhỏ đi), vùng lớn nhất ≤ 7%; frame mờ/marine snow 5 có mảng liền 44-57% nên cần điều kiện vùng đơn lẻ; 25% chọn gấp khoảng 3 lần vết lớn nhất đã thấy (8,3%). Không cần calibrate lại quy tắc bề mặt: không frame calibration nào bị abstain ở cả hai cổng |

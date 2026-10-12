@@ -107,6 +107,13 @@ class SurfaceCalibration:
     source_sha256: str = ""
     pixel_thresholds_sha256: str = ""     # pixel threshold file the calibration was made with
 
+    def lowest_threshold(self, category: str) -> float:
+        """Lowest stratum threshold of a structure group (frame-level hit test of the gate)."""
+        values = [value for name, value in self.thresholds.items() if name.startswith(f"{category}/")]
+        if not values:
+            raise KeyError(f"No surface calibration for group {category}")
+        return min(values)
+
     def threshold(self, key: CellKey) -> float:
         name = stratum(key[0], (key[1] + 0.5) * CELL_M)
         if name not in self.thresholds:
