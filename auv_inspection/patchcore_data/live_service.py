@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 import sys
 import time
+from typing import Callable
 
 import cv2
 import numpy as np
@@ -26,6 +27,7 @@ from robustness.geometric_roi import (  # noqa: E402
     DEFAULT_POSE_SIGMA_M, DEFAULT_POSE_SIGMA_YAW_DEG, geometric_roi)
 from robustness.geometry import GeometryParams, load_params  # noqa: E402
 from robustness.quality import measure  # noqa: E402
+from detector_v2.scorer import is_v2_model, load_scorer  # noqa: E402
 from robustness.surface_evidence import (  # noqa: E402
     CALIBRATION_FILE as SURFACE_CALIBRATION_FILE, POOL_PX, SurfaceAlert, SurfaceEvidence,
     frame_cells, load_calibration)
@@ -49,9 +51,12 @@ DIFFUSE_MAX_CANDIDATES = 6
 DIFFUSE_MAX_REGION_SHARE = 0.25   # a single above-threshold region
 
 
+Scorer = Callable[[np.ndarray, np.ndarray, str], np.ndarray]  # (frame, roi, group) -> score map
+
+
 @dataclass
 class Session:
-    model: torch.nn.Module
+    model: torch.nn.Module | None       # PatchCore v1; None when `scorer` is set
     banks: dict[str, torch.Tensor]
     references: list[ReferenceFrame]
     thresholds: dict[str, float]
@@ -63,6 +68,7 @@ class Session:
     score_margin_px: int = 0
     diffuse_gate: bool = False
     evidence: SurfaceEvidence | None = None  # set when the alert rule is "surface"
+    scorer: Scorer | None = None             # detector v2 (P4) instead of PatchCore
 
 
 def create_session(model_dir: Path, reference_dataset: Path,
@@ -86,10 +92,13 @@ def create_session(model_dir: Path, reference_dataset: Path,
     if any(not np.isfinite(value) for value in thresholds.values()):
         raise ValueError("Non-finite category threshold")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = load_model(model_dir, CATEGORIES[0], device)
-    banks = {category: torch.load(model_dir / f"{category}_bank.pt",
-                                  map_location=device, weights_only=True)
-             for category in CATEGORIES}
+    scorer = load_scorer(model_dir, device) if is_v2_model(model_dir) else None
+    if scorer is not None and roi_mode != "geometry":
+        raise ValueError("Detector v2 banks were built on the geometric ROI")
+    model = None if scorer else load_model(model_dir, CATEGORIES[0], device)
+    banks = {} if scorer else {category: torch.load(model_dir / f"{category}_bank.pt",
+                                                     map_location=device, weights_only=True)
+                               for category in CATEGORIES}
     # The reference dataset stays required: the approval gate fingerprints it.
     references = load_references(reference_dataset) if roi_mode == "reference" else []
     return Session(model=model, banks=banks, references=references,
@@ -98,7 +107,8 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    geometry=load_params() if roi_mode == "geometry" else None,
                    score_margin_px=score_margin_px, diffuse_gate=diffuse_gate,
                    evidence=(surface_evidence(surface_calibration, thresholds_file, thresholds)
-                             if alert_rule == "surface" else None))
+                             if alert_rule == "surface" else None),
+                   scorer=scorer)
 
 
 def surface_evidence(calibration_file: Path, thresholds_file: Path,
@@ -225,8 +235,11 @@ def score_request(session: Session, request: dict, frame: np.ndarray,
     if next(iter_tiles(frame, roi), None) is None:
         return unavailable(reason="no_surface_tiles")
     identity["quality"] = measure(frame, roi)
-    session.model.memory_bank = session.banks[category]
-    scores = predict_map(session.model, frame, roi, session.device)
+    if session.scorer is not None:
+        scores = session.scorer(frame, roi, category)
+    else:
+        session.model.memory_bank = session.banks[category]
+        scores = predict_map(session.model, frame, roi, session.device)
     if session.score_margin_px:
         scores[~interior(roi, session.score_margin_px)] = np.nan
     if not np.isfinite(scores).any():

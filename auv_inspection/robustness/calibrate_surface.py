@@ -112,11 +112,12 @@ def capture_cells(session: object, capture: Path) -> tuple[dict, list[list[float
     return dict(views), positions, dict(status)
 
 
-def calibrate(captures: list[Path], destination: Path) -> dict:
+def calibrate(captures: list[Path], destination: Path, model_dir: Path = MODEL_DIR,
+              thresholds: Path = THRESHOLDS) -> dict:
     from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX, create_session
     if destination.exists():
         raise FileExistsError(f"Refusing to overwrite {destination}")
-    session = create_session(MODEL_DIR, REFERENCE, THRESHOLDS, "geometry", DEFAULT_SCORE_MARGIN_PX, True)
+    session = create_session(model_dir, REFERENCE, thresholds, "geometry", DEFAULT_SCORE_MARGIN_PX, True)
     per_stratum: dict[str, list[float]] = defaultdict(list)
     evaluated, length, sources = 0, 0.0, []
     for capture in captures:
@@ -152,8 +153,8 @@ def calibrate(captures: list[Path], destination: Path) -> dict:
         "false_cells_per_100m_budget": FALSE_CELLS_PER_100M,
         "evaluated_cells": evaluated, "surveyed_length_m": round(length, 1),
         "cells_per_100m": round(cells_per_100m, 1), "alpha_per_cell": alpha,
-        "model_dir": str(MODEL_DIR),
-        "pixel_thresholds_sha256": hashlib.sha256(THRESHOLDS.read_bytes()).hexdigest(),
+        "model_dir": str(model_dir),
+        "pixel_thresholds_sha256": hashlib.sha256(thresholds.read_bytes()).hexdigest(),
         "score_margin_px": DEFAULT_SCORE_MARGIN_PX, "diffuse_gate": True,
         "sources": sources, "strata": strata,
         "caveats": ["cells of one run are spatially correlated; runs are the independent units",
@@ -168,8 +169,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("captures", nargs="+", type=Path, help="Clean calibration capture folders")
     parser.add_argument("--output", type=Path, default=CALIBRATION_FILE)
+    parser.add_argument("--model-dir", type=Path, default=MODEL_DIR,
+                        help="PatchCore v1 (default) or a detector_v2 model directory")
+    parser.add_argument("--thresholds", type=Path, default=THRESHOLDS,
+                        help="Pixel thresholds of that model (v2: <model_dir>/pixel_thresholds.json)")
     args = parser.parse_args()
-    result = calibrate(args.captures, args.output)
+    result = calibrate(args.captures, args.output, args.model_dir, args.thresholds)
     print(json.dumps({name: {key: item[key] for key in ("threshold", "cells", "data_limited")}
                       for name, item in result["strata"].items()}, indent=2))
 

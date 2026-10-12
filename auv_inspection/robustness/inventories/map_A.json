@@ -2,10 +2,11 @@
   "map": "/Game/AUVInspection/Maps/AUVInspection",
   "map_sha256": "daba22ece60400aa19e5e2676a0005af51d19d105f5e03f6bce611948dc361d2",
   "status": "reviewed",
-  "method": "Positions from robustness.geometry (uncalibrated camera at PoseSensor, see geometry.py). Pipe defects: centres of confirmed true-alert boxes averaged over PatchCore session_20261008_174818_976289 and Classical session_20260927_170823_870627 / run_20260927_165753_811149; radius_m covers crack length plus about 0.3 m localization error. Pier defect: a segment from crack end points traced on held-out frame tick 3478 of capture_test_mixed_20261008_190916_184618 (pixels (300,478) and (495,362) projected on the pier face).",
+  "method": "Positions from robustness.geometry (uncalibrated camera at PoseSensor, see geometry.py). Pipe defects: centres of confirmed true-alert boxes averaged over PatchCore session_20261008_174818_976289 and Classical session_20260927_170823_870627 / run_20260927_165753_811149; radius_m covers crack length plus about 0.3 m localization error. Pier defect: a segment from crack end points traced on held-out frame tick 3478 of capture_test_mixed_20261008_190916_184618 (pixels (300,478) and (495,362) projected on the pier face). A_pipe_front_2 (from 2026-10-12): a segment from crack end points traced on frames tick 463 (pixels (240,289)-(383,252)) and tick 478 ((327,291)-(466,254)) of the same capture with the calibrated geometry; the two views agree within 0.07 m.",
   "revisions": [
     "2026-10-08: A_pier_0_1 changed from a point (-10.0, -5.55, -8.4) r 0.6 m to a segment. The P1 baseline counted a PatchCore alert at tick 3478 as false although its box lies on the visible crack (0.71 m from the old point); the segment follows the crack seen in the image, not the detector output.",
-    "2026-10-09: status proposed -> reviewed; the user approved the labels after reviewing the held-out overlay sheet and the tick 3478 pier alert image."
+    "2026-10-09: status proposed -> reviewed; the user approved the labels after reviewing the held-out overlay sheet and the tick 3478 pier alert image.",
+    "2026-10-12: A_pipe_front_2 changed from a point (-7.66, 0.5, -10.3) r 0.6 m to a segment (-7.07, 0.533, -10.6) -> (-7.93, 0.50, -10.375) r 0.35 m, approved by the user. With the spread-based diffuse gate a surface alert at x = -7.05 (turbidity 2) sat on the left end of this ~0.9 m crack (checked in the image) but 0.61 m from the old point; the segment follows the crack traced in two frames, not the detector output."
   ],
   "defects": [
     {
@@ -34,11 +35,11 @@
       "id": "A_pipe_front_2",
       "category": "pipe_front",
       "world_m": [
-        -7.66,
-        0.5,
-        -10.3
+        -7.07,
+        0.533,
+        -10.6
       ],
-      "radius_m": 0.6,
+      "radius_m": 0.35,
       "sources": {
         "patchcore_P0_event_002": [
           -7.53,
@@ -49,8 +50,37 @@
           -7.8,
           0.5,
           -10.28
+        ],
+        "crack_trace_tick_463": [
+          [
+            -7.03,
+            0.533,
+            -10.598
+          ],
+          [
+            -7.908,
+            0.498,
+            -10.371
+          ]
+        ],
+        "crack_trace_tick_478": [
+          [
+            -7.101,
+            0.533,
+            -10.604
+          ],
+          [
+            -7.95,
+            0.501,
+            -10.378
+          ]
         ]
-      }
+      },
+      "end_m": [
+        -7.93,
+        0.5,
+        -10.375
+      ]
     },
     {
       "id": "A_pier_0_1",
