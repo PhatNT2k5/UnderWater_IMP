@@ -27,7 +27,7 @@ from inspection_route import ROUTE
 PATCHCORE_MODEL = ROOT / "auv_inspection/output/patchcore_model_v1"
 PATCHCORE_REFERENCE = ROOT / "auv_inspection/output/patchcore_dataset_clean_20260925"
 PATCHCORE_THRESHOLDS = ROOT / "auv_inspection/output/patchcore_thresholds_v1.json"
-# P5: alert after 3 separated views of one surface cell (needs robustness/calibration/surface_v1.json).
+# P5: alert after 3 separated views of one surface cell (needs robustness/calibration/surface_v2.json).
 PATCHCORE_ALERT_RULE = "surface"
 PATCHCORE_EVALUATION = ROOT / "auv_inspection/output/patchcore_evaluation_B_v1.json"
 

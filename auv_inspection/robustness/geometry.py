@@ -24,7 +24,8 @@ HORIZONTAL_FOV_DEG = 80.0
 FOCAL_PX = (IMAGE_WIDTH / 2) / tan(radians(HORIZONTAL_FOV_DEG / 2))  # ~381.4 px
 PIER_Z_RANGE = (-12.0, 1.6)
 CATEGORIES = ("pipe_front", "pipe_back", "pier_0", "pier_1")
-CALIBRATION_FILE = Path(__file__).resolve().parent / "calibration" / "geometry_v1.json"
+# v2 (2026-10-12): camera offsets from the HoveringAUV socket figures; v1 kept for comparison.
+CALIBRATION_FILE = Path(__file__).resolve().parent / "calibration" / "geometry_v2.json"
 
 
 @dataclass(frozen=True)

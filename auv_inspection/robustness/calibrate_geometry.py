@@ -1,9 +1,12 @@
-"""Fit camera/structure geometry to the reviewed ROI masks and save calibration/geometry_v1.json.
+"""Fit camera/structure geometry to the reviewed ROI masks and save calibration/geometry_v<n>.json.
 
 Fitted: pipe radius, pipe axis height, pier half-width, camera lateral offset and pitch.
-Fixed at 0: camera forward and vertical offsets. With a single standoff in the clean data
-they trade off exactly against pipe radius / pier width and pipe axis height respectively,
-so fitting them would be unidentifiable.
+Fixed: camera forward and vertical offsets. With a single standoff in the clean data they trade
+off exactly against pipe radius / pier width and pipe axis height respectively, so they cannot be
+fitted from these masks. v1 fixed them at 0; v2 (2026-10-12) fixes them at the CameraLeftSocket
+position relative to the IMUSocket (PoseSensor) measured on the HoloOcean HoveringAUV socket
+figures, scaled by the documented thruster positions (+/-0.25 m, +/-0.22 m): 0.41 m forward,
+0.09 m up. Two views of the same pier crack from different levels disagreed by 0.35 m with v1.
 
 Split by blocks so validation covers unseen route sections: pipe frames with x < 0 fit,
 x >= 0 validate; pier levels 0-1 fit, levels 2-3 validate. Objective: mean (1 - IoU) on a
@@ -67,8 +70,8 @@ def iou(frame: dict, params: GeometryParams) -> float:
     return np.count_nonzero(predicted & frame["truth"]) / union if union else 1.0
 
 
-def with_values(values: np.ndarray) -> GeometryParams:
-    return replace(DEFAULT_PARAMS, **{name: float(value) for name, value in zip(FITTED, values)})
+def with_values(values: np.ndarray, base: GeometryParams = DEFAULT_PARAMS) -> GeometryParams:
+    return replace(base, **{name: float(value) for name, value in zip(FITTED, values)})
 
 
 def summarize(frames: list[dict], params: GeometryParams) -> dict:
@@ -83,7 +86,9 @@ def summarize(frames: list[dict], params: GeometryParams) -> dict:
     return summary
 
 
-def calibrate(dataset: Path) -> dict:
+def calibrate(dataset: Path, fixed: dict[str, float] | None = None) -> dict:
+    fixed = fixed or {"camera_forward_m": 0.0, "camera_up_m": 0.0}
+    base = replace(DEFAULT_PARAMS, **fixed)
     frames = load_frames(dataset)
     fit = [frame for frame in frames if frame["split"] == "fit"]
     # Equal weight per structure group so 339 pier frames do not dominate the pipe.
@@ -91,14 +96,14 @@ def calibrate(dataset: Path) -> dict:
               for category in ("pipe_front", "pipe_back", "pier_0", "pier_1")}
 
     def loss(values: np.ndarray) -> float:
-        params = with_values(values)
+        params = with_values(values, base)
         return float(np.mean([1.0 - np.mean([iou(frame, params) for frame in group[::2]])
                               for group in groups.values()]))
 
     start = np.array([getattr(DEFAULT_PARAMS, name) for name in FITTED])
     result = minimize(loss, start, method="Powell", bounds=[BOUNDS[name] for name in FITTED],
                       options={"xtol": 1e-3, "ftol": 1e-4, "maxiter": 40})
-    params = with_values(result.x)
+    params = with_values(result.x, base)
     digest = hashlib.sha256()
     for name in ("manifest.jsonl", "roi_approved.json"):
         digest.update((dataset / name).read_bytes())
@@ -106,11 +111,11 @@ def calibrate(dataset: Path) -> dict:
         "created": date.today().isoformat(),
         "dataset": dataset.name, "dataset_sha256": digest.hexdigest(),
         "grid_step_px": GRID_STEP, "fitted": list(FITTED),
-        "fixed": {"camera_forward_m": 0.0, "camera_up_m": 0.0},
+        "fixed": fixed,
         "params": {name: round(value, 4) for name, value in params_dict(params).items()},
         "optimizer": {"method": "Powell", "loss": round(float(result.fun), 5),
                       "evaluations": int(result.nfev)},
-        "before": summarize(frames, DEFAULT_PARAMS), "after": summarize(frames, params),
+        "before": summarize(frames, base), "after": summarize(frames, params),
     }
 
 
@@ -118,10 +123,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--dataset", type=Path, default=DATASET)
     parser.add_argument("--output", type=Path, default=CALIBRATION_FILE)
+    parser.add_argument("--camera-forward", type=float, default=0.0, help="Fixed camera forward offset (m)")
+    parser.add_argument("--camera-up", type=float, default=0.0, help="Fixed camera vertical offset (m)")
     args = parser.parse_args()
     if args.output.exists():
         parser.error(f"Refusing to overwrite {args.output}; write a new version instead")
-    report = calibrate(args.dataset)
+    report = calibrate(args.dataset, {"camera_forward_m": args.camera_forward, "camera_up_m": args.camera_up})
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps({key: report[key] for key in ("params", "optimizer", "before", "after")}, indent=2))

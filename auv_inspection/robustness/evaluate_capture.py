@@ -35,7 +35,7 @@ from robustness.geometric_roi import (  # noqa: E402
     DEFAULT_POSE_SIGMA_M, DEFAULT_POSE_SIGMA_YAW_DEG, category_from_pose)
 from robustness.geometry import load_params, params_dict  # noqa: E402
 
-GEOMETRY = load_params()  # calibrated if calibration/geometry_v1.json exists
+GEOMETRY = load_params()  # geometry.CALIBRATION_FILE (v2) if it exists
 from robustness.metrics import fraction, rate_per_100m, surveyed_length_m  # noqa: E402
 
 REARM_DISTANCE_M = 2.0
@@ -44,8 +44,9 @@ PATCHCORE_MODEL = INSPECTION / "output/patchcore_model_v1"
 PATCHCORE_REFERENCE = INSPECTION / "output/patchcore_dataset_clean_20260925"
 PATCHCORE_THRESHOLDS = INSPECTION / "output/patchcore_thresholds_v1.json"
 # Detector v2 (P4): each model directory holds its banks, pixel thresholds and surface calibration.
-V2_MODELS = {"dino_surface": INSPECTION / "output/detector_v2_dino_s2_aug",
-             "dino_surface_noaug": INSPECTION / "output/detector_v2_dino_s2_noaug"}
+# "_g2": banks and calibrations rebuilt with geometry v2 (the earlier directories used v1).
+V2_MODELS = {"dino_surface": INSPECTION / "output/detector_v2_dino_s2_aug_g2",
+             "dino_surface_noaug": INSPECTION / "output/detector_v2_dino_s2_noaug_g2"}
 
 
 @dataclass(frozen=True)
@@ -125,7 +126,7 @@ DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patc
 def make_detector(name: str) -> Detector:
     """classical; patchcore = v1.1 reference ROI; patchcore_geo = P2 geometric ROI;
     _m adds the P3 scoring margin; _md adds the margin and the diffuse-anomaly gate;
-    patchcore_surface = _md with the P5 surface alert rule (calibration/surface_v1.json);
+    patchcore_surface = _md with the P5 surface alert rule (surface_evidence.CALIBRATION_FILE);
     dino_surface(_noaug) = detector v2 with the same ROI, margin, gate and surface rule."""
     if name == "classical":
         return classical_detector()

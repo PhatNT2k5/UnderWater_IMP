@@ -45,7 +45,8 @@ MERGE_RADIUS_M = 0.6
 # pipe-body level up to 0.4-0.5 m from a ring centre (ring, shadow, projection offset up to 0.2 m).
 PIPE_JOINTS_X = tuple(3.0 * k for k in range(-5, 6)) + (PIPE_X_MIN, PIPE_X_MAX)
 JOINT_HALF_WIDTH_M = 0.5
-CALIBRATION_FILE = Path(__file__).resolve().parent / "calibration" / "surface_v1.json"
+# v2: recalibrated with geometry v2 (surface cells move with the geometry); v1 kept for comparison.
+CALIBRATION_FILE = Path(__file__).resolve().parent / "calibration" / "surface_v2.json"
 
 CellKey = tuple[str, int, int]
 
