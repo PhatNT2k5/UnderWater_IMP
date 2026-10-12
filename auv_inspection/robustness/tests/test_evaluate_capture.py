@@ -54,6 +54,23 @@ class EvaluateCaptureTests(unittest.TestCase):
         self.assertEqual(len(result["events"]), 1)  # tick 110 is within 2 m of the first alert
         self.assertEqual(result["false_alerts"], 0)
 
+    def test_surface_style_detector_reports_every_alert_without_rearm_lock(self) -> None:
+        capture = write_capture(Path(self.temp.name), self.xs)
+        on_defect, far_left = [310, 230, 20, 20], [20, 230, 20, 20]
+
+        def step(frame: np.ndarray, row: dict) -> FrameResult:
+            if row["tick"] == 100:   # two new regions in one frame
+                return FrameResult(True, True, on_defect, more_alert_bboxes=(far_left,))
+            if row["tick"] == 110:   # another region 0.3 m later, inside the old 2 m lock
+                return FrameResult(True, True, far_left)
+            return FrameResult(True, False, None)
+
+        step.rearm_distance_m = 0.0
+        result = evaluate(capture, "surface", step, Inventory(MAP_HASH, (DEFECT,)), [], 0)
+        self.assertEqual([event["tick"] for event in result["events"]], [100, 100, 110])
+        self.assertEqual(result["defects"]["detected"], ["d1"])
+        self.assertEqual(result["false_alerts"], 2)
+
     def test_alert_away_from_defects_is_a_false_alert(self) -> None:
         capture = write_capture(Path(self.temp.name), self.xs)
         result = evaluate(capture, "scripted", scripted({0}), Inventory(MAP_HASH, (DEFECT,)), [], 0)

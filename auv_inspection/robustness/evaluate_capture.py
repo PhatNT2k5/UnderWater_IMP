@@ -52,6 +52,7 @@ class FrameResult:
     alert_bbox: list[int] | None     # confirmed alert box in this frame
     category: str | None = None      # structure group the detector used, if it chose one
     reason: str | None = None        # why an unavailable frame was not analysed, if known
+    more_alert_bboxes: tuple[list[int], ...] = ()  # further new alerts in the same frame
 
 
 Detector = Callable[[np.ndarray, dict], FrameResult]
@@ -81,11 +82,13 @@ def classical_detector() -> Detector:
 
 def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
                        roi_mode: str = "reference", score_margin_px: int = 0,
-                       diffuse_gate: bool = False) -> Detector:
+                       diffuse_gate: bool = False, alert_rule: str = "track",
+                       surface_calibration: Path | None = None) -> Detector:
     """reference: P0/v1.1 ROI and capture categories; geometry: P2 ROI and pose-derived groups."""
     from auv_inspection.patchcore_data.live_service import (
-        analyze_request, create_session, encode_png)
-    session = create_session(model_dir, reference, thresholds, roi_mode, score_margin_px, diffuse_gate)
+        SURFACE_CALIBRATION_FILE, analyze_request, create_session, encode_png)
+    session = create_session(model_dir, reference, thresholds, roi_mode, score_margin_px, diffuse_gate,
+                             alert_rule, surface_calibration or SURFACE_CALIBRATION_FILE)
 
     def step(frame: np.ndarray, row: dict) -> FrameResult:
         category = row["category"]
@@ -104,21 +107,30 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
             return FrameResult(False, False, None, category, response.get("reason"))
         alerts = response["alerts"]
         return FrameResult(True, bool(response["candidates"]),
-                           alerts[0]["bbox_xywh"] if alerts else None, category)
+                           alerts[0]["bbox_xywh"] if alerts else None, category,
+                           more_alert_bboxes=tuple(item["bbox_xywh"] for item in alerts[1:]))
 
+    if alert_rule == "surface":
+        step.rearm_distance_m = 0.0  # mirrors the dashboard, which lifts the 2 m lock for it
     return step
 
 
-DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md")
+DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md",
+             "patchcore_surface")
 
 
 def make_detector(name: str) -> Detector:
     """classical; patchcore = v1.1 reference ROI; patchcore_geo = P2 geometric ROI;
-    _m adds the P3 scoring margin; _md adds the margin and the diffuse-anomaly gate."""
+    _m adds the P3 scoring margin; _md adds the margin and the diffuse-anomaly gate;
+    patchcore_surface = _md with the P5 surface alert rule (calibration/surface_v1.json)."""
     if name == "classical":
         return classical_detector()
     if name == "patchcore":
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "reference")
+    if name == "patchcore_surface":
+        from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
+        return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "geometry",
+                                  DEFAULT_SCORE_MARGIN_PX, True, "surface")
     if name.startswith("patchcore_geo") and name in DETECTORS:
         from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "geometry",
@@ -160,6 +172,7 @@ class Score:
     events: list[dict] = field(default_factory=list)
     last_alert: np.ndarray | None = None
     elapsed: list[float] = field(default_factory=list)
+    rearm_m: float = REARM_DISTANCE_M
 
 
 def record(score: Score, result: FrameResult, row: dict, perceived: dict, visible: list[str],
@@ -177,14 +190,15 @@ def record(score: Score, result: FrameResult, row: dict, perceived: dict, visibl
     if result.alert_bbox is None:
         return
     believed = np.asarray(perceived["position_m"], float)
-    if score.last_alert is not None and np.linalg.norm(believed - score.last_alert) < REARM_DISTANCE_M:
-        return
-    score.last_alert = believed
     alert_category = result.category or category
-    point = locate_box(result.alert_bbox, believed, float(perceived["yaw_deg"]), alert_category, GEOMETRY)
-    score.events.append({"tick": row["tick"], "category": alert_category, "bbox_xywh": result.alert_bbox,
-                         "world_m": None if point is None else np.round(point, 3).tolist(),
-                         "defect": match_defect(point, alert_category, defects)})
+    for bbox in (result.alert_bbox, *result.more_alert_bboxes):
+        if score.last_alert is not None and np.linalg.norm(believed - score.last_alert) < score.rearm_m:
+            return
+        score.last_alert = believed
+        point = locate_box(bbox, believed, float(perceived["yaw_deg"]), alert_category, GEOMETRY)
+        score.events.append({"tick": row["tick"], "category": alert_category, "bbox_xywh": bbox,
+                             "world_m": None if point is None else np.round(point, 3).tolist(),
+                             "defect": match_defect(point, alert_category, defects)})
 
 
 def evaluate_many(capture: Path, detectors: dict[str, Detector], inventory: Inventory | None,
@@ -203,7 +217,9 @@ def evaluate_many(capture: Path, detectors: dict[str, Detector], inventory: Inve
     defects = inventory.defects if inventory else ()
     views: Counter[str] = Counter()
     positions: dict[str, list[list[float]]] = defaultdict(list)
-    scores = {name: Score() for name in detectors}
+    # A detector may declare its own re-arm distance (the surface rule de-duplicates per region).
+    scores = {name: Score(rearm_m=getattr(detector, "rearm_distance_m", REARM_DISTANCE_M))
+              for name, detector in detectors.items()}
     for row in rows:
         frame = cv2.imread(str(capture / row["image"]), cv2.IMREAD_COLOR)
         if frame is None:
