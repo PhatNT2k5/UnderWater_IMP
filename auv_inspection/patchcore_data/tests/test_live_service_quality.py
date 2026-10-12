@@ -52,21 +52,36 @@ class MarginTests(unittest.TestCase):
 
 
 class DiffuseTests(unittest.TestCase):
-    def test_share_and_count_limits(self) -> None:
+    def test_one_large_crack_is_not_diffuse(self) -> None:
         scores = np.zeros((100, 100), np.float32)
-        scores[:4, :] = 70.0                   # 4% above threshold
-        self.assertFalse(live_service.is_diffuse(scores, 60.0, [])[0])
-        scores[:6, :] = 70.0                   # 6%
-        diffuse, share = live_service.is_diffuse(scores, 60.0, [])
+        scores[40:48, :] = 70.0                # one region of 8% (P5 live crack: 5.6-8.3%)
+        diffuse, shape = live_service.is_diffuse(scores, 60.0, [])
+        self.assertFalse(diffuse)
+        self.assertAlmostEqual(shape["anomaly_share"], 0.08)
+        self.assertAlmostEqual(shape["anomaly_spread"], 0.0)
+
+    def test_scattered_spots_are_diffuse(self) -> None:
+        scores = np.zeros((100, 100), np.float32)
+        scores[::4, ::4] = 70.0                # 625 separate spots, 6.25% outside the largest
+        diffuse, shape = live_service.is_diffuse(scores, 60.0, [])
         self.assertTrue(diffuse)
-        self.assertAlmostEqual(share, 0.06)
+        self.assertGreater(shape["anomaly_spread"], 0.05)
+
+    def test_one_region_over_a_quarter_of_the_roi_is_large_area(self) -> None:
+        scores = np.zeros((100, 100), np.float32)
+        scores[:30, :] = 70.0
+        diffuse, shape = live_service.is_diffuse(scores, 60.0, [])
+        self.assertTrue(diffuse)
+        self.assertAlmostEqual(shape["largest_region_share"], 0.30)
+
+    def test_many_candidate_regions_are_diffuse(self) -> None:
         many = [Candidate((0, 0, 1, 1), (0.0, 0.0), 70.0, 1)] * 7
         self.assertTrue(live_service.is_diffuse(np.zeros((10, 10)), 60.0, many)[0])
 
     def test_nan_scores_are_not_counted(self) -> None:
         scores = np.full((100, 100), np.nan, np.float32)
         scores[:10, :] = 0.0
-        scores[:1, :] = 70.0                   # 10% of finite scores
+        scores[:3, :] = 70.0                   # 30% of finite scores in one region
         self.assertTrue(live_service.is_diffuse(scores, 60.0, [])[0])
 
     def test_diffuse_frame_abstains_and_keeps_tracker(self) -> None:
@@ -78,7 +93,7 @@ class DiffuseTests(unittest.TestCase):
             response = live_service.analyze_request(gated, request(3))
         self.assertEqual(response["status"], "analysis_unavailable")
         self.assertEqual(response["reason"], "diffuse_anomaly")
-        self.assertGreater(response["anomaly_share"], 0.05)
+        self.assertGreater(response["largest_region_share"], 0.25)
         self.assertEqual(gated.tracker.last_tick, 0)
         self.assertEqual(len(gated.tracker.tracks), 1)
 

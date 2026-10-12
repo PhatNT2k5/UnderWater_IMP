@@ -278,7 +278,8 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
                     log.write(json.dumps({
                         key: response.get(key) for key in (
                             "tick", "category", "station", "position_m", "yaw_deg", "status",
-                            "reason", "anomaly_share", "candidate_count", "quality",
+                            "reason", "anomaly_share", "anomaly_spread", "largest_region_share",
+                            "candidate_count", "quality",
                             "surface_alerts", "processing_ms")
                     } | {"candidates": len(response["candidates"]),
                          "alerts": len(response["alerts"])}) + "\n")

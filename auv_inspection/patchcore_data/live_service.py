@@ -38,12 +38,15 @@ ALERT_RULES = ("track", "surface")
 # (16 px), so it sees about +/-24 px around its centre; patches closer than that to the ROI edge
 # score water, flange rims or the pipe end cap (P2 live false alerts). Chosen before measuring.
 DEFAULT_SCORE_MARGIN_PX = 24
-# Defects are sparse and local; environmental change spreads anomalies over the surface (NFAD,
-# ShiftSplit-AD). Development-set defect frames reached at most 3.1% of the ROI above threshold
-# and 5 candidate regions; clean frames 0.3% and 1. Above these limits the frame is reported as
-# a diffuse anomaly instead of being scored for alerts.
-DIFFUSE_MAX_SHARE = 0.05
+# Defects are local; environmental change spreads anomalies over the surface (NFAD,
+# ShiftSplit-AD). "Diffuse" is measured as spread, not area: the share of the ROI above threshold
+# *outside the largest connected region*. The first rule (total share > 5%) abstained on a large
+# crack seen up close in the P5 live run (5.6-8.3% of the ROI in 1-3 regions). On the development
+# set defect frames stay <= 2.4% outside their largest region and <= 5 candidate regions; one
+# region larger than 25% of the ROI (defects reached 8.3%) is reported as large-area anomaly.
+DIFFUSE_MAX_SHARE = 0.05          # above-threshold share outside the largest region
 DIFFUSE_MAX_CANDIDATES = 6
+DIFFUSE_MAX_REGION_SHARE = 0.25   # a single above-threshold region
 
 
 @dataclass
@@ -113,10 +116,24 @@ def interior(roi: np.ndarray, margin_px: int) -> np.ndarray:
     return distance >= margin_px
 
 
-def is_diffuse(scores: np.ndarray, threshold: float, candidates: list) -> tuple[bool, float]:
+def above_threshold_shape(scores: np.ndarray, threshold: float) -> dict[str, float]:
+    """Shares of the scored ROI above threshold: in total, outside the largest region, largest region."""
     finite = np.isfinite(scores)
-    share = float(np.count_nonzero(finite & (scores >= threshold)) / max(np.count_nonzero(finite), 1))
-    return share > DIFFUSE_MAX_SHARE or len(candidates) > DIFFUSE_MAX_CANDIDATES, share
+    above = (finite & (scores >= threshold)).astype(np.uint8)
+    _, _, stats, _ = cv2.connectedComponentsWithStats(above, connectivity=8)
+    areas = stats[1:, cv2.CC_STAT_AREA]
+    largest = int(areas.max()) if len(areas) else 0
+    scored = max(int(np.count_nonzero(finite)), 1)
+    total = int(np.count_nonzero(above))
+    return {"anomaly_share": total / scored, "anomaly_spread": (total - largest) / scored,
+            "largest_region_share": largest / scored}
+
+
+def is_diffuse(scores: np.ndarray, threshold: float, candidates: list) -> tuple[bool, dict[str, float]]:
+    shape = above_threshold_shape(scores, threshold)
+    diffuse = (shape["anomaly_spread"] > DIFFUSE_MAX_SHARE or len(candidates) > DIFFUSE_MAX_CANDIDATES
+               or shape["largest_region_share"] > DIFFUSE_MAX_REGION_SHARE)
+    return diffuse, shape
 
 
 def select_roi(session: Session, frame: np.ndarray, request: dict, category: str,
@@ -216,12 +233,12 @@ def score_request(session: Session, request: dict, frame: np.ndarray,
         return unavailable(reason="no_surface_scores")
     candidates = extract_candidates(scores, session.thresholds[category])
     if session.diffuse_gate:
-        diffuse, share = is_diffuse(scores, session.thresholds[category], candidates)
+        diffuse, shape = is_diffuse(scores, session.thresholds[category], candidates)
         if diffuse:
             # Not "clean" and not a defect: widespread anomaly (environment or large-area damage)
             # is reported for the operator and leaves the tracker untouched.
-            return unavailable(reason="diffuse_anomaly", anomaly_share=round(share, 4),
-                               candidate_count=len(candidates))
+            return unavailable(reason="diffuse_anomaly", candidate_count=len(candidates),
+                               **{key: round(value, 4) for key, value in shape.items()})
     return identity, roi, scores, candidates
 
 
