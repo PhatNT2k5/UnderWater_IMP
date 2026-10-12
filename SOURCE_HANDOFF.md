@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-10-12** - P5 xong offline: quy tắc bằng chứng trên bề mặt (k = 3 lượt nhìn trên ô 10 cm, ngưỡng pixel AND ngưỡng tương đối theo tầng) là mặc định PatchCore của dashboard, chưa chạy live; calibration từ 3 capture sạch mới; không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-12** - P5 xong và đã chạy live (v1.4: 3/3 vết, 0 báo nhầm, 0 báo trùng trên map A): quy tắc bằng chứng trên bề mặt (k = 3 lượt nhìn trên ô 10 cm, ngưỡng pixel AND ngưỡng tương đối theo tầng) là mặc định PatchCore của dashboard; calibration từ 3 capture sạch mới; cổng `diffuse_anomaly` che bớt vết lớn ở gần (chưa sửa); không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -693,12 +693,19 @@ Không có lệnh rebuild map: `auv_inspection/rebuild.py` không có trong repo
 
 ## 8. Trạng thái đã xác minh và giới hạn
 
+### PatchCore v1.4 live trên dashboard (P5)
+
+- `auv_dashboard/output/session_20261012_164927_783087/` (2026-10-12, Tự động + PatchCore, quy tắc bề mặt, map A, điều kiện gốc): route 359/359, 3 cảnh báo, mỗi lần giữ 5 giây rồi tự tiếp tục.
+- Khớp `inventories/map_A.json` bằng `locate_box()` và đã xem ảnh annotated/heatmap: tick 429 → `A_pipe_front_1` (0,12 m), 705 → `A_pipe_front_2` (0,37 m), 3666 → `A_pier_0_1` (0,29 m). **3/3 vết, 0 báo nhầm, 0 báo trùng** (live v1.3: 3/3, 0 báo nhầm, 1 trùng). Event có `surface_alerts` với tọa độ bề mặt.
+- `patchcore_frames.jsonl`: 2.155 frame phân tích (pier_0 663, pier_1 657, pipe_front 450, pipe_back 385), median 219 ms, p90 281 ms; 18 frame không có ROI (tick 1692-1743, vòng qua đầu ống); 12 frame `diffuse_anomaly` (tick 657-690) đều khi `A_pipe_front_2` trong tầm nhìn: 5,6-8,3% ROI vượt ngưỡng với 1-3 vùng. Cổng P3 đang coi vết lớn ở gần là bất thường lan tỏa; chưa sửa (xem `GENERALIZATION_PLAN.md`, Kết quả P5).
+- Một lượt ở điều kiện gốc trên map phát triển, không phải nghiệm thu.
+
 ### PatchCore v1.4: bằng chứng trên bề mặt (P5, offline)
 
 - Capture calibration sạch mới (2026-10-12, map sạch v3 `ea94a84f...`, profile train, đủ route): `auv_inspection/output/capture_calibration_clean_20261012_110540_192827/` (seed 11, ống 2,33 m, 532 ảnh), `..._111452_059585/` (seed 12, 1,99 m, 566 ảnh), `..._114918_998711/` (seed 13, 2,15 m, 533 ảnh). `..._105722_271527/` chỉ có `conditions.json` (lượt bị Ctrl+C khi Unreal chưa khởi động), không dùng.
 - `robustness/calibration/surface_v1.json` từ ba capture trên. Benchmark `auv_inspection/output/benchmark_p5_surface/` (tập phát triển, `patchcore_surface`): **0 báo nhầm ở 12/14 lượt** (v1.3 có 30 trên cùng 12 lượt), recall như v1.3 trừ mờ chuyển động 3 (2/3 → 1/3); marine snow 3 vẫn 19-21/100 m (v1.3: 16-17). Ở điều kiện gốc map A chỉ có 2 cảnh báo, cả hai trúng vết (`A_pipe_front_2`, `A_pier_0_1`).
 - Các lượt thay thế giữ để đối chiếu: `benchmark_p5_surface_norm_only_superseded/` (chỉ ngưỡng tương đối: 10 báo nhầm map A gốc, phần lớn ở vòng bích), `benchmark_p5_surface_abs_degenerate_superseded/` (calibrate thống kê kết hợp: mọi ngưỡng tầng = 0).
-- Đây là bằng chứng offline trên tập phát triển; **chưa chạy dashboard live với v1.4**. Live đầu tiên cần kiểm tra thêm `patchcore_frames.jsonl` (ghi mọi frame phân tích, gồm `diffuse_anomaly`).
+- Đây là bằng chứng offline trên tập phát triển; lượt live v1.4 ở mục ngay trên.
 
 ### PatchCore v1.3 live trên dashboard (P3)
 
@@ -792,6 +799,7 @@ Checklist trước khi bàn giao:
 
 ## 10. Nhật ký cập nhật tài liệu
 
+- `2026-10-12`: Ghi kết quả live v1.4 (`session_20261012_164927_783087`): 3/3 vết map A, 0 báo nhầm, 0 báo trùng; `patchcore_frames.jsonl` cho thấy cổng `diffuse_anomaly` abstain 12 frame khi vết `A_pipe_front_2` lớn trong tầm nhìn. Chỉ đổi tài liệu, không đổi code, model, ngưỡng hay map.
 - `2026-10-12`: P5. Thêm `robustness/surface.py` (tọa độ bề mặt theo mét), `robustness/surface_evidence.py` (ô 10 cm, `frame_cells()`, `is_hit()` = ngưỡng pixel AND ngưỡng tương đối theo tầng thân ống/mối nối/mặt trụ, `SurfaceEvidence` k = 3 lượt nhìn cách ≥ 0,3 m, gộp 0,6 m, `load_calibration()`), `robustness/calibrate_surface.py` (conformal theo tầng, `data_limited`) và `calibration/surface_v1.json` từ 3 capture calibration sạch mới (seed 11/12/13). `live_service.py`: `score_request()` tách từ `analyze_request()`, `surface_step()`, `surface_evidence()` kiểm hash file ngưỡng pixel, `--alert-rule {track,surface}`, `--surface-calibration`, response `surface_alerts`. Harness: `FrameResult.more_alert_bboxes`, `Score.rearm_m` theo `rearm_distance_m` của detector, detector `patchcore_surface`. Dashboard: `PATCHCORE_ALERT_RULE = "surface"`, client truyền `--alert-rule`, bridge patch `CRACK_REARM_DISTANCE_M` về 0 cho quy tắc bề mặt (người dùng đồng ý; không sửa `run_inspection.py`), ghi `patchcore_frames.jsonl` mỗi frame, event có `surface_alerts`. Benchmark tập phát triển `benchmark_p5_surface`: 0 báo nhầm ở 12/14 lượt, marine snow 3 vẫn 19-21/100 m. Test: surface 12, service surface 3, harness 6, PatchCore/robustness liên quan pass trong `.venv-patchcore`, dashboard 7/7 trong `mainenv`. **Chưa chạy dashboard live với v1.4.**
 - `2026-10-09`: Mục 7 bỏ đường dẫn ghi cứng `$env:USERPROFILE\.conda\envs\mainenv\python.exe` (14 lệnh), dùng `python` sau `conda activate mainenv`; người dùng gặp lỗi khi conda cài ở `D:\Anaconda` (và `"$env:D:\..."` bị PowerShell hiểu là biến môi trường `D`). Chỉ đổi tài liệu.
 - `2026-10-09`: Ghi kết quả live v1.3 (`session_20261009_150224_114943`): 3/3 vết map A, 0 báo nhầm, 1 báo trùng vết trụ; session chưa lưu frame `diffuse_anomaly`. Chỉ đổi tài liệu, không đổi code, model, ngưỡng hay map.
