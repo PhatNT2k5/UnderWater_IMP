@@ -17,7 +17,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P2 | ROI hình học + tọa độ bề mặt | **Xong** (live `session_20261009_103800_863732`: 3/3 vết, 2 báo nhầm ở biên ROI, 1 báo trùng) | Hiệu chỉnh hình học IoU kiểm tra 0,89-1,00; ROI hình học + lọc góc tới; frame được phân tích 100%; xem mục Kết quả P2. Tọa độ bề mặt (`surface_coordinates`) đã có, dùng ở P5 |
 | P3 | Cổng chất lượng ảnh | **Xong** (live `session_20261009_150224_114943`: 3/3 vết, **0 báo nhầm**, 1 báo trùng vết trụ) | Lề chấm điểm 24 px + cổng `diffuse_anomaly`; số đo chất lượng chỉ để chẩn đoán (cổng theo phân vị bị loại). Tập phát triển: tổng báo nhầm 14 lượt chạy 410 → 97, recall giữ ở điều kiện có nghĩa; xem mục Kết quả P3 |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng trên bề mặt | **Xong** (live `session_20261012_164927_783087`: **3/3 vết, 0 báo nhầm, 0 báo trùng**) | Quy tắc k = 3 lượt nhìn trên ô 10 cm, hit = ngưỡng pixel AND ngưỡng tương đối theo tầng (thân ống / mối nối / mặt trụ), calibrate conformal trên 3 capture sạch train mới. Tập phát triển: 0 báo nhầm ở 12/14 lượt (v1.3: 30), marine snow 3 vẫn 19-21/100 m; xem mục Kết quả P5 |
-| P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Đang làm** (phần 2: bank thật và benchmark xong; xem Kết quả P4 phần 2) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
+| P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Đang làm** (phần 3: hình học v2, v2 + suy giảm mức 1 đạt 17/21 vết và 2 báo nhầm trên 14 lượt; chưa live; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | Chưa làm | |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | Chưa làm | |
 
@@ -138,6 +138,30 @@ Bank: 4 capture train sạch mới (seed 21-24, khoảng cách ống 2,08-2,34 m
 - **Chưa đạt tiêu chí nghiệm thu** với v2 (≤ 1/100 m): map sạch gốc 3,31/100 m, map A độ đục 2 và đèn yếu 1,97/100 m.
 - **Phát hiện hình học:** cùng vết nứt trụ chiếu từ tick 2963 (AUV z -9,0, yaw -58°) và tick 3478 (z -7,4, yaw -81°) cho hai đường song song lệch khoảng 0,35 m theo chiều đứng. Đây là sai số hình học giữa các tầng quan sát trụ (offset đứng của camera hoặc pitch, không xác định được ở P2 vì chỉ có một khoảng cách), làm ô bề mặt của các lượt nhìn khác tầng lệch khoảng 3 ô và làm định vị cảnh báo trụ lệch. Có thể calibrate lại bằng các capture nhiều độ sâu hiện có.
 - **Độ nhiễu của phép đo:** khác biệt giữa các biến thể ở từng lượt chỉ là 1-4 cảnh báo trên 2 capture, nên nhiều so sánh nằm trong dao động ngẫu nhiên; tập phát triển nhỏ và đã được dùng cho nhiều quyết định.
+
+## Kết quả P4 phần 3: hình học v2 (2026-10-13, tập phát triển)
+
+Cùng dữ liệu và quy trình như phần 2, nhưng mọi thứ phụ thuộc hình học được làm lại với `geometry_v2.json`: nhãn map A, `surface_v2.json` của v1.4, bank v2 (`detector_v2_dino_s2_aug_g2`, `..._noaug_g2`) cùng ngưỡng pixel và ngưỡng tầng. Kết quả: `auv_inspection/output/benchmark_p4_dino_g2/` (vết map A, báo nhầm, tỷ lệ frame abstain).
+
+| Map | Điều kiện | v1.4 | **v2 + suy giảm mức 1** | v2 không suy giảm |
+|---|---|---|---|---|
+| A | Gốc | 2/3, 0 | **3/3, 0** | 3/3, 1 |
+| A | Độ đục 2 | 3/3, 0 | **3/3, 0** | 3/3, 0 |
+| A | Độ đục 4 | 2/3, 0 | 3/3, 1 (9%) | 2/3, 0 |
+| A | Marine snow 3 | 2/3, 37 | 1/3, **0** (35%) | 0/3, 0 (100%) |
+| A | Marine snow 5 | 1/3, 1 (90%) | 1/3, **0** (42%) | 0/3, 0 (100%) |
+| A | Đèn yếu 4 | 2/3, 1 | **3/3, 0** | 3/3, 0 |
+| A | Mờ chuyển động 3 | 2/3, 0 | **3/3, 0** | 3/3, 1 |
+| sạch | Gốc / độ đục 2 / độ đục 4 | 0 / 0 / 0 | 0 / 0 / 0 (13-16%) | 4 / 0 / 0 |
+| sạch | Marine snow 3 / 5 | 39 / 0 | 0 / 1 (31-34%) | 0 / 0 (100%) |
+| sạch | Đèn yếu / mờ | 0 / 0 | 0 / 0 (20% / 8%) | 0 / 0 |
+| | **Tổng** | 14/21 vết, 78 báo nhầm | **17/21 vết, 2 báo nhầm** | 14/21 vết, 6 báo nhầm |
+
+- **v2 + suy giảm mức 1 đạt ≤ 1 báo nhầm/100 m ở cả 14 lượt** (tệ nhất 0,49/100 m: một ô thân ống sau ở độ đục 4 và một ô mặt trụ ở marine snow 5). Báo nhầm vùng trụ gần mặt nước ở phần 2 biến mất khi sửa hình học, nên chúng là hệ quả của ô bề mặt lệch giữa các lượt nhìn, không phải do bản thân vùng đó.
+- **Recall 17/21 = 81%** (Wilson 95% chỉ mang tính tham khảo vì 3 vết × 7 điều kiện tương quan); ngoài marine snow: 15/15. Marine snow 3/5 mỗi mức chỉ 1/3 vết. Chưa đạt mục tiêu 90%.
+- **Giá phải trả:** v2 abstain 13-20% frame trên map sạch ngay cả điều kiện gốc (map A: 1-9%); bank không suy giảm thì abstain toàn bộ khi có marine snow. Chọn **v2 + suy giảm mức 1** làm ứng viên detector; v1 vẫn là mặc định dashboard tới khi chạy live và nghiệm thu.
+- So với phần 2 (hình học v1): tổng báo nhầm v2 19 → 2, recall 13/21 → 17/21. Sửa hình học có tác dụng lớn hơn đổi backbone ở lượt này.
+- Vẫn là tập phát triển 2 capture đã dùng cho nhiều quyết định; P7 phải kiểm trên heldout mới.
 
 ## Tiêu chí nghiệm thu (bản đầu)
 

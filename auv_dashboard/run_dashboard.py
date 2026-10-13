@@ -16,13 +16,16 @@ def main() -> None:
     parser.add_argument("--autostart", action="store_true")
     parser.add_argument("--steps", type=int, default=60000)
     parser.add_argument("--smoke-test", action="store_true", help="Exercise the live UI and save QA evidence")
+    parser.add_argument("--v2-model", type=Path,
+                        help="Use a detector v2 directory (P4) instead of PatchCore v1, e.g. "
+                             "auv_inspection/output/detector_v2_dino_s2_aug_g2")
     args = parser.parse_args()
     if args.steps <= 0:
         parser.error("--steps must be positive")
     ctypes.windll.user32.SetProcessDPIAware()
     from auv_dashboard.app import Dashboard
     root = tk.Tk()
-    dashboard = Dashboard(root, args.steps, args.smoke_test)
+    dashboard = Dashboard(root, args.steps, args.smoke_test, args.v2_model.resolve() if args.v2_model else None)
     if args.autostart or args.smoke_test:
         root.after(500, dashboard.start)
     root.mainloop()

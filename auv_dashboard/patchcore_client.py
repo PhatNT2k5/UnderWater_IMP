@@ -18,7 +18,7 @@ class PatchCoreClient:
                  reference_dataset: Path, thresholds_file: Path,
                  python_executable: Path | None = None, roi_mode: str = "geometry",
                  score_margin_px: int = 24, diffuse_gate: bool = True,
-                 alert_rule: str = "track") -> None:
+                 alert_rule: str = "track", surface_calibration: Path | None = None) -> None:
         executable = python_executable or root / ".venv-patchcore/Scripts/python.exe"
         if not executable.is_file():
             raise FileNotFoundError(f"PatchCore Python not found: {executable}")
@@ -32,6 +32,8 @@ class PatchCoreClient:
                    "--alert-rule", alert_rule]
         if diffuse_gate:
             command.append("--diffuse-gate")
+        if surface_calibration is not None:
+            command += ["--surface-calibration", str(surface_calibration)]
         try:
             self.process = subprocess.Popen(
                 command, cwd=root, stdin=subprocess.PIPE, stdout=subprocess.PIPE,

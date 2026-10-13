@@ -32,6 +32,16 @@ PATCHCORE_ALERT_RULE = "surface"
 PATCHCORE_EVALUATION = ROOT / "auv_inspection/output/patchcore_evaluation_B_v1.json"
 
 
+def v2_files(model_dir: Path) -> dict[str, Path]:
+    """Detector v2 (P4) directory: banks, its own pixel thresholds and surface calibration."""
+    files = {"patchcore_model": model_dir, "patchcore_thresholds": model_dir / "pixel_thresholds.json",
+             "patchcore_surface_calibration": model_dir / "surface_calibration.json"}
+    missing = [str(path) for path in files.values() if not path.exists()]
+    if missing:
+        raise FileNotFoundError(f"Detector v2 files missing: {missing}")
+    return files
+
+
 def default_detector() -> str:
     return ("PatchCore" if approval_matches(
         PATCHCORE_MODEL, PATCHCORE_REFERENCE,
@@ -40,8 +50,12 @@ def default_detector() -> str:
 
 
 class Dashboard:
-    def __init__(self, root: tk.Tk, steps: int = 60000, smoke_test: bool = False) -> None:
+    def __init__(self, root: tk.Tk, steps: int = 60000, smoke_test: bool = False,
+                 v2_model: Path | None = None) -> None:
         self.root, self.steps, self.smoke_test = root, steps, smoke_test
+        # Opt-in detector v2; the default stays PatchCore v1 behind its approval gate.
+        self.patchcore_files = (v2_files(v2_model) if v2_model else
+                                {"patchcore_model": PATCHCORE_MODEL, "patchcore_thresholds": PATCHCORE_THRESHOLDS})
         self.context = mp.get_context("spawn")
         self.worker: mp.Process | None = None
         self.engine_pid: int | None = None
@@ -111,7 +125,8 @@ class Dashboard:
         self.mode = tk.StringVar(value="Tự động")
         self.mode_box = ttk.Combobox(controls, textvariable=self.mode, values=["Tự động", "Thủ công"], state="readonly", width=12)
         self.mode_box.pack(side="left", padx=10)
-        self.detector = tk.StringVar(value="Classical" if self.smoke_test else default_detector())
+        self.detector = tk.StringVar(value="Classical" if self.smoke_test else
+                                     "PatchCore" if v2_model else default_detector())
         self.detector_box = ttk.Combobox(controls, textvariable=self.detector,
                                          values=["Classical", "PatchCore"], state="readonly", width=12)
         self.detector_box.pack(side="left", padx=(0, 10))
@@ -235,7 +250,7 @@ class Dashboard:
             if self.mode.get() != "Tự động":
                 self.status.configure(text="●  PatchCore hiện chỉ dùng tuyến tự động", fg="#ffb79b")
                 return
-            if not PATCHCORE_THRESHOLDS.is_file():
+            if not Path(self.patchcore_files["patchcore_thresholds"]).is_file():
                 self.status.configure(text="●  PatchCore chưa có ngưỡng hiệu chỉnh", fg="#ffb79b")
                 return
         stage_text = (["01  Bề mặt phân tích", "02  Bản đồ bất thường", "03  Kết quả"]
@@ -287,9 +302,8 @@ class Dashboard:
             "follow": self.follow.get(),
             "mode": "auto" if self.mode.get() == "Tự động" else "manual",
             "detector": selected_detector,
-            "patchcore_model": str(PATCHCORE_MODEL),
+            **{key: str(value) for key, value in self.patchcore_files.items()},
             "patchcore_reference": str(PATCHCORE_REFERENCE),
-            "patchcore_thresholds": str(PATCHCORE_THRESHOLDS),
             "patchcore_alert_rule": PATCHCORE_ALERT_RULE,
         }), name="AUV-dashboard-worker")
         self.worker.start()
