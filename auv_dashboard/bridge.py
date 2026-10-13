@@ -458,6 +458,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
                 Path(str(options["patchcore_thresholds"])), alert_rule=alert_rule,
                 surface_calibration=(Path(str(options["patchcore_surface_calibration"]))
                                      if options.get("patchcore_surface_calibration") else None),
+                border_margin=bool(options.get("patchcore_border_margin", False)),
             )
         events.put({"type": "status", "text": "Đang khởi động Unreal…"})
         args = argparse.Namespace(

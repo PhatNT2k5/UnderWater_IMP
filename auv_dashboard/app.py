@@ -39,7 +39,8 @@ def v2_files(model_dir: Path) -> dict[str, Path]:
     missing = [str(path) for path in files.values() if not path.exists()]
     if missing:
         raise FileNotFoundError(f"Detector v2 files missing: {missing}")
-    return files
+    # Margin at the image border too: halved v2 false alerts on the six-capture dev set (P4).
+    return {**files, "patchcore_border_margin": True}
 
 
 def default_detector() -> str:
@@ -303,7 +304,8 @@ class Dashboard:
             "follow": self.follow.get(),
             "mode": "auto" if self.mode.get() == "Tự động" else "manual",
             "detector": selected_detector,
-            **{key: str(value) for key, value in self.patchcore_files.items()},
+            **{key: value if isinstance(value, bool) else str(value)
+               for key, value in self.patchcore_files.items()},
             "patchcore_reference": str(PATCHCORE_REFERENCE),
             "patchcore_alert_rule": PATCHCORE_ALERT_RULE,
         }), name="AUV-dashboard-worker")

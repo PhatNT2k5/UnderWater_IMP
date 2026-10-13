@@ -17,7 +17,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P2 | ROI hình học + tọa độ bề mặt | **Xong** (live `session_20261009_103800_863732`: 3/3 vết, 2 báo nhầm ở biên ROI, 1 báo trùng) | Hiệu chỉnh hình học IoU kiểm tra 0,89-1,00; ROI hình học + lọc góc tới; frame được phân tích 100%; xem mục Kết quả P2. Tọa độ bề mặt (`surface_coordinates`) đã có, dùng ở P5 |
 | P3 | Cổng chất lượng ảnh | **Xong** (live `session_20261009_150224_114943`: 3/3 vết, **0 báo nhầm**, 1 báo trùng vết trụ) | Lề chấm điểm 24 px + cổng `diffuse_anomaly`; số đo chất lượng chỉ để chẩn đoán (cổng theo phân vị bị loại). Tập phát triển: tổng báo nhầm 14 lượt chạy 410 → 97, recall giữ ở điều kiện có nghĩa; xem mục Kết quả P3 |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng trên bề mặt | **Xong** (live `session_20261012_164927_783087`: **3/3 vết, 0 báo nhầm, 0 báo trùng**) | Quy tắc k = 3 lượt nhìn trên ô 10 cm, hit = ngưỡng pixel AND ngưỡng tương đối theo tầng (thân ống / mối nối / mặt trụ), calibrate conformal trên 3 capture sạch train mới. Tập phát triển: 0 báo nhầm ở 12/14 lượt (v1.3: 30), marine snow 3 vẫn 19-21/100 m; xem mục Kết quả P5 |
-| P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Đang làm** (phần 3: hình học v2, v2 + suy giảm mức 1 đạt 17/21 vết và 2 báo nhầm trên 14 lượt; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
+| P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Đang làm** (phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | Chưa làm | |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | Chưa làm | |
 
@@ -164,6 +164,27 @@ Cùng dữ liệu và quy trình như phần 2, nhưng mọi thứ phụ thuộc
 - **Live v2** (`auv_dashboard/output/session_20261013_091452_126695/`, `--v2-model detector_v2_dino_s2_aug_g2`, map A, điều kiện gốc): route 359/359, 4 cảnh báo. Tick 396 `A_pipe_front_1` (cách nhãn 0,20 m), 627 `A_pipe_front_2` (0,04 m), 3228 `A_pier_0_1` (0,02 m): **3/3 vết, định vị sát hơn hẳn** live v1.4 (0,12-0,37 m với hình học v1). Tick 6954 trụ 1 (z -6,95) là **báo nhầm** trên một vệt sẫm dọc của vân bê tông (đã xem ảnh). `patchcore_frames.jsonl`: 2.148 frame, median 256 ms (p90 317 ms) khi chạy cùng Unreal; 34 frame `diffuse_anomaly` (32 ở ống trước) đều do tiêu chí > 6 vùng (7-16 vùng nhỏ, phân tán 0,1-1%): giới hạn 6 vùng đặt cho v1, bản đồ điểm v2 mịn hơn nên nhiều vùng nhỏ hơn; cần xem lại.
 - Vẫn là tập phát triển 2 capture đã dùng cho nhiều quyết định; P7 phải kiểm trên heldout mới.
 
+## Kết quả P4 phần 4: tập phát triển 6 capture và lề ở mép ảnh (2026-10-13)
+
+Tập phát triển mở rộng thêm 4 capture heldout (map A seed 3, 4; map sạch seed 5, 6), tổng 3 capture map A + 3 capture map sạch, 7 điều kiện, 42 lượt mỗi detector. `dino_surface_b` = v2 + suy giảm mức 1 với lề 24 px cả ở mép ảnh (calibration giữ nguyên, bảo thủ). Kết quả: `auv_inspection/output/benchmark_p4_dino_g2/` (vết map A trên 9, tổng báo nhầm, lượt tệ nhất/100 m, tỷ lệ abstain trung bình).
+
+| Điều kiện | v1.4 | v2 | **v2 + lề mép ảnh** |
+|---|---|---|---|
+| Gốc | 5/9, 9 (2,95), 0% | 9/9, 9 (2,72), 7% | **9/9, 3 (0,61), 5%** |
+| Độ đục 2 | 6/9, 0, 0% | 9/9, 10 (2,46), 10% | **9/9, 2 (0,98), 7%** |
+| Độ đục 4 | 5/9, 2 (0,49), 0% | 8/9, 8 (0,98), 12% | 8/9, 13 (1,81), 9% |
+| Marine snow 3 | 7/9, **190** (19,64), 29% | 3/9, 6 (1,81), 34% | 3/9, **0**, 33% |
+| Marine snow 5 | 1/9, 18 (3,35), 85% | 3/9, 3 (0,91), 39% | 3/9, 1 (0,47), 37% |
+| Đèn yếu 4 | 5/9, 7 (2,46), 0% | 9/9, 6 (1,23), 8% | **9/9, 1 (0,61), 7%** |
+| Mờ chuyển động 3 | 3/9, 10 (2,87), 0% | 7/9, 0, 6% | **7/9, 0, 4%** |
+| **Tổng** | 32/63 (51%), 236 | 48/63 (76%), 42 | **48/63 (76%), 20** |
+
+- **Hai capture cũ đánh giá quá cao v2:** trên chúng v2 có 17/21 vết, 2 báo nhầm; trên 4 capture mới v2 thêm 40 báo nhầm. Báo nhầm trên capture mới tập trung ở dải ≤ 24 px quanh mép ảnh (mép dưới trên mặt trụ ở xa, nơi đèn tắt dần) và chân trụ.
+- **Lề ở mép ảnh** giảm báo nhầm v2 từ 42 xuống 20 mà không mất vết nào; 2 capture sạch mới có 0 báo nhầm. Chọn làm mặc định của v2 trong dashboard.
+- **Recall ngoài marine snow 42/45 (93%)**, vượt mục tiêu 90%; marine snow 3 và 5 chỉ 3/9 mỗi mức. Tổng 76% chưa đạt.
+- **Báo nhầm còn lại chủ yếu ở độ đục 4** (13/20): thân ống cách vòng bích 0,55-0,76 m (ngay ngoài dải mối nối ±0,5 m) và lệch về phía phải ảnh; trừ độ đục 4, mọi lượt ≤ 0,98/100 m.
+- **Live v2** (lượt `session_20261013_091452_126695`, chưa có lề mép ảnh): 3/3 vết, 1 báo nhầm.
+
 ## Tiêu chí nghiệm thu (bản đầu)
 
 Đo trên **điều kiện môi trường chưa từng dùng** để train hay chọn ngưỡng:
@@ -183,6 +204,7 @@ Cùng dữ liệu và quy trình như phần 2, nhưng mọi thứ phụ thuộc
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
 | 2026-10-09 | Live P2 xác nhận nguồn báo nhầm chính là **biên ROI** (đầu ống, mép ống khi nhìn xiên): ROI giới hạn tâm đặc trưng nhưng trường nhìn của đặc trưng rộng hơn. Thêm vào **P3** một lề chấm điểm bên trong ROI theo trường nhìn của đặc trưng, đánh giá trên tập phát triển trước. Báo trùng cùng một vết (hai vị trí cách 2,08 m) để **P5** gộp theo tọa độ bề mặt |
+| 2026-10-13 | Tập phát triển mở rộng 4 capture heldout (map A seed 3, 4; map sạch seed 5, 6), người dùng chạy. v2 dùng **lề 24 px cả ở mép ảnh** (`--border-margin`, mặc định tắt cho v1): báo nhầm v2 trên các capture mới tập trung sát mép ảnh; trên 6 capture lề này giảm báo nhầm 42 → 20 mà không mất vết. Chọn sau khi đo trên tập phát triển, P7 kiểm lại |
 | 2026-10-12 | **Hình học v2** (người dùng duyệt): `camera_forward_m` = 0,41 m, `camera_up_m` = 0,09 m cố định theo vị trí `CameraLeftSocket` so với `IMUSocket` (PoseSensor) đo trên hình socket của HoveringAUV trong tài liệu HoloOcean, tỷ lệ lấy từ vị trí thruster trong client (±0,25 m, ±0,22 m); 5 tham số còn lại fit lại trên 552 mask như P2. Lý do: cùng vết nứt trụ nhìn từ hai tầng lệch 0,35 m với v1; dò từng tham số cho thấy chỉ offset tiến (khoảng 0,3 m) hoặc nửa cạnh trụ 1,2 m (mâu thuẫn silhouette) khử được, còn pitch và offset đứng thì không. v2: lệch hai lượt 0,030 m, hai lượt vết ống 0,015 m (v1: 0,057), pitch 0,005° (AUV luôn cân bằng theo roll/pitch ghi trong capture; v1 3,92° là bù sai), trục ống -10,294 (hằng số route -10,3); IoU kiểm tra trên mask và mask ORB tương đương v1 (mask một khoảng cách không phân biệt được). Nhãn map A tính lại từ đúng nguồn ảnh cũ với v2; mọi calibration bề mặt, bank v2 và benchmark P4 làm lại; `geometry_v1.json`, `surface_v1.json` và model v2 cũ giữ để đối chiếu |
 | 2026-10-12 | P4: **cổng lan tỏa đếm hit của quy tắc bề mặt** (điểm ≥ ngưỡng pixel AND điểm ≥ ngưỡng tầng thấp nhất của nhóm × median frame) khi có quy tắc bề mặt. Lý do: ngưỡng pixel v2 (calibrate theo ô) thấp ở mức pixel, cổng chỉ dùng ngưỡng tuyệt đối abstain 19-52% frame của v2 ở điều kiện gốc và độ đục 2 (lưu `benchmark_p4_dino_abs_gate_superseded/`). Hệ quả với v1.4: ở mờ chuyển động 3 abstain 14% → 0,5% và có 3 báo nhầm (trước là 0). `calibrate_surface.py` từ nay chấm mọi frame sạch, không qua cổng (cổng phụ thuộc chính ngưỡng được calibrate; thêm dữ liệu chỉ làm ngưỡng cao hơn hoặc bằng); `surface_v1.json` của v1 không đổi vì không frame calibration nào bị abstain |
 | 2026-10-12 | P4 bắt đầu, người dùng duyệt: (1) tải trọng số `timm/vit_small_patch14_dinov2.lvd142m` (85 MB, Hugging Face); (2) 4 capture **bank** sạch mới, profile train, seed 21-24 (`--dataset-role train`); (3) **ranh giới suy giảm chốt trước**: bank chỉ thêm suy giảm offline mức 1 (mỗi frame một bản, một yếu tố ngẫu nhiên), benchmark dùng mức 2-5 nên vẫn là điều kiện chưa thấy; (4) nhãn `A_pipe_front_2` đổi từ điểm sang đoạn. Phân chia dữ liệu: bank = seed 21-24 train; calibration ngưỡng = seed 11-13; phát triển = heldout seed 1-2; nghiệm thu P7 = heldout mới + map B. v2 có ngưỡng pixel riêng (conformal trên capture calibration, cùng thống kê với quy tắc bề mặt) vì không gian đặc trưng mới; model, ngưỡng v1 và `patchcore_artifacts/` giữ nguyên |

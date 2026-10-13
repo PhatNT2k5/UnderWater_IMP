@@ -87,12 +87,12 @@ def classical_detector() -> Detector:
 def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
                        roi_mode: str = "reference", score_margin_px: int = 0,
                        diffuse_gate: bool = False, alert_rule: str = "track",
-                       surface_calibration: Path | None = None) -> Detector:
+                       surface_calibration: Path | None = None, border_margin: bool = False) -> Detector:
     """reference: P0/v1.1 ROI and capture categories; geometry: P2 ROI and pose-derived groups."""
     from auv_inspection.patchcore_data.live_service import (
         SURFACE_CALIBRATION_FILE, analyze_request, create_session, encode_png)
     session = create_session(model_dir, reference, thresholds, roi_mode, score_margin_px, diffuse_gate,
-                             alert_rule, surface_calibration or SURFACE_CALIBRATION_FILE)
+                             alert_rule, surface_calibration or SURFACE_CALIBRATION_FILE, border_margin)
 
     def step(frame: np.ndarray, row: dict) -> FrameResult:
         category = row["category"]
@@ -120,23 +120,25 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
 
 
 DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md",
-             "patchcore_surface", *V2_MODELS)
+             "patchcore_surface", *V2_MODELS, "dino_surface_b")
 
 
 def make_detector(name: str) -> Detector:
     """classical; patchcore = v1.1 reference ROI; patchcore_geo = P2 geometric ROI;
     _m adds the P3 scoring margin; _md adds the margin and the diffuse-anomaly gate;
     patchcore_surface = _md with the P5 surface alert rule (surface_evidence.CALIBRATION_FILE);
-    dino_surface(_noaug) = detector v2 with the same ROI, margin, gate and surface rule."""
+    dino_surface(_noaug) = detector v2 with the same ROI, margin, gate and surface rule;
+    dino_surface_b = dino_surface with the margin also at the image border."""
     if name == "classical":
         return classical_detector()
     if name == "patchcore":
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "reference")
-    if name in V2_MODELS:
+    if name in V2_MODELS or name == "dino_surface_b":
         from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
-        model = V2_MODELS[name]
+        model = V2_MODELS[name.removesuffix("_b")]
         return patchcore_detector(model, PATCHCORE_REFERENCE, model / "pixel_thresholds.json", "geometry",
-                                  DEFAULT_SCORE_MARGIN_PX, True, "surface", model / "surface_calibration.json")
+                                  DEFAULT_SCORE_MARGIN_PX, True, "surface", model / "surface_calibration.json",
+                                  border_margin=name.endswith("_b"))
     if name == "patchcore_surface":
         from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "geometry",

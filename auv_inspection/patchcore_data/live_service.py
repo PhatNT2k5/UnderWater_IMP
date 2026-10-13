@@ -66,6 +66,7 @@ class Session:
     roi_mode: str = "geometry"
     geometry: GeometryParams | None = None
     score_margin_px: int = 0
+    border_margin: bool = False              # apply the margin at the image border as well
     diffuse_gate: bool = False
     evidence: SurfaceEvidence | None = None  # set when the alert rule is "surface"
     scorer: Scorer | None = None             # detector v2 (P4) instead of PatchCore
@@ -75,7 +76,8 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    thresholds_file: Path, roi_mode: str = "geometry",
                    score_margin_px: int = 0, diffuse_gate: bool = False,
                    alert_rule: str = "track",
-                   surface_calibration: Path = SURFACE_CALIBRATION_FILE) -> Session:
+                   surface_calibration: Path = SURFACE_CALIBRATION_FILE,
+                   border_margin: bool = False) -> Session:
     if score_margin_px < 0:
         raise ValueError("score_margin_px must be non-negative")
     if alert_rule not in ALERT_RULES:
@@ -105,7 +107,8 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    thresholds=thresholds, tracker=AlertTracker(), device=device,
                    model_dir=model_dir.resolve(), roi_mode=roi_mode,
                    geometry=load_params() if roi_mode == "geometry" else None,
-                   score_margin_px=score_margin_px, diffuse_gate=diffuse_gate,
+                   score_margin_px=score_margin_px, border_margin=border_margin,
+                   diffuse_gate=diffuse_gate,
                    evidence=(surface_evidence(surface_calibration, thresholds_file, thresholds)
                              if alert_rule == "surface" else None),
                    scorer=scorer)
@@ -119,9 +122,15 @@ def surface_evidence(calibration_file: Path, thresholds_file: Path,
     return SurfaceEvidence(calibration, thresholds)
 
 
-def interior(roi: np.ndarray, margin_px: int) -> np.ndarray:
-    """ROI pixels at least margin_px from the ROI edge; the image border is not an edge."""
-    padded = cv2.copyMakeBorder((roi > 0).astype(np.uint8), 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=1)
+def interior(roi: np.ndarray, margin_px: int, image_border: bool = False) -> np.ndarray:
+    """ROI pixels at least margin_px from the ROI edge.
+
+    By default the image border is not an edge (the surface continues out of frame). With
+    `image_border` it is: v2 false alerts on the extended development set sat within 24 px of
+    the frame border, where the lights fall off and tokens see the frame edge.
+    """
+    padded = cv2.copyMakeBorder((roi > 0).astype(np.uint8), 1, 1, 1, 1, cv2.BORDER_CONSTANT,
+                                value=0 if image_border else 1)
     distance = cv2.distanceTransform(padded, cv2.DIST_L2, 5)[1:-1, 1:-1]
     return distance >= margin_px
 
@@ -251,7 +260,7 @@ def score_request(session: Session, request: dict, frame: np.ndarray,
         session.model.memory_bank = session.banks[category]
         scores = predict_map(session.model, frame, roi, session.device)
     if session.score_margin_px:
-        scores[~interior(roi, session.score_margin_px)] = np.nan
+        scores[~interior(roi, session.score_margin_px, session.border_margin)] = np.nan
     if not np.isfinite(scores).any():
         return unavailable(reason="no_surface_scores")
     candidates = extract_candidates(scores, session.thresholds[category])
@@ -356,10 +365,12 @@ def main() -> None:
     parser.add_argument("--alert-rule", choices=ALERT_RULES, default="track",
                         help="track: three-frame image track (v1); surface: k views of one surface cell (P5)")
     parser.add_argument("--surface-calibration", type=Path, default=SURFACE_CALIBRATION_FILE)
+    parser.add_argument("--border-margin", action="store_true",
+                        help="also ignore scores within the margin of the image border")
     args = parser.parse_args()
     serve(create_session(args.model_dir, args.reference_dataset, args.thresholds_file,
                          args.roi_mode, args.score_margin_px, args.diffuse_gate,
-                         args.alert_rule, args.surface_calibration))
+                         args.alert_rule, args.surface_calibration, args.border_margin))
 
 
 if __name__ == "__main__":

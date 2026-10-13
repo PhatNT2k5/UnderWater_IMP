@@ -39,6 +39,12 @@ class MarginTests(unittest.TestCase):
         self.assertTrue(inside[130, 320])      # 30 px from the ROI edge
         self.assertFalse(inside[50, 320])      # outside the ROI
 
+    def test_image_border_margin_is_optional(self) -> None:
+        inside = live_service.interior(band_roi(), 24, image_border=True)
+        self.assertFalse(inside[240, 0])       # now 0 px from the image side
+        self.assertFalse(inside[240, 20])
+        self.assertTrue(inside[240, 30])
+
     def test_margin_masks_edge_scores_before_candidates(self) -> None:
         scores = np.full((480, 640), 10.0, np.float32)
         scores[100:108, 300:320] = 90.0        # rim artefact on the ROI edge
