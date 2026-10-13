@@ -2,7 +2,7 @@
 
 > Tài liệu bàn giao dành cho AI/agent và thành viên mới. Hãy đọc file này trước khi sửa source.
 >
-> Cập nhật gần nhất: **2026-10-13** - Live v2 (`session_20261013_091452_126695`): 3/3 vết map A, 1 báo nhầm trên vân bê tông trụ 1; 4 capture heldout mới (seed 3-6) mở rộng tập phát triển. P4 phần 3: benchmark lại với hình học v2 (v2 + suy giảm mức 1: 17/21 vết, 2 báo nhầm trên 14 lượt tập phát triển); dashboard có tùy chọn `--v2-model` (opt-in, chưa chạy live). Hình học v2 làm mặc định (offset camera theo socket HoveringAUV), nhãn map A tính lại, calibration bề mặt `surface_v2.json` và bank v2 `_g2` đang dựng lại. P4 phần 2: bank DINOv2 thật (4 capture train seed 21-24) và benchmark tập phát triển; cổng lan tỏa đếm hit của quy tắc bề mặt. P4 phần 1: package `auv_inspection/detector_v2/` (DINOv2 kNN) tích hợp vào service, chưa có bank thật; nhãn `A_pipe_front_2` thành đoạn. P5 xong và đã chạy live (v1.4: 3/3 vết, 0 báo nhầm, 0 báo trùng trên map A): quy tắc bằng chứng trên bề mặt (k = 3 lượt nhìn trên ô 10 cm, ngưỡng pixel AND ngưỡng tương đối theo tầng) là mặc định PatchCore của dashboard; calibration từ 3 capture sạch mới; cổng `diffuse_anomaly` đo độ phân tán (đã sửa sau live, chưa chạy live lại); không chỉnh map thủ công.
+> Cập nhật gần nhất: **2026-10-13** - P4 phần 4: benchmark tập phát triển 6 capture; v2 dùng lề 24 px cả ở mép ảnh (`--border-margin`), mặc định trong dashboard `--v2-model`. Live v2 (`session_20261013_091452_126695`): 3/3 vết map A, 1 báo nhầm trên vân bê tông trụ 1; 4 capture heldout mới (seed 3-6) mở rộng tập phát triển. P4 phần 3: benchmark lại với hình học v2 (v2 + suy giảm mức 1: 17/21 vết, 2 báo nhầm trên 14 lượt tập phát triển); dashboard có tùy chọn `--v2-model` (opt-in, chưa chạy live). Hình học v2 làm mặc định (offset camera theo socket HoveringAUV), nhãn map A tính lại, calibration bề mặt `surface_v2.json` và bank v2 `_g2` đang dựng lại. P4 phần 2: bank DINOv2 thật (4 capture train seed 21-24) và benchmark tập phát triển; cổng lan tỏa đếm hit của quy tắc bề mặt. P4 phần 1: package `auv_inspection/detector_v2/` (DINOv2 kNN) tích hợp vào service, chưa có bank thật; nhãn `A_pipe_front_2` thành đoạn. P5 xong và đã chạy live (v1.4: 3/3 vết, 0 báo nhầm, 0 báo trùng trên map A): quy tắc bằng chứng trên bề mặt (k = 3 lượt nhìn trên ô 10 cm, ngưỡng pixel AND ngưỡng tương đối theo tầng) là mặc định PatchCore của dashboard; calibration từ 3 capture sạch mới; cổng `diffuse_anomaly` đo độ phân tán (đã sửa sau live, chưa chạy live lại); không chỉnh map thủ công.
 
 ## 1. Mục tiêu và phạm vi
 
@@ -529,7 +529,7 @@ Lưu ý: map hiện tại đã được chỉnh thủ công sau lần sinh từ 
 
 ### `auv_dashboard/patchcore_client.py`
 
-`PatchCoreClient.__init__(..., roi_mode="geometry", score_margin_px=24, diffuse_gate=True, alert_rule="track", surface_calibration=None)` (P4: truyền `--surface-calibration` khi có) mở Python riêng từ `.venv-patchcore` và truyền `--roi-mode`, `--score-margin-px`, `--diffuse-gate` (cấu hình P3), `--alert-rule` (P5), ghi stderr vào `patchcore_worker.log`, đọc stdout JSON-lines bằng thread và chờ thông điệp ready có timeout; bắt buộc file ngưỡng đã hiệu chỉnh. `_read_responses()` và `_receive()` chuyển lỗi/timeout/worker exit thành lỗi rõ; `analyze()` gửi PNG cùng tick/nhóm/station/pose, xác minh tick/nhóm trả về; `close()` dừng và thu hồi subprocess; `decode_image()` giải mã ảnh stage. Client đã được smoke offline với một frame A và đóng sạch. Bridge/app gọi nhánh này khi người dùng chọn PatchCore và có ngưỡng, nhưng chưa chạy thử cùng Unreal.
+`PatchCoreClient.__init__(..., roi_mode="geometry", score_margin_px=24, diffuse_gate=True, alert_rule="track", surface_calibration=None, border_margin=False)` (P4: truyền `--surface-calibration` khi có, `--border-margin` khi bật; bridge lấy từ `options["patchcore_border_margin"]`) mở Python riêng từ `.venv-patchcore` và truyền `--roi-mode`, `--score-margin-px`, `--diffuse-gate` (cấu hình P3), `--alert-rule` (P5), ghi stderr vào `patchcore_worker.log`, đọc stdout JSON-lines bằng thread và chờ thông điệp ready có timeout; bắt buộc file ngưỡng đã hiệu chỉnh. `_read_responses()` và `_receive()` chuyển lỗi/timeout/worker exit thành lỗi rõ; `analyze()` gửi PNG cùng tick/nhóm/station/pose, xác minh tick/nhóm trả về; `close()` dừng và thu hồi subprocess; `decode_image()` giải mã ảnh stage. Client đã được smoke offline với một frame A và đóng sạch. Bridge/app gọi nhánh này khi người dùng chọn PatchCore và có ngưỡng, nhưng chưa chạy thử cùng Unreal.
 
 ### `auv_dashboard/viewport.py`
 
@@ -544,7 +544,7 @@ Lưu ý: map hiện tại đã được chỉnh thủ công sau lần sinh từ 
 
 ### `auv_dashboard/app.py`
 
-`PATCHCORE_ALERT_RULE = "surface"` (P5) được truyền vào worker qua `options["patchcore_alert_rule"]`; `v2_files(model_dir)` (P4) trả model, `pixel_thresholds.json`, `surface_calibration.json` của một thư mục detector v2 và báo lỗi khi thiếu; `Dashboard(..., v2_model=None)` dùng các file đó thay v1 khi được truyền (mặc định chọn PatchCore, không qua cổng phê duyệt v1) và gửi `patchcore_surface_calibration` cho worker; đổi về `"track"` để dùng tracker ảnh ba frame cũ. `default_detector()` gọi `approval_gate.approval_matches()`; chỉ chọn PatchCore mặc định khi báo cáo B đạt đủ điều kiện và hash của ngưỡng, backbone/bốn bank/config, dataset ROI tham chiếu vẫn khớp bản đã đánh giá; hiện trả PatchCore sau khi B offline đạt. Chế độ `--smoke-test` luôn chọn Classical để giữ hợp đồng QA cũ. Đường dẫn model/dataset/ngưỡng/đánh giá là các hằng số ở đầu file.
+`PATCHCORE_ALERT_RULE = "surface"` (P5) được truyền vào worker qua `options["patchcore_alert_rule"]`; `v2_files(model_dir)` (P4) trả model, `pixel_thresholds.json`, `surface_calibration.json` của một thư mục detector v2 (báo lỗi khi thiếu) và `patchcore_border_margin: True`; `Dashboard(..., v2_model=None)` dùng các file đó thay v1 khi được truyền (mặc định chọn PatchCore, không qua cổng phê duyệt v1) và gửi `patchcore_surface_calibration` cho worker; đổi về `"track"` để dùng tracker ảnh ba frame cũ. `default_detector()` gọi `approval_gate.approval_matches()`; chỉ chọn PatchCore mặc định khi báo cáo B đạt đủ điều kiện và hash của ngưỡng, backbone/bốn bank/config, dataset ROI tham chiếu vẫn khớp bản đã đánh giá; hiện trả PatchCore sau khi B offline đạt. Chế độ `--smoke-test` luôn chọn Classical để giữ hợp đồng QA cũ. Đường dẫn model/dataset/ngưỡng/đánh giá là các hằng số ở đầu file.
 
 | Thành viên `Dashboard` | Trách nhiệm |
 |---|---|
@@ -707,6 +707,10 @@ Không có lệnh rebuild map: `auv_inspection/rebuild.py` không có trong repo
 
 ## 8. Trạng thái đã xác minh và giới hạn
 
+### Tập phát triển 6 capture (P4 phần 4, offline)
+
+- Benchmark `auv_inspection/output/benchmark_p4_dino_g2/` mở rộng tới 6 capture (thêm seed 3-6; log `benchmark_p4_dino_g2_dev6*.log`, chạy qua hai lần tạm dừng của người dùng): v1.4 32/63 vết, 236 báo nhầm; v2 48/63, 42; **v2 + lề mép ảnh 48/63, 20** (lượt tệ nhất 1,81/100 m ở độ đục 4, mọi điều kiện khác ≤ 0,98). Ngoài marine snow v2 bắt 42/45 vết. Chi tiết: `GENERALIZATION_PLAN.md`, Kết quả P4 phần 4.
+
 ### Detector v2 với hình học v2 (P4 phần 3, offline)
 
 - Model: `auv_inspection/output/detector_v2_dino_s2_aug_g2/` và `..._noaug_g2/` (dựng lại từ cùng 4 capture bank, calibration từ cùng 3 capture calibration). Log: `geometry_v2_rebuild.log`, `benchmark_p4_dino_g2.log`, `benchmark_p4_dino_g2_resume.log` (lượt cuối chạy lại sau khi người dùng tạm dừng).
@@ -826,6 +830,7 @@ Checklist trước khi bàn giao:
 
 ## 10. Nhật ký cập nhật tài liệu
 
+- `2026-10-13`: P4 phần 4. `live_service.interior(..., image_border)`, `Session.border_margin`, CLI `--border-margin`; harness detector `dino_surface_b`; dashboard: `v2_files()` bật `patchcore_border_margin`, client/bridge truyền `--border-margin`. Benchmark 6 capture: v2 + lề mép ảnh 48/63 vết, 20 báo nhầm (v2 không lề 42, v1.4 236). Test service quality 11, dashboard 7/7, service v2 khởi động tới `ready` với `--border-margin`. Chưa chạy live với lề mép ảnh.
 - `2026-10-13`: Ghi live v2 (`session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm) và 4 capture heldout mới (seed 3-6) cho tập phát triển. Chỉ đổi tài liệu.
 - `2026-10-13`: Sửa lỗi `NameError` khi chạy `run_dashboard.py --v2-model` (người dùng gặp khi chạy live): `Dashboard._build()` dùng biến cục bộ `v2_model` của `__init__`; nay lưu thành `Dashboard.v2_model`. Đã dựng Dashboard ở cả hai chế độ và khởi động `PatchCoreClient` với tham số v2 tới `ready`; dashboard test 7/7. Chưa chạy live v2.
 - `2026-10-13`: P4 phần 3. Benchmark `benchmark_p4_dino_g2` với hình học v2: v2 + suy giảm mức 1 đạt 17/21 vết, 2 báo nhầm trên 14 lượt (v1.4: 14/21, 78). Dashboard: `app.v2_files()`, `Dashboard(v2_model)`, `run_dashboard.py --v2-model`, bridge/client truyền `--surface-calibration`. Dashboard test 7/7 trong `mainenv`. Chưa chạy live v2.
