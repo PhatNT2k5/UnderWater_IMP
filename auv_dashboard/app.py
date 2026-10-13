@@ -54,6 +54,7 @@ class Dashboard:
                  v2_model: Path | None = None) -> None:
         self.root, self.steps, self.smoke_test = root, steps, smoke_test
         # Opt-in detector v2; the default stays PatchCore v1 behind its approval gate.
+        self.v2_model = v2_model
         self.patchcore_files = (v2_files(v2_model) if v2_model else
                                 {"patchcore_model": PATCHCORE_MODEL, "patchcore_thresholds": PATCHCORE_THRESHOLDS})
         self.context = mp.get_context("spawn")
@@ -126,7 +127,7 @@ class Dashboard:
         self.mode_box = ttk.Combobox(controls, textvariable=self.mode, values=["Tự động", "Thủ công"], state="readonly", width=12)
         self.mode_box.pack(side="left", padx=10)
         self.detector = tk.StringVar(value="Classical" if self.smoke_test else
-                                     "PatchCore" if v2_model else default_detector())
+                                     "PatchCore" if self.v2_model else default_detector())
         self.detector_box = ttk.Combobox(controls, textvariable=self.detector,
                                          values=["Classical", "PatchCore"], state="readonly", width=12)
         self.detector_box.pack(side="left", padx=(0, 10))
