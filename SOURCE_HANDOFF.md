@@ -830,6 +830,7 @@ Checklist trước khi bàn giao:
 
 ## 10. Nhật ký cập nhật tài liệu
 
+- `2026-10-13`: Đo hồ sơ ô sạch theo khoảng cách tới vòng bích (v2 + lề mép ảnh, 3 capture calibration và 6 capture phát triển, gốc và độ đục 4; `auv_inspection/output/joint_profile_v2.log`): giữ `JOINT_HALF_WIDTH_M` = 0,5; báo nhầm độ đục 4 rải dọc thân ống, không do vòng bích. Không đổi code.
 - `2026-10-13`: P4 phần 4. `live_service.interior(..., image_border)`, `Session.border_margin`, CLI `--border-margin`; harness detector `dino_surface_b`; dashboard: `v2_files()` bật `patchcore_border_margin`, client/bridge truyền `--border-margin`. Benchmark 6 capture: v2 + lề mép ảnh 48/63 vết, 20 báo nhầm (v2 không lề 42, v1.4 236). Test service quality 11, dashboard 7/7, service v2 khởi động tới `ready` với `--border-margin`. Chưa chạy live với lề mép ảnh.
 - `2026-10-13`: Ghi live v2 (`session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm) và 4 capture heldout mới (seed 3-6) cho tập phát triển. Chỉ đổi tài liệu.
 - `2026-10-13`: Sửa lỗi `NameError` khi chạy `run_dashboard.py --v2-model` (người dùng gặp khi chạy live): `Dashboard._build()` dùng biến cục bộ `v2_model` của `__init__`; nay lưu thành `Dashboard.v2_model`. Đã dựng Dashboard ở cả hai chế độ và khởi động `PatchCoreClient` với tham số v2 tới `ready`; dashboard test 7/7. Chưa chạy live v2.
