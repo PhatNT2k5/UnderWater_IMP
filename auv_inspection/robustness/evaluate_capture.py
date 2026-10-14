@@ -46,7 +46,10 @@ PATCHCORE_THRESHOLDS = INSPECTION / "output/patchcore_thresholds_v1.json"
 # Detector v2 (P4): each model directory holds its banks, pixel thresholds and surface calibration.
 # "_g2": banks and calibrations rebuilt with geometry v2 (the earlier directories used v1).
 V2_MODELS = {"dino_surface": INSPECTION / "output/detector_v2_dino_s2_aug_g2",
-             "dino_surface_noaug": INSPECTION / "output/detector_v2_dino_s2_noaug_g2"}
+             "dino_surface_noaug": INSPECTION / "output/detector_v2_dino_s2_noaug_g2",
+             # P4.3: same banks as dino_surface plus a nuisance projection / Mahalanobis whitening.
+             "dino_nfad": INSPECTION / "output/detector_v2_dino_s2_aug_g2_nfad8",
+             "dino_maha": INSPECTION / "output/detector_v2_dino_s2_aug_g2_maha"}
 
 
 @dataclass(frozen=True)
@@ -120,7 +123,7 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
 
 
 DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md",
-             "patchcore_surface", *V2_MODELS, "dino_surface_b")
+             "patchcore_surface", *V2_MODELS, *(f"{name}_b" for name in V2_MODELS))
 
 
 def make_detector(name: str) -> Detector:
@@ -128,12 +131,13 @@ def make_detector(name: str) -> Detector:
     _m adds the P3 scoring margin; _md adds the margin and the diffuse-anomaly gate;
     patchcore_surface = _md with the P5 surface alert rule (surface_evidence.CALIBRATION_FILE);
     dino_surface(_noaug) = detector v2 with the same ROI, margin, gate and surface rule;
-    dino_surface_b = dino_surface with the margin also at the image border."""
+    dino_nfad / dino_maha = dino_surface banks with a P4.3 feature transform;
+    a "_b" suffix adds the margin at the image border."""
     if name == "classical":
         return classical_detector()
     if name == "patchcore":
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "reference")
-    if name in V2_MODELS or name == "dino_surface_b":
+    if name in DETECTORS and name.removesuffix("_b") in V2_MODELS:
         from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
         model = V2_MODELS[name.removesuffix("_b")]
         return patchcore_detector(model, PATCHCORE_REFERENCE, model / "pixel_thresholds.json", "geometry",

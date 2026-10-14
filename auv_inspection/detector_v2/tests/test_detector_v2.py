@@ -10,7 +10,7 @@ from unittest import mock
 import numpy as np
 import torch
 
-from auv_inspection.detector_v2 import build_bank, scorer
+from auv_inspection.detector_v2 import build_bank, scorer, transforms
 from auv_inspection.detector_v2.features import PATCH_PX, input_size, roi_cells
 
 
@@ -66,6 +66,40 @@ class ScorerTests(unittest.TestCase):
             self.assertFalse(scorer.is_v2_model(path))
             with self.assertRaises(ValueError):
                 scorer.load_scorer(path, torch.device("cpu"))
+
+
+class TransformTests(unittest.TestCase):
+    def test_nuisance_projection_removes_the_nuisance_direction_only(self) -> None:
+        rng = np.random.default_rng(0)
+        noise = torch.zeros(500, 6, dtype=torch.float64)
+        noise[:, 0] = torch.from_numpy(rng.normal(0, 3.0, 500))   # environment moves axis 0
+        noise[:, 1:] = torch.from_numpy(rng.normal(0, 0.1, (500, 5)))
+        transform, explained = transforms.nuisance_projection(noise.T @ noise / 500, 1)
+        self.assertGreater(explained, 0.9)
+        projected = transform.apply(torch.tensor([[1.0, 1.0, 0, 0, 0, 0]]))
+        self.assertLess(abs(float(projected[0, 0])), 1e-2)              # nuisance component removed
+        self.assertAlmostEqual(float(projected[0, 1]), 1.0, places=3)    # orthogonal component kept
+        state = transforms.from_state(transform.state())
+        self.assertEqual(state.metric, "cosine")
+
+    def test_mahalanobis_whitening_gives_unit_covariance(self) -> None:
+        rng = np.random.default_rng(1)
+        bank = torch.from_numpy(rng.normal(0, 1, (4000, 4)) * [5.0, 1.0, 0.2, 2.0]).float()
+        transform = transforms.mahalanobis_whitening(bank, shrinkage=0.0)
+        whitened = transform.apply(bank).double()
+        covariance = torch.cov(whitened.T)
+        np.testing.assert_allclose(covariance.numpy(), np.eye(4), atol=0.08)
+        self.assertEqual(transform.metric, "euclidean")
+        with self.assertRaises(ValueError):
+            transforms.mahalanobis_whitening(bank, shrinkage=1.0)
+
+    def test_euclidean_distance_across_bank_chunks(self) -> None:
+        bank = torch.tensor([[0.0, 0.0], [3.0, 4.0], [10.0, 0.0]])
+        with mock.patch.object(scorer, "BANK_CHUNK", 1):
+            distance = scorer.nearest_distance(torch.tensor([[3.0, 0.0], [3.0, 4.0]]), bank, "euclidean")
+        np.testing.assert_allclose(distance.numpy(), [3.0, 0.0], atol=1e-5)
+        with self.assertRaises(ValueError):
+            scorer.nearest_distance(bank, bank, "manhattan")
 
 
 class BankRuleTests(unittest.TestCase):

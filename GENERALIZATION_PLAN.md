@@ -17,7 +17,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P2 | ROI hình học + tọa độ bề mặt | **Xong** (live `session_20261009_103800_863732`: 3/3 vết, 2 báo nhầm ở biên ROI, 1 báo trùng) | Hiệu chỉnh hình học IoU kiểm tra 0,89-1,00; ROI hình học + lọc góc tới; frame được phân tích 100%; xem mục Kết quả P2. Tọa độ bề mặt (`surface_coordinates`) đã có, dùng ở P5 |
 | P3 | Cổng chất lượng ảnh | **Xong** (live `session_20261009_150224_114943`: 3/3 vết, **0 báo nhầm**, 1 báo trùng vết trụ) | Lề chấm điểm 24 px + cổng `diffuse_anomaly`; số đo chất lượng chỉ để chẩn đoán (cổng theo phân vị bị loại). Tập phát triển: tổng báo nhầm 14 lượt chạy 410 → 97, recall giữ ở điều kiện có nghĩa; xem mục Kết quả P3 |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng trên bề mặt | **Xong** (live `session_20261012_164927_783087`: **3/3 vết, 0 báo nhầm, 0 báo trùng**) | Quy tắc k = 3 lượt nhìn trên ô 10 cm, hit = ngưỡng pixel AND ngưỡng tương đối theo tầng (thân ống / mối nối / mặt trụ), calibrate conformal trên 3 capture sạch train mới. Tập phát triển: 0 báo nhầm ở 12/14 lượt (v1.3: 30), marine snow 3 vẫn 19-21/100 m; xem mục Kết quả P5 |
-| P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Đang làm** (phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
+| P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Đang làm** (P4.3: NFAD 55/63 vết, 30 báo nhầm; Mahalanobis 40/63, 5 báo nhầm, xem Kết quả P4.3; phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | Chưa làm | |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | Chưa làm | |
 
@@ -184,6 +184,26 @@ Tập phát triển mở rộng thêm 4 capture heldout (map A seed 3, 4; map s�
 - **Recall ngoài marine snow 42/45 (93%)**, vượt mục tiêu 90%; marine snow 3 và 5 chỉ 3/9 mỗi mức. Tổng 76% chưa đạt.
 - **Báo nhầm còn lại chủ yếu ở độ đục 4** (13/20); trừ độ đục 4, mọi lượt ≤ 0,98/100 m. Giả thuyết "vùng ảnh hưởng vòng bích rộng hơn 0,5 m khi nước đục" đã bị bác bỏ (xem nhật ký quyết định 2026-10-13): ô vượt ngưỡng ở độ đục 4 rải dọc thân ống, tức lệch miền do nước đục.
 - **Live v2** (lượt `session_20261013_091452_126695`, chưa có lề mép ảnh): 3/3 vết, 1 báo nhầm.
+
+## Kết quả P4.3: NFAD và Mahalanobis (2026-10-14, tập phát triển 6 capture)
+
+Cả hai là biến đổi tuyến tính trên bank của `detector_v2_dino_s2_aug_g2` (không dựng lại bank), có lề mép ảnh, calibration ngưỡng pixel và ngưỡng tầng riêng trên 3 capture calibration. NFAD: 8 hướng nhiễu từ chênh lệch token giữa frame capture bank và chính frame đó suy giảm mức 1 (6 yếu tố, 100 frame mỗi capture), giải thích 47-51% phương sai nhiễu theo nhóm. Mahalanobis: shrinkage 0,1. Kết quả: `auv_inspection/output/benchmark_p4_dino_g2/` (vết map A, báo nhầm, lượt tệ nhất/100 m).
+
+| Điều kiện | v2 + lề mép ảnh | NFAD k = 8 | Mahalanobis |
+|---|---|---|---|
+| Gốc | 9/9, 3 (0,61) | 9/9, 5 (1,42) | 9/9, 0 |
+| Độ đục 2 | 9/9, 2 (0,98) | 9/9, 5 (1,91) | 9/9, 3 (0,98) |
+| Độ đục 4 | 8/9, 13 (1,81) | 8/9, **0** | 6/9, 0 |
+| Marine snow 3 | 3/9, 0 | **8/9**, 16 (2,72) | 3/9, 0 |
+| Marine snow 5 | 3/9, 1 (0,47) | **8/9**, 3 (0,98) | 0/9, 1 (0,45) |
+| Đèn yếu 4 | 9/9, 1 (0,61) | 9/9, 1 (0,48) | 9/9, 1 (0,48) |
+| Mờ chuyển động 3 | **7/9**, 0 | 4/9, 0 | 4/9, 0 |
+| **Tổng** | 48/63 (76%), 20 | **55/63 (87%)**, 30 | 40/63 (63%), **5** |
+
+- **NFAD** tăng recall mạnh ở marine snow (3/9 → 8/9 mỗi mức) và bỏ hết báo nhầm độ đục 4 (13 → 0), nhưng thêm báo nhầm ở marine snow 3 (0 → 16), gốc và độ đục 2, và **mất vết khi mờ chuyển động** (7/9 → 4/9). Đúng cảnh báo ShiftSplit-AD: một phần tín hiệu vết nứt mảnh (mờ làm vết giống thay đổi môi trường) nằm trong các hướng bị loại.
+- **Mahalanobis** là biến thể duy nhất đạt **≤ 1 báo nhầm/100 m ở cả 42 lượt** (5 báo nhầm), nhưng recall giảm còn 63% (marine snow 5: 0/9, mờ: 4/9, độ đục 4: 6/9).
+- Không biến thể nào đạt đồng thời cả hai tiêu chí; mỗi kỹ thuật đánh đổi một phía. Chưa đổi mặc định (dashboard vẫn v2 + lề mép ảnh).
+- Thời gian xử lý trung vị: 256-326 ms/frame cho cả ba (phép biến đổi không làm chậm đáng kể).
 
 ## Tiêu chí nghiệm thu (bản đầu)
 
