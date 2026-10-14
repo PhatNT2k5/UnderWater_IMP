@@ -18,7 +18,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P3 | Cổng chất lượng ảnh | **Xong** (live `session_20261009_150224_114943`: 3/3 vết, **0 báo nhầm**, 1 báo trùng vết trụ) | Lề chấm điểm 24 px + cổng `diffuse_anomaly`; số đo chất lượng chỉ để chẩn đoán (cổng theo phân vị bị loại). Tập phát triển: tổng báo nhầm 14 lượt chạy 410 → 97, recall giữ ở điều kiện có nghĩa; xem mục Kết quả P3 |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng trên bề mặt | **Xong** (live `session_20261012_164927_783087`: **3/3 vết, 0 báo nhầm, 0 báo trùng**) | Quy tắc k = 3 lượt nhìn trên ô 10 cm, hit = ngưỡng pixel AND ngưỡng tương đối theo tầng (thân ống / mối nối / mặt trụ), calibrate conformal trên 3 capture sạch train mới. Tập phát triển: 0 báo nhầm ở 12/14 lượt (v1.3: 30), marine snow 3 vẫn 19-21/100 m; xem mục Kết quả P5 |
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Xong offline** (ứng viên: v2 + lề mép ảnh; P4.3 kết hợp NFAD + Mahalanobis 42/63, 17 không hơn; trước đó P4.3: NFAD 55/63 vết, 30 báo nhầm; Mahalanobis 40/63, 5 báo nhầm, xem Kết quả P4.3; phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
-| P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Đang làm** (P6.1: đo vùng mơ hồ offline; thiết kế ở mục 3.7) | |
+| P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | Chưa làm | |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
@@ -207,6 +207,27 @@ Cả hai là biến đổi tuyến tính trên bank của `detector_v2_dino_s2_a
 - **NFAD rồi Mahalanobis** (`dino_nfmaha_b`: phép chiếu của `nfad8`, rồi làm trắng trên bank đã chiếu): 42/63 vết (67%), 17 báo nhầm (lượt tệ nhất 1,47/100 m). Không gộp được ưu điểm: giữ phần lớn recall marine snow 3 của NFAD (7/9) nhưng mất hết vết ở marine snow 5 như Mahalanobis (0/9) và tệ nhất khi mờ (2/9).
 - **Kết luận P4.3:** không biến thể nào trội trên mọi mặt; giữ **v2 + lề mép ảnh** làm ứng viên chính (48/63, 20 báo nhầm, cân bằng nhất, mờ 7/9). NFAD ghi nhận là lựa chọn khi vùng nước nhiều marine snow (8/9 mỗi mức). SPARC chưa thử (cần frame sạch đã xác nhận tại hiện trường).
 
+## Kết quả P6.1: vùng bằng chứng mơ hồ (2026-10-14, tập phát triển 6 capture)
+
+Ứng viên `dino_surface_b`, 42 lượt, `auv_inspection/output/benchmark_p6_ambiguity/` (mục `ambiguity` trong mỗi kết quả). Vùng mơ hồ = ô chưa báo có 1-2 hit, gộp trong 0,6 m, đếm cuối lượt.
+
+| Điều kiện | Vùng ≥ 1 hit /100 m | Vùng ≥ 2 hit /100 m | Vết sót | Sót trong vùng ≥ 1 hit | Sót trong vùng ≥ 2 hit |
+|---|---|---|---|---|---|
+| Gốc | 18,3 | 3,4 | 0 | 0 | 0 |
+| Độ đục 2 | 20,8 | 5,0 | 0 | 0 | 0 |
+| Độ đục 4 | 18,5 | 5,9 | 1 | 1 | 1 |
+| Marine snow 3 | 22,0 | 1,3 | 6 | 1 | 0 |
+| Marine snow 5 | 22,1 | 3,2 | 6 | 0 | 0 |
+| Đèn yếu 4 | 16,9 | 2,3 | 0 | 0 | 0 |
+| Mờ chuyển động 3 | 12,4 | 2,1 | 2 | 2 | 1 |
+| **Tổng** | **18,7** | **3,3** | **15** | **4** | **2** |
+
+- **Chi phí:** quay lại mọi vùng ≥ 1 hit là khoảng 19 lần/100 m; chỉ vùng ≥ 2 hit là 3,3 lần/100 m.
+- **Lợi ích tối đa nhỏ:** 4/15 vết sót nằm trong vùng mơ hồ, 2/15 trong vùng ≥ 2 hit. Marine snow chiếm 12/15 vết sót nhưng ở đó vết gần như không đạt hit nào (cổng lan tỏa abstain 33-37% frame, điểm không qua ngưỡng): bằng chứng vắng mặt chứ không mơ hồ.
+- **Lợi ích vật lý của việc tiến gần không đo được** trong hệ thống hiện tại: suy giảm được áp offline lên ảnh, không phụ thuộc khoảng cách, và Unreal của dự án không có độ đục/marine snow (`water_fog` cần tag `WaterPPV`).
+- **Quyết định:** dừng P6 ở mức đo (không viết logic chèn route), chuyển P7. Làm lại P6 khi có mô phỏng độ đục/marine snow phụ thuộc khoảng cách, với quy tắc vùng ≥ 2 hit và ngân sách khoảng 3 lần/100 m.
+- **Live v2 + lề mép ảnh** (`auv_dashboard/output/session_20261014_161937_404843/`, map A, điều kiện gốc): route 359/359, **3/3 vết, 0 báo nhầm** (tick 399 `A_pipe_front_1` 0,20 m; 633 `A_pipe_front_2` 0,04 m; 3237 `A_pier_0_1` 0,07 m); báo nhầm vân bê tông của lượt live v2 trước không còn. 32 frame `diffuse_anomaly` do tiêu chí > 6 vùng. Median 321 ms/frame (p90 506 ms), chạy đồng thời với benchmark P6.1 trên cùng GPU nên không phải tốc độ đơn lẻ.
+
 ## Tiêu chí nghiệm thu (bản đầu)
 
 Đo trên **điều kiện môi trường chưa từng dùng** để train hay chọn ngưỡng:
@@ -226,6 +247,7 @@ Cả hai là biến đổi tuyến tính trên bank của `detector_v2_dino_s2_a
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
 | 2026-10-09 | Live P2 xác nhận nguồn báo nhầm chính là **biên ROI** (đầu ống, mép ống khi nhìn xiên): ROI giới hạn tâm đặc trưng nhưng trường nhìn của đặc trưng rộng hơn. Thêm vào **P3** một lề chấm điểm bên trong ROI theo trường nhìn của đặc trưng, đánh giá trên tập phát triển trước. Báo trùng cùng một vết (hai vị trí cách 2,08 m) để **P5** gộp theo tọa độ bề mặt |
+| 2026-10-14 | **Dừng P6 sau P6.1** (đo offline, không viết logic chèn route). Vết bị sót trên tập phát triển chủ yếu ở marine snow, nơi bằng chứng vắng mặt chứ không mơ hồ; lợi ích tối đa của quay lại theo vùng mơ hồ là 2-4/15 vết; lợi ích vật lý của tiến gần (cột nước ngắn hơn) không mô phỏng được vì suy giảm offline không phụ thuộc khoảng cách và Unreal không có độ đục/marine snow. Chuyển P7 |
 | 2026-10-14 | Kết thúc P4: ứng viên detector là **v2 (DINOv2 + bank suy giảm mức 1) + lề 24 px cả ở mép ảnh**, cân bằng nhất trên tập phát triển 6 capture (48/63 vết, 20 báo nhầm). Ablation P4.3: NFAD tăng recall marine snow nhưng mất vết khi mờ và thêm báo nhầm; Mahalanobis giảm báo nhầm nhưng mất recall; kết hợp hai cái kém cả ứng viên. Không thử thêm biến thể trên cùng tập phát triển để tránh khớp quá; P7 kiểm ứng viên trên heldout mới |
 | 2026-10-13 | **Giữ dải mối nối ±0,5 m** (không nới theo báo nhầm độ đục 4). Đo số ô sạch sẽ báo nếu áp ngưỡng thân ống, theo khoảng cách tới vòng bích gần nhất, với v2 + lề mép ảnh: 3 capture calibration gần như 0 ở mọi khoảng cách; tập phát triển điều kiện gốc 39 ô trong 0-0,2 m (đã nằm trong dải và bị ngưỡng mối nối chặn), 1 ô ở 0,3-0,5 m, 1 ô ngoài 1 m; độ đục 4: 31 ô trong 0-0,2 m, 4 ở 0,3-0,5 m, 15 ở 0,5-1,0 m, 7 ngoài 1 m. Ở độ đục 4 các ô rải dọc thân ống chứ không dồn ngay ngoài mép dải, nên nguyên nhân là ngoại hình thân ống thay đổi khi nước đục (lệch miền), không phải vòng bích; nới dải sẽ là tinh chỉnh theo tập phát triển mà ít tác dụng. Log: `auv_inspection/output/joint_profile_v2.log` |
 | 2026-10-13 | Tập phát triển mở rộng 4 capture heldout (map A seed 3, 4; map sạch seed 5, 6), người dùng chạy. v2 dùng **lề 24 px cả ở mép ảnh** (`--border-margin`, mặc định tắt cho v1): báo nhầm v2 trên các capture mới tập trung sát mép ảnh; trên 6 capture lề này giảm báo nhầm 42 → 20 mà không mất vết. Chọn sau khi đo trên tập phát triển, P7 kiểm lại |
