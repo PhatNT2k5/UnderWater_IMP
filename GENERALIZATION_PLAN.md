@@ -19,7 +19,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P5 | Ngưỡng conformal + tích lũy bằng chứng trên bề mặt | **Xong** (live `session_20261012_164927_783087`: **3/3 vết, 0 báo nhầm, 0 báo trùng**) | Quy tắc k = 3 lượt nhìn trên ô 10 cm, hit = ngưỡng pixel AND ngưỡng tương đối theo tầng (thân ống / mối nối / mặt trụ), calibrate conformal trên 3 capture sạch train mới. Tập phát triển: 0 báo nhầm ở 12/14 lượt (v1.3: 30), marine snow 3 vẫn 19-21/100 m; xem mục Kết quả P5 |
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Xong offline** (ứng viên: v2 + lề mép ảnh; P4.3 kết hợp NFAD + Mahalanobis 42/63, 17 không hơn; trước đó P4.3: NFAD 55/63 vết, 30 báo nhầm; Mahalanobis 40/63, 5 báo nhầm, xem Kết quả P4.3; phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
-| P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Đang làm** (đã đăng ký trước; 6 capture heldout seed 101-106 đủ route; nhãn map B đã khóa; benchmark đang chạy) | `robustness/acceptance_preregistration.json` |
+| P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt); còn live map A/B và cổng hash code | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
 
@@ -228,6 +228,27 @@ Cả hai là biến đổi tuyến tính trên bank của `detector_v2_dino_s2_a
 - **Quyết định:** dừng P6 ở mức đo (không viết logic chèn route), chuyển P7. Làm lại P6 khi có mô phỏng độ đục/marine snow phụ thuộc khoảng cách, với quy tắc vùng ≥ 2 hit và ngân sách khoảng 3 lần/100 m.
 - **Live v2 + lề mép ảnh** (`auv_dashboard/output/session_20261014_161937_404843/`, map A, điều kiện gốc): route 359/359, **3/3 vết, 0 báo nhầm** (tick 399 `A_pipe_front_1` 0,20 m; 633 `A_pipe_front_2` 0,04 m; 3237 `A_pier_0_1` 0,07 m); báo nhầm vân bê tông của lượt live v2 trước không còn. 32 frame `diffuse_anomaly` do tiêu chí > 6 vùng. Median 321 ms/frame (p90 506 ms), chạy đồng thời với benchmark P6.1 trên cùng GPU nên không phải tốc độ đơn lẻ.
 
+## Kết quả P7: nghiệm thu offline trên dữ liệu heldout mới (2026-10-15)
+
+Theo đúng đăng ký trước (`robustness/acceptance_preregistration.json`, code `2114d6a`, SHA256 artifact khớp, nhãn map B khóa `ecedd4f0...` trước khi chấm). 6 capture seed 101-106 (map A 101/102, map sạch 103/104, map B 105/106), 7 điều kiện, 42 lượt mỗi detector, `auv_inspection/output/benchmark_p7_acceptance/`, báo cáo `acceptance_report.json` (`acceptance.py`).
+
+| Tiêu chí (gộp mọi điều kiện) | Ngưỡng | Ứng viên `dino_surface_b` | Đối chứng `patchcore_surface` |
+|---|---|---|---|
+| Recall theo vết vật lý | ≥ 90% | **72,3%** (81/112; bootstrap 95%: 63,5-79,4%) **không đạt** | 58,9% (66/112; 49,4-68,8%) không đạt |
+| Báo nhầm /100 m | ≤ 1 | **0,345** (30 trên 86,9 m×100; 0,19-0,56) đạt | 2,89 (1,96-3,88) không đạt |
+| FPR mức ô (cận trên Wilson 95%) | ≤ 5% | **0,031%** (138/523.525 ô) đạt | 0,150% đạt |
+| **Kết luận** | | **Không đạt nghiệm thu** | Không đạt |
+
+Recall ứng viên theo điều kiện: gốc 15/16, độ đục 2 15/16, độ đục 4 15/16, đèn yếu 4 16/16, mờ chuyển động 3 12/16, **marine snow 3 4/16, marine snow 5 4/16** (cổng lan tỏa abstain 33-36% frame). Theo map: A 33/42, B 48/70 (seed 105 27/35, seed 106 21/35).
+
+Phân tích sau (không thay đổi kết luận, không dùng để chỉnh gì trên bộ dữ liệu này):
+- Ngoài marine snow ứng viên tìm 73/80 vết (91%), gần với tập phát triển (42/45); 24/31 vết sót nằm trong marine snow. Đây là giới hạn đã biết từ P4/P6.
+- Map B (lỗ thủng, chưa có trong dev) không sụp: 48/70. Vết sót ngoài marine snow đều ở seed 106 (route trụ gần 2,43 m): `B_pipe_front_hole_large` ở gốc và độ đục 2, cả 4 vết ống/trụ ở mờ chuyển động 3.
+- 17/30 báo nhầm của ứng viên nằm ở chân trụ (z < -10 m), lặp lại theo điều kiện trên cùng vị trí (ví dụ (10,9; -7,2; -10,4) ở 4 điều kiện seed 101).
+- Ứng viên tốt hơn đối chứng ở cả ba chỉ số; đối chứng có 154 báo nhầm riêng ở marine snow 3.
+
+Theo quy tắc đã đăng ký, không đổi ngưỡng, bank, cổng hay nhãn sau khi xem kết quả; mọi cải tiến (marine snow, chân trụ) phải qua đăng ký mới và dữ liệu heldout mới.
+
 ## Tiêu chí nghiệm thu (bản đầu)
 
 Đo trên **điều kiện môi trường chưa từng dùng** để train hay chọn ngưỡng:
@@ -247,6 +268,7 @@ Cả hai là biến đổi tuyến tính trên bank của `detector_v2_dino_s2_a
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
 | 2026-10-09 | Live P2 xác nhận nguồn báo nhầm chính là **biên ROI** (đầu ống, mép ống khi nhìn xiên): ROI giới hạn tâm đặc trưng nhưng trường nhìn của đặc trưng rộng hơn. Thêm vào **P3** một lề chấm điểm bên trong ROI theo trường nhìn của đặc trưng, đánh giá trên tập phát triển trước. Báo trùng cùng một vết (hai vị trí cách 2,08 m) để **P5** gộp theo tọa độ bề mặt |
+| 2026-10-15 | **Kết quả nghiệm thu P7 offline: ứng viên v2 + lề mép ảnh không đạt** vì recall 72,3% (bootstrap 63,5-79,4%) < 90%; báo nhầm 0,345/100 m và FPR mức ô 0,031% đạt. Đối chứng v1.4: 58,9%, 2,89/100 m. Thiếu hụt chủ yếu ở marine snow (8/32). Giữ nguyên kết luận theo đăng ký; không chỉnh gì trên dữ liệu heldout này |
 | 2026-10-14 | **Khóa nhãn map B** (`robustness/inventories/map_B.json`, SHA256 `ecedd4f0...`, ghi vào `acceptance_preregistration.json` mục `map_B_labels_locked`): 5 vết (2 nứt và 2 lỗ trên mặt trước ống, 1 nứt mặt trước trụ 1), vẽ chỉ từ ảnh seed 105 (mỗi vết 2 frame, lệch ≤ 0,04 m), kiểm trên seed 106, người dùng duyệt bảng ảnh trước khi detector nào chạy trên map B. Vị trí đặt decal trong script tạo map chỉ dùng để đối chiếu |
 | 2026-10-14 | **Đăng ký trước P7** (`auv_inspection/robustness/acceptance_preregistration.json`, commit code `2114d6a`, người dùng duyệt kế hoạch): ứng viên `dino_surface_b` (v2 + lề mép ảnh), đối chứng `patchcore_surface` (v1.4), SHA256 của mọi bank, ngưỡng, calibration, hình học và nhãn map A; dữ liệu heldout mới seed 101-102 (map A), 103-104 (map sạch), 105-106 (map B, chưa ai xem); 7 điều kiện, seed suy giảm 0. Tiêu chí: recall theo vết vật lý ≥ 90%, ≤ 1 báo nhầm/100 m (gộp mọi điều kiện), **FPR mức ô** ≤ 5% theo cận trên Wilson 95% (ô bề mặt sạch đã đánh giá phát cảnh báo; tỷ lệ frame có ứng viên không phải cảnh báo nên không dùng). Nhãn map B vẽ chỉ từ ảnh capture, người dùng duyệt và khóa trước khi chấm. Không đổi gì sau đăng ký; mọi thay đổi cần đăng ký và dữ liệu heldout mới |
 | 2026-10-14 | **Dừng P6 sau P6.1** (đo offline, không viết logic chèn route). Vết bị sót trên tập phát triển chủ yếu ở marine snow, nơi bằng chứng vắng mặt chứ không mơ hồ; lợi ích tối đa của quay lại theo vùng mơ hồ là 2-4/15 vết; lợi ích vật lý của tiến gần (cột nước ngắn hơn) không mô phỏng được vì suy giảm offline không phụ thuộc khoảng cách và Unreal không có độ đục/marine snow. Chuyển P7 |
