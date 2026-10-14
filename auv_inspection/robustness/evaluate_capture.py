@@ -49,7 +49,8 @@ V2_MODELS = {"dino_surface": INSPECTION / "output/detector_v2_dino_s2_aug_g2",
              "dino_surface_noaug": INSPECTION / "output/detector_v2_dino_s2_noaug_g2",
              # P4.3: same banks as dino_surface plus a nuisance projection / Mahalanobis whitening.
              "dino_nfad": INSPECTION / "output/detector_v2_dino_s2_aug_g2_nfad8",
-             "dino_maha": INSPECTION / "output/detector_v2_dino_s2_aug_g2_maha"}
+             "dino_maha": INSPECTION / "output/detector_v2_dino_s2_aug_g2_maha",
+             "dino_nfmaha": INSPECTION / "output/detector_v2_dino_s2_aug_g2_nfmaha"}
 
 
 @dataclass(frozen=True)
@@ -131,7 +132,8 @@ def make_detector(name: str) -> Detector:
     _m adds the P3 scoring margin; _md adds the margin and the diffuse-anomaly gate;
     patchcore_surface = _md with the P5 surface alert rule (surface_evidence.CALIBRATION_FILE);
     dino_surface(_noaug) = detector v2 with the same ROI, margin, gate and surface rule;
-    dino_nfad / dino_maha = dino_surface banks with a P4.3 feature transform;
+    dino_nfad / dino_maha / dino_nfmaha = dino_surface banks with a P4.3 feature transform
+    (nfmaha: the nfad projection, then whitening of the projected bank);
     a "_b" suffix adds the margin at the image border."""
     if name == "classical":
         return classical_detector()

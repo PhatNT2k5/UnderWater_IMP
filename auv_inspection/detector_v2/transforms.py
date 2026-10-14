@@ -7,6 +7,7 @@
   development benchmark shows it helps.
 - `mahalanobis`: whiten with the bank's mean and shrunk covariance, z' = (z - mu) Sigma^-1/2,
   Euclidean search (Mahalanobis PatchCore).
+- a chain applies several in order (nuisance projection, then whitening of the projected bank).
 """
 from __future__ import annotations
 
@@ -44,7 +45,31 @@ class FeatureTransform:
                 "mean": None if self.mean is None else self.mean.cpu()}
 
 
-def from_state(state: dict) -> FeatureTransform:
+@dataclass(frozen=True)
+class ChainedTransform:
+    steps: tuple[FeatureTransform, ...]
+
+    @property
+    def metric(self) -> str:
+        return self.steps[-1].metric
+
+    def apply(self, tokens: torch.Tensor) -> torch.Tensor:
+        for step in self.steps:
+            tokens = step.apply(tokens)
+        return tokens
+
+    def to(self, device: torch.device) -> "ChainedTransform":
+        return ChainedTransform(tuple(step.to(device) for step in self.steps))
+
+    def state(self) -> list[dict]:
+        return [step.state() for step in self.steps]
+
+
+def from_state(state: dict | list) -> FeatureTransform | ChainedTransform:
+    if isinstance(state, list):
+        if not state:
+            raise ValueError("Empty transform chain")
+        return ChainedTransform(tuple(from_state(step) for step in state))
     if state["kind"] not in KINDS:
         raise ValueError(f"Unknown transform kind {state['kind']!r}")
     return FeatureTransform(state["kind"], state["matrix"], state.get("mean"))

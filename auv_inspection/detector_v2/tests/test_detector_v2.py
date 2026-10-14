@@ -93,6 +93,19 @@ class TransformTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             transforms.mahalanobis_whitening(bank, shrinkage=1.0)
 
+    def test_chain_applies_steps_in_order_and_round_trips(self) -> None:
+        bank = torch.randn(500, 4)
+        projection, _ = transforms.nuisance_projection(torch.diag(torch.tensor([9.0, 1.0, 1.0, 1.0])), 1)
+        whitening = transforms.mahalanobis_whitening(projection.apply(bank), 0.1)
+        chain = transforms.ChainedTransform((projection, whitening))
+        expected = whitening.apply(projection.apply(bank))
+        torch.testing.assert_close(chain.apply(bank), expected)
+        restored = transforms.from_state(chain.state())
+        torch.testing.assert_close(restored.apply(bank), expected)
+        self.assertEqual(restored.metric, "euclidean")
+        with self.assertRaises(ValueError):
+            transforms.from_state([])
+
     def test_euclidean_distance_across_bank_chunks(self) -> None:
         bank = torch.tensor([[0.0, 0.0], [3.0, 4.0], [10.0, 0.0]])
         with mock.patch.object(scorer, "BANK_CHUNK", 1):

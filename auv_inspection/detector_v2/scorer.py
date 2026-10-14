@@ -18,7 +18,7 @@ import numpy as np
 import torch
 
 from .features import DinoExtractor, MODEL_NAME, frame_tokens, load_extractor
-from .transforms import FeatureTransform, from_state
+from .transforms import ChainedTransform, FeatureTransform, from_state
 
 BANK_CHUNK = 16384  # bank rows per similarity matmul, bounds GPU memory on the 4 GB card
 MODEL_KIND = "DINOv2-kNN"
@@ -51,7 +51,7 @@ def nearest_distance(tokens: torch.Tensor, bank: torch.Tensor, metric: str = "co
 class DinoScorer:
     extractor: DinoExtractor
     banks: dict[str, torch.Tensor]                       # already transformed when transforms is set
-    transforms: dict[str, FeatureTransform] | None = None
+    transforms: dict[str, FeatureTransform | ChainedTransform] | None = None
 
     def __call__(self, frame: np.ndarray, roi: np.ndarray, category: str) -> np.ndarray:
         if category not in self.banks:
