@@ -1,0 +1,78 @@
+{
+  "registered": "2026-10-14T19:04:54+07:00",
+  "code_commit": "2114d6afa52563167495fbeeb8b28007c4f8b94c",
+  "purpose": "P7 acceptance on held-out captures nobody has looked at; everything below is fixed before the data exist",
+  "candidate": {
+    "harness_name": "dino_surface_b",
+    "description": "DINOv2 ViT-S/14 kNN, bank of 4 clean train captures + severity-1 augmentation, geometric ROI (geometry v2), 24 px score margin incl. image border, diffuse gate (spread), surface rule k=3",
+    "model_dir": "auv_inspection/output/detector_v2_dino_s2_aug_g2",
+    "sha256": {
+      "config.json": "7ed6e8b9cce0ac3189794edb373afc630326762e0672b7344f35176410c998fc",
+      "pipe_front_bank.pt": "f8ca2192d6fdb0e28272af1d99aa4c14a673d704a199b03ce6be085e93163f01",
+      "pipe_back_bank.pt": "e37126634da29a318e12c9dd91de808f8fce32bc3a3aad1661903e695eb9fc11",
+      "pier_0_bank.pt": "36554a8442adc8ed4ee40a097bcf99978fdb5a651c9ee167966b084173a29d44",
+      "pier_1_bank.pt": "2ee53a6dba81b3cb8c76263020a3a81e80b6f48a5dc3e926bfb4a7235c110b4f",
+      "pixel_thresholds.json": "c2dda9c1961279116ec46e253755fbd3ea1659ffc008a2577516c696d718c6ce",
+      "surface_calibration.json": "cf86f7ec3adeef970423c2ccfd6fb013ec267d3ab276b5319fd2794dc7fb941e"
+    }
+  },
+  "baseline": {
+    "harness_name": "patchcore_surface",
+    "description": "PatchCore v1 WRN50 (locked), same ROI/margin (no image border)/gate/surface rule",
+    "model_dir": "auv_inspection/output/patchcore_model_v1",
+    "sha256": {
+      "config.json": "e17dc01159c57a35356f701e8f7545233e2fa460e4864947b03526bd7debf272",
+      "backbone.pt": "5bcb0c35c064122c7071626baa2349d081135679431831801ec85113e51da828",
+      "pipe_front_bank.pt": "86d00114b7847d5e5edb0950bdd1d700a3795ccd70c5d1c81963ca0f6d4218f3",
+      "pipe_back_bank.pt": "12e458db06c29336dd4a25d58ad3161f977d49392ebcf18aba59df6ffc8dfe8c",
+      "pier_0_bank.pt": "fd2113cb9e9abdc33c029c92c2c4568b739a21393f073c8ac082386ac9071537",
+      "pier_1_bank.pt": "753436a0c192d636e56984aec30254e8e65516620cb7677bf83321ea19763c67",
+      "patchcore_thresholds_v1.json": "5a553b9ee55941bdd09339342a07505fa7646490d38e90a80c0b1970baa5e50f",
+      "surface_v2.json": "a024565261e3faff753964d26fee14964ccc0f82ca4cb04fc9319d416d7eee95"
+    }
+  },
+  "shared_sha256": {
+    "geometry_v2.json": "97f8e6f6d3c017844c8da8eccb18f1bbad58d78383a55fc031d57eae5c965856",
+    "map_A.json": "a478738d1335512643b9f2b134aeac57ddba2ba89c3e39840e31b4fecd824690"
+  },
+  "data": {
+    "profile": "heldout",
+    "map_A_seeds": [
+      101,
+      102
+    ],
+    "clean_map_seeds": [
+      103,
+      104
+    ],
+    "map_B_seeds": [
+      105,
+      106
+    ],
+    "maps": {
+      "A": "/Game/AUVInspection/Maps/AUVInspection",
+      "clean": "/Game/AUVInspection/Maps/AUVInspection_PatchCoreClean_20260926_v3",
+      "B": "/Game/AUVInspection/Maps/AUVInspection_PatchCoreB_20260926_v3"
+    },
+    "never_used_for": "training, calibration, development or label tuning"
+  },
+  "conditions": [
+    "none",
+    "turbidity:2",
+    "turbidity:4",
+    "marine_snow:3",
+    "marine_snow:5",
+    "illumination:4",
+    "motion_blur:3"
+  ],
+  "degradation_seed": 0,
+  "criteria": {
+    "recall_min": 0.9,
+    "false_alerts_per_100m_max": 1.0,
+    "cell_fpr_wilson95_upper_max": 0.05,
+    "definitions": "robustness/acceptance.py docstring; pooled over all conditions and all held-out captures; recall over observable physical defect occurrences (defect x capture x condition, >= 3 views); bootstrap over captures for uncertainty"
+  },
+  "map_B_labels": "defect positions traced only from the held-out map B capture images (no detector output viewed), reviewed by the user and locked (sha256 recorded) before any detector is scored on map B",
+  "live": "dashboard --v2-model runs on map A and map B after the offline report",
+  "no_changes": "no threshold, bank, geometry, margin, gate or rule change after this registration; any change starts a new registration and needs new held-out data"
+}
