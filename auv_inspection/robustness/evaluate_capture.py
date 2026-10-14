@@ -35,6 +35,7 @@ from robustness.geometric_roi import (  # noqa: E402
     DEFAULT_POSE_SIGMA_M, DEFAULT_POSE_SIGMA_YAW_DEG, category_from_pose)
 from robustness.geometry import load_params, params_dict  # noqa: E402
 from robustness.surface import surface_point  # noqa: E402
+from robustness.surface_evidence import CELL_M, VIEWS_REQUIRED  # noqa: E402
 
 GEOMETRY = load_params()  # geometry.CALIBRATION_FILE (v2) if it exists
 from robustness.metrics import fraction, rate_per_100m, surveyed_length_m  # noqa: E402
@@ -122,6 +123,8 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
     if alert_rule == "surface":
         step.rearm_distance_m = 0.0  # mirrors the dashboard, which lifts the 2 m lock for it
         step.ambiguous_regions = session.evidence.ambiguous_regions  # P6: what a revisit could settle
+        step.surface_cells = lambda: [(key, state.views, state.alert_id is not None)  # P7: cell FPR
+                                      for key, state in session.evidence.cells.items()]
     return step
 
 
@@ -300,8 +303,25 @@ def ambiguity_report(detector: Detector, defects: tuple, length_m: float) -> dic
         region["defect"] = match_defect(point, region["category"], defects)
     per_100m = {f"hits>={k}": rate_per_100m(sum(r["max_hits"] >= k for r in regions), length_m)
                 for k in (1, 2)}
-    return {"regions": regions, "regions_per_100m": per_100m,
-            "defects_touched": sorted({r["defect"] for r in regions if r["defect"]})}
+    report = {"regions": regions, "regions_per_100m": per_100m,
+              "defects_touched": sorted({r["defect"] for r in regions if r["defect"]})}
+    if hasattr(detector, "surface_cells"):
+        report["clean_cell_fpr"] = clean_cell_fpr(detector.surface_cells(), defects)
+    return report
+
+
+def clean_cell_fpr(cells: list[tuple], defects: tuple) -> dict:
+    """P7 cell-level FPR: clean evaluated cells (>= k views, not on a labelled defect) that alerted."""
+    alerted = evaluated = 0
+    for (category, cell_u, cell_v), views, alert in cells:
+        if views < VIEWS_REQUIRED:
+            continue
+        centre = surface_point(np.array([[(cell_u + 0.5) * CELL_M, (cell_v + 0.5) * CELL_M]]), category, GEOMETRY)[0]
+        if match_defect(centre, category, defects) is not None:
+            continue
+        evaluated += 1
+        alerted += alert
+    return fraction(alerted, evaluated)
 
 
 def evaluate(capture: Path, detector_name: str, detector: Detector, inventory: Inventory | None,
