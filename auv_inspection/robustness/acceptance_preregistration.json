@@ -74,5 +74,12 @@
   },
   "map_B_labels": "defect positions traced only from the held-out map B capture images (no detector output viewed), reviewed by the user and locked (sha256 recorded) before any detector is scored on map B",
   "live": "dashboard --v2-model runs on map A and map B after the offline report",
-  "no_changes": "no threshold, bank, geometry, margin, gate or rule change after this registration; any change starts a new registration and needs new held-out data"
+  "no_changes": "no threshold, bank, geometry, margin, gate or rule change after this registration; any change starts a new registration and needs new held-out data",
+  "map_B_labels_locked": {
+    "locked": "2026-10-14",
+    "file": "auv_inspection/robustness/inventories/map_B.json",
+    "sha256": "ecedd4f0371edbc03ce8f18f5f41c86f7d394b6e99857b9abbc2a81d0ce17464",
+    "defects": 5,
+    "note": "traced from seed 105 images only, checked on seed 106, approved by the user before any detector ran on map B"
+  }
 }
