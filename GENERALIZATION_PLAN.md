@@ -235,7 +235,7 @@ Theo đúng đăng ký trước (`robustness/acceptance_preregistration.json`, c
 | Tiêu chí (gộp mọi điều kiện) | Ngưỡng | Ứng viên `dino_surface_b` | Đối chứng `patchcore_surface` |
 |---|---|---|---|
 | Recall theo vết vật lý | ≥ 90% | **72,3%** (81/112; bootstrap 95%: 63,5-79,4%) **không đạt** | 58,9% (66/112; 49,4-68,8%) không đạt |
-| Báo nhầm /100 m | ≤ 1 | **0,345** (30 trên 86,9 m×100; 0,19-0,56) đạt | 2,89 (1,96-3,88) không đạt |
+| Báo nhầm /100 m | ≤ 1 | **0,345** (30 báo nhầm trên 8,69 km; 0,19-0,56) đạt | 2,89 (1,96-3,88) không đạt |
 | FPR mức ô (cận trên Wilson 95%) | ≤ 5% | **0,031%** (138/523.525 ô) đạt | 0,150% đạt |
 | **Kết luận** | | **Không đạt nghiệm thu** | Không đạt |
 
