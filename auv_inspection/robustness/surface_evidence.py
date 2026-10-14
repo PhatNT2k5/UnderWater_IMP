@@ -198,6 +198,37 @@ class SurfaceEvidence:
                 return state.alert_id
         return None
 
+    def ambiguous_regions(self, min_hits: int = 1) -> list[dict]:
+        """Regions of cells with min_hits..k-1 hits and no alert: evidence a revisit could settle (P6).
+
+        Cells within MERGE_RADIUS_M on the same structure form one region; each region reports its
+        hit-weighted centre (surface metres), largest hit count, cells and views.
+        """
+        pending = {key: state for key, state in self.cells.items()
+                   if state.alert_id is None and min_hits <= state.hits < VIEWS_REQUIRED}
+        radius = MERGE_RADIUS_M / CELL_M
+        regions, seen = [], set()
+        for start in pending:
+            if start in seen:
+                continue
+            members, frontier = [], [start]
+            seen.add(start)
+            while frontier:
+                key = frontier.pop()
+                members.append(key)
+                for other in pending:
+                    if other not in seen and other[0] == key[0] and \
+                            np.hypot(other[1] - key[1], other[2] - key[2]) <= radius:
+                        seen.add(other)
+                        frontier.append(other)
+            weights = np.array([pending[key].hits for key in members], float)
+            centre = np.array([[(key[1] + 0.5) * CELL_M, (key[2] + 0.5) * CELL_M] for key in members])
+            regions.append({"category": start[0], "cells": len(members),
+                            "max_hits": int(weights.max()),
+                            "views": int(sum(pending[key].views for key in members)),
+                            "centre_uv_m": (weights @ centre / weights.sum()).round(3).tolist()})
+        return regions
+
     def coverage(self, min_views: int = VIEWS_REQUIRED) -> dict[str, int]:
         """Cells per structure group with at least min_views kept views (inspected surface)."""
         counts: dict[str, int] = {}

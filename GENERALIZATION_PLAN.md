@@ -18,7 +18,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P3 | Cổng chất lượng ảnh | **Xong** (live `session_20261009_150224_114943`: 3/3 vết, **0 báo nhầm**, 1 báo trùng vết trụ) | Lề chấm điểm 24 px + cổng `diffuse_anomaly`; số đo chất lượng chỉ để chẩn đoán (cổng theo phân vị bị loại). Tập phát triển: tổng báo nhầm 14 lượt chạy 410 → 97, recall giữ ở điều kiện có nghĩa; xem mục Kết quả P3 |
 | P5 | Ngưỡng conformal + tích lũy bằng chứng trên bề mặt | **Xong** (live `session_20261012_164927_783087`: **3/3 vết, 0 báo nhầm, 0 báo trùng**) | Quy tắc k = 3 lượt nhìn trên ô 10 cm, hit = ngưỡng pixel AND ngưỡng tương đối theo tầng (thân ống / mối nối / mặt trụ), calibrate conformal trên 3 capture sạch train mới. Tập phát triển: 0 báo nhầm ở 12/14 lượt (v1.3: 30), marine snow 3 vẫn 19-21/100 m; xem mục Kết quả P5 |
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Xong offline** (ứng viên: v2 + lề mép ảnh; P4.3 kết hợp NFAD + Mahalanobis 42/63, 17 không hơn; trước đó P4.3: NFAD 55/63 vết, 30 báo nhầm; Mahalanobis 40/63, 5 báo nhầm, xem Kết quả P4.3; phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
-| P6 | Quay lại chụp gần khi bằng chứng mơ hồ | Chưa làm | |
+| P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Đang làm** (P6.1: đo vùng mơ hồ offline; thiết kế ở mục 3.7) | |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | Chưa làm | |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
@@ -386,6 +386,11 @@ B < L_c < A             → chưa đủ bằng chứng → 3.7
 Hư hại đứng yên trên bề mặt, còn hạt phù du, bọt khí và đốm phản sáng di chuyển theo tọa độ bề mặt, nên cộng dồn theo ô tự lọc nhiễu thoáng qua mà không cần hằng số pixel. Báo cáo có vị trí vật lý (ví dụ "ống, s = 12,4 m, θ = 35°"). Các frame liên tiếp có tương quan: chỉ cộng quan sát cách nhau một khoảng dịch chuyển tối thiểu và giới hạn mức cộng mỗi ô; cần kiểm chứng trên dữ liệu.
 
 ### 3.7 Quay lại quan sát gần
+
+> **Thiết kế thực hiện (P6, 2026-10-14):**
+> - **Vùng mơ hồ:** các ô bề mặt chưa có cảnh báo, có 1 đến k-1 = 2 lượt nhìn đạt hit (ngưỡng pixel AND ngưỡng tầng), gộp trong 0,6 m (`SurfaceEvidence.ambiguous_regions()`). Quay lại chỉ có ích ở đây: ô có 0 hit là sạch theo bằng chứng hiện có, ô đủ 3 hit đã báo.
+> - **Cơ chế chèn route:** runtime đọc route từ danh sách Python và bridge đã bọc `advance_station`, nên bridge có thể chèn điểm quay lại vào danh sách đang chạy mà không sửa `run_inspection.py`. Điểm quay lại: hướng thẳng vào tâm vùng, khoảng cách camera-bề mặt không nhỏ hơn khoảng bank/calibration đã thấy (khoảng 1,6 m), qua `clearance_violations()`, rồi trở lại route.
+> - **Chi phí là rủi ro chính:** marine snow tạo nhiều ô 1 hit ngẫu nhiên. P6.1 đo offline trên tập phát triển số vùng mơ hồ/100 m (chi phí) và vết bị bỏ sót có nằm trong vùng mơ hồ hay không (lợi ích tối đa), để chọn ngưỡng kích hoạt (ví dụ chỉ vùng có 2 hit) và ngân sách (số lần quay lại/100 m) **trước** khi viết logic chèn route (P6.2), rồi chạy live.
 
 Ô ở vùng B < L < A kích hoạt lập lại kế hoạch: giữ vị trí, tiến gần, đổi góc nhìn. Lợi ích tính trước theo mô hình suy hao:
 

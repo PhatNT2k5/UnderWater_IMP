@@ -45,6 +45,24 @@ def surface_uv(points: np.ndarray, category: str,
     return np.column_stack([points[:, 2], perimeter])
 
 
+def surface_point(uv: np.ndarray, category: str, params: GeometryParams = DEFAULT_PARAMS) -> np.ndarray:
+    """Inverse of `surface_uv`: (N, 3) points on the structure for (N, 2) surface coordinates."""
+    uv = np.atleast_2d(np.asarray(uv, float))
+    u, v = uv[:, 0], uv[:, 1]
+    if category in ("pipe_front", "pipe_back"):
+        side = 1.0 if category == "pipe_front" else -1.0
+        angle = v / params.pipe_radius_m
+        return np.column_stack([u, side * params.pipe_radius_m * np.cos(angle),
+                                params.pipe_axis_z + params.pipe_radius_m * np.sin(angle)])
+    if category not in ("pier_0", "pier_1"):
+        raise ValueError(f"Unknown structure category: {category}")
+    half = params.pier_half_width_m
+    s = np.mod(v, 8 * half)
+    dx = np.select([s < 2 * half, s < 4 * half, s < 6 * half], [half - s, -half, s - 5 * half], half)
+    dy = np.select([s < 2 * half, s < 4 * half, s < 6 * half], [half, 3 * half - s, -half], s - 7 * half)
+    return np.column_stack([PIER_CENTERS_X[int(category[-1])] + dx, PIER_Y + dy, u])
+
+
 def render_uv(position: np.ndarray, yaw_deg: float, category: str,
               params: GeometryParams = DEFAULT_PARAMS, step: int = 4) -> np.ndarray:
     """(H/step, W/step, 2) surface coordinates of each grid pixel centre; NaN where no hit."""

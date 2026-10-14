@@ -34,6 +34,7 @@ from robustness.degradation import Degradation, apply_degradations, parse_degrad
 from robustness.geometric_roi import (  # noqa: E402
     DEFAULT_POSE_SIGMA_M, DEFAULT_POSE_SIGMA_YAW_DEG, category_from_pose)
 from robustness.geometry import load_params, params_dict  # noqa: E402
+from robustness.surface import surface_point  # noqa: E402
 
 GEOMETRY = load_params()  # geometry.CALIBRATION_FILE (v2) if it exists
 from robustness.metrics import fraction, rate_per_100m, surveyed_length_m  # noqa: E402
@@ -120,6 +121,7 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
 
     if alert_rule == "surface":
         step.rearm_distance_m = 0.0  # mirrors the dashboard, which lifts the 2 m lock for it
+        step.ambiguous_regions = session.evidence.ambiguous_regions  # P6: what a revisit could settle
     return step
 
 
@@ -255,6 +257,8 @@ def evaluate_many(capture: Path, detectors: dict[str, Detector], inventory: Inve
             record(scores[name], result, row, perceived, visible, defects,
                    (time.perf_counter() - start) * 1000)
     observable = [defect.defect_id for defect in defects if views[defect.defect_id] >= MIN_VIEWS_OBSERVABLE]
+    ambiguity = {name: ambiguity_report(detector, defects, length_of(positions))
+                 for name, detector in detectors.items() if hasattr(detector, "ambiguous_regions")}
     length = sum(surveyed_length_m(items) for items in positions.values())
     results = {}
     for name, score in scores.items():
@@ -275,11 +279,29 @@ def evaluate_many(capture: Path, detectors: dict[str, Detector], inventory: Inve
             "processing_ms_median": float(np.median(score.elapsed)) if score.elapsed else None,
             "timing_basis": "analysed_frames_only",
             "events": score.events,
+            **({"ambiguity": ambiguity[name]} if name in ambiguity else {}),
             "caveats": ["capture frames are sampled every few ticks, not every tick as at runtime",
                         "consecutive frames are correlated; Wilson intervals are indicative",
                         "defect visibility is geometric and ignores lighting"],
         }
     return results
+
+
+def length_of(positions: dict[str, list[list[float]]]) -> float:
+    return sum(surveyed_length_m(items) for items in positions.values())
+
+
+def ambiguity_report(detector: Detector, defects: tuple, length_m: float) -> dict:
+    """P6: unresolved surface regions (1..k-1 hits) at the end of a run and the defects they touch."""
+    regions = detector.ambiguous_regions()
+    for region in regions:
+        point = surface_point(np.array([region["centre_uv_m"]]), region["category"], GEOMETRY)[0]
+        region["world_m"] = np.round(point, 3).tolist()
+        region["defect"] = match_defect(point, region["category"], defects)
+    per_100m = {f"hits>={k}": rate_per_100m(sum(r["max_hits"] >= k for r in regions), length_m)
+                for k in (1, 2)}
+    return {"regions": regions, "regions_per_100m": per_100m,
+            "defects_touched": sorted({r["defect"] for r in regions if r["defect"]})}
 
 
 def evaluate(capture: Path, detector_name: str, detector: Detector, inventory: Inventory | None,

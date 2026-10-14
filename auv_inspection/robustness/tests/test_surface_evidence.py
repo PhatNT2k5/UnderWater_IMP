@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from inspection_route import PIER_CENTERS_X, PIER_Y  # noqa: E402
 from robustness.calibrate_surface import conformal_threshold, kth_highest  # noqa: E402
 from robustness.geometry import load_params  # noqa: E402
-from robustness.surface import render_uv, surface_uv  # noqa: E402
+from robustness.surface import render_uv, surface_point, surface_uv  # noqa: E402
 from robustness.surface_evidence import (  # noqa: E402
     CELL_M, MERGE_RADIUS_M, MIN_MOVE_M, POOL_PX, VIEWS_REQUIRED, SurfaceCalibration,
     SurfaceEvidence, element_of, load_calibration, pooled)
@@ -48,6 +48,17 @@ class SurfaceCoordinateTests(unittest.TestCase):
         np.testing.assert_allclose(surface_uv(centres, "pier_0", PARAMS)[:, 1], [h, 3 * h, 5 * h, 7 * h])
         corner = np.array([[cx - h, PIER_Y + h, -8.0]])
         self.assertAlmostEqual(float(surface_uv(corner, "pier_0", PARAMS)[0, 1]), 2 * h)
+
+    def test_surface_point_inverts_surface_uv(self) -> None:
+        r, axis, h = PARAMS.pipe_radius_m, PARAMS.pipe_axis_z, PARAMS.pier_half_width_m
+        pipe = np.array([[2.0, r * np.cos(0.3), axis + r * np.sin(0.3)]])
+        np.testing.assert_allclose(surface_point(surface_uv(pipe, "pipe_front", PARAMS), "pipe_front", PARAMS),
+                                   pipe, atol=1e-9)
+        cx = PIER_CENTERS_X[1]
+        pier = np.array([[cx + 0.3, PIER_Y + h, -7.0], [cx - h, PIER_Y - 0.2, -5.0],
+                         [cx - 0.4, PIER_Y - h, -3.0], [cx + h, PIER_Y + 0.5, -2.0]])
+        np.testing.assert_allclose(surface_point(surface_uv(pier, "pier_1", PARAMS), "pier_1", PARAMS),
+                                   pier, atol=1e-9)
 
     def test_render_uv_follows_the_camera_along_the_pipe(self) -> None:
         uv = render_uv(np.array([3.0, 2.1, -10.3]), -90.0, "pipe_front", PARAMS, POOL_PX)
@@ -103,6 +114,20 @@ class SurfaceRuleTests(unittest.TestCase):
         self.assertEqual(calibration.lowest_threshold("pipe_front"), 1.2)
         with self.assertRaises(KeyError):
             calibration.lowest_threshold("pier_1")
+
+    def test_ambiguous_regions_group_unresolved_cells(self) -> None:
+        state = evidence()
+        two_hits = {("pipe_front", 10, 0): HIT, ("pipe_front", 11, 0): HIT}   # neighbours, 2 hits each
+        alerting = {("pipe_front", 50, 0): HIT}                               # reaches 3 hits
+        lonely = {("pier_0", 5, 5): HIT}                                      # 1 hit
+        for step in range(2):
+            state.observe(moved(step), {**two_hits, **alerting, **(lonely if step == 0 else {})})
+        state.observe(moved(2), alerting)
+        regions = sorted(state.ambiguous_regions(), key=lambda r: r["category"])
+        self.assertEqual([(r["category"], r["cells"], r["max_hits"]) for r in regions],
+                         [("pier_0", 1, 1), ("pipe_front", 2, 2)])
+        np.testing.assert_allclose(regions[1]["centre_uv_m"], [1.1, 0.05])
+        self.assertEqual(len(state.ambiguous_regions(min_hits=2)), 1)
 
     def test_calibration_constants_must_match_runtime(self) -> None:
         with TemporaryDirectory() as folder:
