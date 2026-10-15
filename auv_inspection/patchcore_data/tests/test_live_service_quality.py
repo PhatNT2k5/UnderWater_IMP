@@ -90,6 +90,31 @@ class DiffuseTests(unittest.TestCase):
         scores[::4, ::4] = 120.0                # scattered spots well above 1.5 x median
         self.assertTrue(live_service.is_diffuse(scores, 60.0, [], relative_threshold=1.5)[0])
 
+    def test_p8_gate_ignores_particle_sized_regions(self) -> None:
+        scores = np.zeros((480, 640), np.float32)
+        for row in range(20, 460, 40):         # 132 particle-sized spots of 25 px
+            for col in range(20, 620, 50):
+                scores[row:row + 5, col:col + 5] = 70.0
+        scores[200:216, 100:300] = 70.0         # one crack-like region of 3200 px
+        self.assertTrue(live_service.is_diffuse(scores, 60.0, [], relative_threshold=0.0)[0])
+        diffuse, shape = live_service.is_diffuse(scores, 60.0, [], relative_threshold=0.0,
+                                                 min_region_px=live_service.GATE_MIN_REGION_PX,
+                                                 region_share=False)
+        self.assertFalse(diffuse)
+        self.assertEqual(shape["regions"], 1)
+        self.assertEqual(shape["anomaly_spread"], 0.0)
+        for top in range(0, 480, 60):           # eight further large regions are still diffuse
+            scores[top:top + 15, 500:520] = 70.0
+        self.assertTrue(live_service.is_diffuse(scores, 60.0, [], relative_threshold=0.0,
+                                                min_region_px=live_service.GATE_MIN_REGION_PX,
+                                                region_share=False)[0])
+
+    def test_p8_gate_keeps_one_large_region(self) -> None:
+        scores = np.zeros((100, 100), np.float32)
+        scores[:30, :] = 70.0                   # a large hole seen up close
+        self.assertTrue(live_service.is_diffuse(scores, 60.0, [])[0])
+        self.assertFalse(live_service.is_diffuse(scores, 60.0, [], min_region_px=196, region_share=False)[0])
+
     def test_many_candidate_regions_are_diffuse(self) -> None:
         many = [Candidate((0, 0, 1, 1), (0.0, 0.0), 70.0, 1)] * 7
         self.assertTrue(live_service.is_diffuse(np.zeros((10, 10)), 60.0, many)[0])

@@ -26,7 +26,7 @@ INSPECTION = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(INSPECTION))
 from robustness.calibrate_surface import FALSE_CELLS_PER_100M, conformal_threshold, kth_highest  # noqa: E402
 from robustness.geometric_roi import category_from_pose, geometric_roi  # noqa: E402
-from robustness.geometry import load_params  # noqa: E402
+from robustness.geometry import params_dict  # noqa: E402
 from robustness.metrics import surveyed_length_m  # noqa: E402
 from robustness.surface_evidence import MIN_MOVE_M, VIEWS_REQUIRED, frame_cells  # noqa: E402
 
@@ -36,12 +36,12 @@ SCORE_MARGIN_PX = 24  # live_service.DEFAULT_SCORE_MARGIN_PX (not imported to ke
 
 
 def calibrate(model_dir: Path, captures: list[Path], destination: Path) -> dict:
-    from auv_inspection.patchcore_data.live_service import interior
+    from auv_inspection.patchcore_data.live_service import interior, model_geometry
     if destination.exists():
         raise FileExistsError(destination)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     scorer = load_scorer(model_dir, device)
-    params = load_params()
+    params = model_geometry(model_dir)  # the ROI geometry the model is scored with
     per_group: dict[str, list[float]] = defaultdict(list)
     evaluated, length, sources = 0, 0.0, []
     for capture in captures:
@@ -91,7 +91,7 @@ def calibrate(model_dir: Path, captures: list[Path], destination: Path) -> dict:
               "created": datetime.now().astimezone().isoformat(timespec="seconds"),
               "method": "conformal upper quantile of the per-cell k-th highest absolute score",
               "views_required": VIEWS_REQUIRED, "min_move_m": MIN_MOVE_M, "score_margin_px": SCORE_MARGIN_PX,
-              "alpha_per_cell": alpha, "evaluated_cells": evaluated, "surveyed_length_m": round(length, 1),
+              "alpha_per_cell": alpha, "geometry": params_dict(params), "evaluated_cells": evaluated, "surveyed_length_m": round(length, 1),
               "sources": sources, "groups": groups}
     destination.write_text(json.dumps(result, indent=2), encoding="utf-8")
     return result

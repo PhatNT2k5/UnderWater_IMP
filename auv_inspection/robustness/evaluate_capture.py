@@ -52,7 +52,9 @@ V2_MODELS = {"dino_surface": INSPECTION / "output/detector_v2_dino_s2_aug_g2",
              # P4.3: same banks as dino_surface plus a nuisance projection / Mahalanobis whitening.
              "dino_nfad": INSPECTION / "output/detector_v2_dino_s2_aug_g2_nfad8",
              "dino_maha": INSPECTION / "output/detector_v2_dino_s2_aug_g2_maha",
-             "dino_nfmaha": INSPECTION / "output/detector_v2_dino_s2_aug_g2_nfmaha"}
+             "dino_nfmaha": INSPECTION / "output/detector_v2_dino_s2_aug_g2_nfmaha",
+             # P8: same banks, pier ROI stops at the seabed (calibration/geometry_v3.json)
+             "dino_floor": INSPECTION / "output/detector_v2_dino_s2_aug_g2_floor"}
 
 
 @dataclass(frozen=True)
@@ -93,12 +95,14 @@ def classical_detector() -> Detector:
 def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
                        roi_mode: str = "reference", score_margin_px: int = 0,
                        diffuse_gate: bool = False, alert_rule: str = "track",
-                       surface_calibration: Path | None = None, border_margin: bool = False) -> Detector:
+                       surface_calibration: Path | None = None, border_margin: bool = False,
+                       gate_min_region_px: int = 0, gate_region_share: bool = True) -> Detector:
     """reference: P0/v1.1 ROI and capture categories; geometry: P2 ROI and pose-derived groups."""
     from auv_inspection.patchcore_data.live_service import (
         SURFACE_CALIBRATION_FILE, analyze_request, create_session, encode_png)
     session = create_session(model_dir, reference, thresholds, roi_mode, score_margin_px, diffuse_gate,
-                             alert_rule, surface_calibration or SURFACE_CALIBRATION_FILE, border_margin)
+                             alert_rule, surface_calibration or SURFACE_CALIBRATION_FILE, border_margin,
+                             gate_min_region_px, gate_region_share)
 
     def step(frame: np.ndarray, row: dict) -> FrameResult:
         category = row["category"]
@@ -129,7 +133,8 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
 
 
 DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md",
-             "patchcore_surface", *V2_MODELS, *(f"{name}_b" for name in V2_MODELS))
+             "patchcore_surface", *V2_MODELS, *(f"{name}_b" for name in V2_MODELS),
+             *(f"{name}_bg" for name in V2_MODELS))
 
 
 def make_detector(name: str) -> Detector:
@@ -139,17 +144,22 @@ def make_detector(name: str) -> Detector:
     dino_surface(_noaug) = detector v2 with the same ROI, margin, gate and surface rule;
     dino_nfad / dino_maha / dino_nfmaha = dino_surface banks with a P4.3 feature transform
     (nfmaha: the nfad projection, then whitening of the projected bank);
-    a "_b" suffix adds the margin at the image border."""
+    a "_b" suffix adds the margin at the image border, "_bg" also the P8 gate
+    (live_service.GATE_MIN_REGION_PX, no single-large-region rule)."""
     if name == "classical":
         return classical_detector()
     if name == "patchcore":
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "reference")
-    if name in DETECTORS and name.removesuffix("_b") in V2_MODELS:
-        from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
-        model = V2_MODELS[name.removesuffix("_b")]
+    base = name.removesuffix("_bg").removesuffix("_b")
+    if name in DETECTORS and base in V2_MODELS:
+        from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX, GATE_MIN_REGION_PX
+        model = V2_MODELS[base]
+        p8_gate = name.endswith("_bg")
         return patchcore_detector(model, PATCHCORE_REFERENCE, model / "pixel_thresholds.json", "geometry",
                                   DEFAULT_SCORE_MARGIN_PX, True, "surface", model / "surface_calibration.json",
-                                  border_margin=name.endswith("_b"))
+                                  border_margin=name.endswith(("_b", "_bg")),
+                                  gate_min_region_px=GATE_MIN_REGION_PX if p8_gate else 0,
+                                  gate_region_share=not p8_gate)
     if name == "patchcore_surface":
         from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "geometry",

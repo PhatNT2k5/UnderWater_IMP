@@ -70,7 +70,7 @@ def nuisance_scatter(base_config: dict, captures: list[Path], frames_per_capture
 
 def derive(base: Path, destination: Path, kind: str, captures: list[Path], k: int,
            shrinkage: float, frames_per_capture: int, seed: int = 20261014,
-           from_nuisance: Path | None = None) -> dict:
+           from_nuisance: Path | None = None, geometry_file: str | None = None) -> dict:
     if destination.exists():
         raise FileExistsError(destination)
     config = json.loads((base / "config.json").read_text(encoding="utf-8"))
@@ -109,13 +109,21 @@ def derive(base: Path, destination: Path, kind: str, captures: list[Path], k: in
             states[category] = [projection.state(), mahalanobis_whitening(projected, shrinkage).state()]
         meta.update({"shrinkage": shrinkage, "nuisance_model": str(from_nuisance.resolve()),
                      "nuisance": source["transform"]})
+    elif kind == "geometry":
+        # Same banks and features, another ROI geometry (P8: pier floor); needs its own thresholds.
+        if not geometry_file:
+            raise ValueError("geometry needs --geometry-file")
+        states = None
     else:
         raise ValueError(f"Unknown transform kind {kind!r}")
     destination.mkdir(parents=True)
-    torch.save(states, destination / "transforms.pt")
     derived = {**config, "bank_dir": str(bank_dir), "base_model": str(base.resolve()),
-               "transform_file": "transforms.pt", "transform": meta,
                "created": datetime.now().astimezone().isoformat(timespec="seconds")}
+    if states is not None:
+        torch.save(states, destination / "transforms.pt")
+        derived.update({"transform_file": "transforms.pt", "transform": meta})
+    if geometry_file:
+        derived["geometry_file"] = geometry_file  # relative to the repository root
     (destination / "config.json").write_text(json.dumps(derived, indent=2), encoding="utf-8")
     return derived
 
@@ -124,7 +132,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("base_model", type=Path)
     parser.add_argument("destination", type=Path)
-    parser.add_argument("kind", choices=("nuisance", "mahalanobis", "nuisance_mahalanobis"))
+    parser.add_argument("kind", choices=("nuisance", "mahalanobis", "nuisance_mahalanobis", "geometry"))
+    parser.add_argument("--geometry-file", help="Geometry calibration for the ROI, relative to the repository "
+                                                "root, e.g. auv_inspection/robustness/calibration/geometry_v3.json")
     parser.add_argument("--from-nuisance", type=Path, help="Nuisance model whose projection to reuse")
     parser.add_argument("--captures", nargs="*", type=Path, default=[], help="Bank (train) captures for nuisance")
     parser.add_argument("--k", type=int, default=8)
@@ -134,8 +144,9 @@ def main() -> None:
     if args.kind == "nuisance" and not args.captures:
         parser.error("nuisance needs --captures")
     result = derive(args.base_model, args.destination, args.kind, args.captures, args.k,
-                    args.shrinkage, args.frames_per_capture, from_nuisance=args.from_nuisance)
-    print(json.dumps(result["transform"], indent=2))
+                    args.shrinkage, args.frames_per_capture, from_nuisance=args.from_nuisance,
+                    geometry_file=args.geometry_file)
+    print(json.dumps({key: result.get(key) for key in ("transform", "geometry_file")}, indent=2))
 
 
 if __name__ == "__main__":
