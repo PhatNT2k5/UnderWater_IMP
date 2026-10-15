@@ -39,8 +39,10 @@ def main() -> None:
     else:
         v2_model = default_v2_model()
         if v2_model is None:
-            logging.warning("Detector v2 files differ from the P7 pre-registration; falling back to PatchCore v1")
-    logging.info("Detector: %s; world: %s", v2_model or "PatchCore v1", args.world or "scenario default")
+            logging.warning("Detector v2 files or scoring code differ from the P7 pre-registration; "
+                            "falling back to the PatchCore v1 approval gate")
+    logging.info("Detector v2: %s; world: %s", v2_model or "off (v1 approval gate, else Classical)",
+                 args.world or "scenario default")
     ctypes.windll.user32.SetProcessDPIAware()
     root = tk.Tk()
     dashboard = Dashboard(root, args.steps, args.smoke_test, v2_model, args.world)

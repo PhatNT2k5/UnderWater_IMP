@@ -81,5 +81,25 @@
     "sha256": "ecedd4f0371edbc03ce8f18f5f41c86f7d394b6e99857b9abbc2a81d0ce17464",
     "defects": 5,
     "note": "traced from seed 105 images only, checked on seed 106, approved by the user before any detector ran on map B"
-  }
+  },
+  "code_sha256": {
+    "auv_inspection/detector_v2/__init__.py": "38bb549650e2ad11aa548be9dcf3a5d733c11a51317bd8e9fe52b88b5bbe09e2",
+    "auv_inspection/detector_v2/features.py": "984382eeabe7c8986de108196ae79a7602d4e1e60478020cb30b556af24efe55",
+    "auv_inspection/detector_v2/scorer.py": "0d5c89cc92c7abf4378b58ec8a1b0f4cc56393ea78c18dbc11b6feda0628e666",
+    "auv_inspection/detector_v2/transforms.py": "8ebbf21979428b2df9e56a9f559b168f9a328494a8f98b140df434fcc6c0f023",
+    "auv_inspection/inspection_route.py": "2b904495fb7e089daa638421e03e23c09c625c607550865c1bf6c7120e7342c9",
+    "auv_inspection/patchcore_data/__init__.py": "e569d2bd65197e484e2a13572eaecbd85da964c333bde97681740b19909bc886",
+    "auv_inspection/patchcore_data/alerts.py": "465a7cfb1722281abdc808301b233e00036c1ed0eba251065d4a689968a4a637",
+    "auv_inspection/patchcore_data/live_roi.py": "407ac81f66ee5784f328535dd59f8b4176b8687c2c54d28d9306ac9c900d100e",
+    "auv_inspection/patchcore_data/live_service.py": "e8f621b81ae28ba75de63cac83518e580d9d08ebd5741e7d92dab041d6ff8fec",
+    "auv_inspection/patchcore_data/model.py": "5b6a8e1f9093b14ae7887f697d3e33056ed084b400923faf911941cc133b84cb",
+    "auv_inspection/patchcore_data/predict.py": "9581c141e7bbe6a4cdeef1124a2a773dc294a52861c623e052e8db4c8df0cf63",
+    "auv_inspection/robustness/__init__.py": "158b3826463ae5f551f1287fe1ec2dd48fe83959114daab9f251f5a0b7a2cb5f",
+    "auv_inspection/robustness/geometric_roi.py": "b3d4b22ef4682328b6cedd253f0bcf45c5456fa26d5f0bbcf90ad171a3341f92",
+    "auv_inspection/robustness/geometry.py": "2303c1b5c47c8b41f7c7a285596a1b0648166c41567bda9f73ca44f14ef126b1",
+    "auv_inspection/robustness/quality.py": "2042ce3c401b1eb2f1c9d036d4e5ce3cbc98d0b4bee4172091867756210fbf72",
+    "auv_inspection/robustness/surface.py": "151d38d0212f2848c02cee3d9f675356678f6c5e6d1176f4f948dcf266b99257",
+    "auv_inspection/robustness/surface_evidence.py": "a6e0c021d60aa5a5109fff6bc7c3ff3775d925c6285f7c8f5d70fee9e112147f"
+  },
+  "code_sha256_note": "added 2026-10-15 (D11): SHA256 (CRLF normalised to LF) of approval_gate.SCORING_CODE taken from code_commit; identical to the working tree when added; the dashboard v2 default requires them to match"
 }
