@@ -20,7 +20,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Xong offline** (ứng viên: v2 + lề mép ảnh; P4.3 kết hợp NFAD + Mahalanobis 42/63, 17 không hơn; trước đó P4.3: NFAD 55/63 vết, 30 báo nhầm; Mahalanobis 40/63, 5 báo nhầm, xem Kết quả P4.3; phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt). Live: map A 3/3, 0 báo nhầm; map B 4/5, 2 báo nhầm theo quy tắc (1 trong 2 nằm trên vết khi xem ảnh). Cổng hash code xong (D11) | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
-| P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Đang làm** (P8.1 chẩn đoán xong) | Xem Kết quả P8.1 |
+| P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Đang làm** (P8.1 xong; P8.2 phần 1: giới hạn trụ đạt, cổng P8 tăng recall nhưng báo nhầm ×19) | Xem Kết quả P8.1 |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
 
@@ -277,6 +277,28 @@ Tập phát triển P8 = seed 1-6 cũ + seed 101-106 của P7 (đã xem nên kh�
 - **Mép vòng bích mặt sau ống:** một báo nhầm live trên map B.
 
 **Hướng P8.2 rút ra:** (1) cổng lan tỏa không đếm vùng cỡ hạt (hoặc che hạt trước khi đếm) và không chặn một vùng lớn đặc; quy tắc bề mặt k = 3 lượt nhìn đã loại nhiễu ngẫu nhiên giữa các frame, cần đo báo nhầm trên tập phát triển; (2) sửa giới hạn dưới của trụ về mặt đáy rồi calibrate lại ngưỡng; (3) sau đó mới xét mặt nạ tín hiệu thấp cho rìa quầng đèn.
+
+## Kết quả P8.2 phần 1: cổng P8 và giới hạn dưới của trụ (2026-10-15, tập phát triển 12 capture)
+
+12 capture (seed 1-6, 101-106) × 7 điều kiện = 84 lượt mỗi detector; `auv_inspection/output/benchmark_p8_dev/` (`dino_surface_b` chép từ P6/P7 vì code chấm điểm của nó không đổi, `dino_surface_bg`), `benchmark_p8_dev_floor/` (`dino_floor_bg`); so sánh bằng `output/p8_diagnosis/p8_compare.py`.
+
+| Detector | Recall | Báo nhầm | /100 m | FPR ô | Frame bị cổng |
+|---|---|---|---|---|---|
+| `dino_surface_b` (ứng viên P7) | 129/175 (73,7%) | 50 | 0,29 | 0,026% | 14,7% |
+| `dino_surface_bg` (cổng P8) | 167/175 (95,4%) | 967 | 5,63 | 0,68% | 2,4% |
+| `dino_floor_bg` (cổng P8 + giới hạn trụ) | 166/175 (94,9%) | 950 | 5,54 | 0,67% | 2,4% |
+
+| Điều kiện | b: recall / báo nhầm | bg: recall / báo nhầm |
+|---|---|---|
+| Gốc | 24/25 / 11 | 25/25 / 20 |
+| Độ đục 2 / 4 | 24/25 / 7; 23/25 / 17 | 25/25 / 32; 24/25 / 57 |
+| Marine snow 3 / 5 | 7/25 / 6; 7/25 / 4 | 25/25 / 472; 24/25 / 333 |
+| Đèn yếu 4 | 25/25 / 5 | 25/25 / 32 |
+| Mờ chuyển động 3 | 19/25 / 0 | 19/25 / 21 |
+
+- **Cổng P8 không dùng được như vậy.** Nó lấy lại gần hết vết dưới marine snow (14 → 49/50) và lỗ lớn, nhưng báo nhầm tăng 19 lần (nhiều nhất ở marine snow, 805 trên thân ống, và cả ở mọi điều kiện khác). Cổng cũ hóa ra đang làm phần lớn việc chặn báo nhầm: các frame bị nó bỏ là các frame mà quy tắc bề mặt gom được hit giả qua nhiều lượt nhìn. Box báo nhầm dưới marine snow không chứa nhiều hạt hơn mức trung bình của frame (1,5% so với 1,6% pixel), nên báo nhầm không nằm trên hạt mà là do điểm của cả frame bị đẩy lên.
+- **Giới hạn dưới của trụ làm đúng việc của nó:** báo nhầm "trụ dưới -10 m" 17 → 0, recall không đổi (166 so với 167, chênh 1 lượt mờ chuyển động). Có thể áp dụng độc lập với cổng.
+- Vết sót ngoài marine snow gần như chỉ còn mờ chuyển động 3 (6-7 lượt).
 
 ## Tiêu chí nghiệm thu (bản đầu)
 
