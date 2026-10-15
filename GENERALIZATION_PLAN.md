@@ -19,7 +19,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P5 | Ngưỡng conformal + tích lũy bằng chứng trên bề mặt | **Xong** (live `session_20261012_164927_783087`: **3/3 vết, 0 báo nhầm, 0 báo trùng**) | Quy tắc k = 3 lượt nhìn trên ô 10 cm, hit = ngưỡng pixel AND ngưỡng tương đối theo tầng (thân ống / mối nối / mặt trụ), calibrate conformal trên 3 capture sạch train mới. Tập phát triển: 0 báo nhầm ở 12/14 lượt (v1.3: 30), marine snow 3 vẫn 19-21/100 m; xem mục Kết quả P5 |
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Xong offline** (ứng viên: v2 + lề mép ảnh; P4.3 kết hợp NFAD + Mahalanobis 42/63, 17 không hơn; trước đó P4.3: NFAD 55/63 vết, 30 báo nhầm; Mahalanobis 40/63, 5 báo nhầm, xem Kết quả P4.3; phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
-| P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt); còn live map A/B và cổng hash code | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
+| P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt). Live: map A 3/3, 0 báo nhầm; map B 4/5, 2 báo nhầm theo quy tắc (1 trong 2 nằm trên vết khi xem ảnh). Còn cổng hash code | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
 
@@ -248,6 +248,12 @@ Phân tích sau (không thay đổi kết luận, không dùng để chỉnh gì
 - Ứng viên tốt hơn đối chứng ở cả ba chỉ số; đối chứng có 154 báo nhầm riêng ở marine snow 3.
 
 Theo quy tắc đã đăng ký, không đổi ngưỡng, bank, cổng hay nhãn sau khi xem kết quả; mọi cải tiến (marine snow, chân trụ) phải qua đăng ký mới và dữ liệu heldout mới.
+
+**Live P7 (2026-10-15, dashboard mặc định v2 + lề mép ảnh, điều kiện gốc, route danh định 359/359):**
+- Map A (`auv_dashboard/output/session_20261015_103902_679289/`): **3/3 vết, 0 báo nhầm** (tick 399 `A_pipe_front_1` 0,33 m; 645 `A_pipe_front_2` 0,17 m; 3276 `A_pier_0_1` 0,07 m).
+- Map B (`session_20261015_105712_694396/`, world `AUVInspection_PatchCoreB_20260926_v3`), chấm theo quy tắc của harness (tâm box qua `locate_box`, bán kính nhãn đã khóa): **4/5 vết, 2 báo nhầm**. Khớp: tick 582 `B_pipe_front_crack_1` 0,27 m; 888 `B_pipe_front_hole_small` 0,10 m; 1158 `B_pipe_front_crack_2` 0,08 m; 1458 `B_pipe_front_hole_large` 0,25 m. Không khớp: tick 2352 `pipe_back` mép vòng bích x ≈ 9,2, ảnh không có vết (báo nhầm thật); tick 7596 `pier_1` tâm box cách `B_pier_1_crack` 0,41 m > 0,35 m, nhưng ảnh annotated cho thấy box nằm trên chính vết nứt và ô bề mặt của cảnh báo (u, v) = (-8,05; 1,15) cách đoạn nhãn khoảng 0,14 m. Theo quy tắc, ghi là 1 vết sót + 1 báo nhầm; theo xem ảnh là 5/5 vết, 1 báo nhầm. Nhãn không sửa.
+- Thời gian xử lý median 296 ms (map A) / 275 ms (map B), p90 ≈ 316 ms; 79 / 94 frame `diffuse_anomaly`.
+- Tiêu chí live của P7 (ít nhất 1 cảnh báo đi trọn vòng) đạt trên cả hai map; không thay đổi kết luận offline (không đạt recall).
 
 ## Tiêu chí nghiệm thu (bản đầu)
 
