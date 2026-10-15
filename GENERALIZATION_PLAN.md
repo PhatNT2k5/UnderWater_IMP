@@ -20,6 +20,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Xong offline** (ứng viên: v2 + lề mép ảnh; P4.3 kết hợp NFAD + Mahalanobis 42/63, 17 không hơn; trước đó P4.3: NFAD 55/63 vết, 30 báo nhầm; Mahalanobis 40/63, 5 báo nhầm, xem Kết quả P4.3; phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt). Live: map A 3/3, 0 báo nhầm; map B 4/5, 2 báo nhầm theo quy tắc (1 trong 2 nằm trên vết khi xem ảnh). Cổng hash code xong (D11) | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
+| P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Đang làm** (P8.1 chẩn đoán xong) | Xem Kết quả P8.1 |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
 
@@ -255,6 +256,28 @@ Theo quy tắc đã đăng ký, không đổi ngưỡng, bank, cổng hay nhãn 
 - Thời gian xử lý median 296 ms (map A) / 275 ms (map B), p90 ≈ 316 ms; 79 / 94 frame `diffuse_anomaly`.
 - Tiêu chí live của P7 (ít nhất 1 cảnh báo đi trọn vòng) đạt trên cả hai map; không thay đổi kết luận offline (không đạt recall).
 
+## Kết quả P8.1: chẩn đoán lỗi của ứng viên P7 (2026-10-15, offline, không sửa gì)
+
+Tập phát triển P8 = seed 1-6 cũ + seed 101-106 của P7 (đã xem nên không còn là heldout). Kết quả và script: `auv_inspection/output/p8_diagnosis/` (`defect_views.jsonl`, `p8_diag_views.py`, bảng ảnh báo nhầm `*_false_alerts_*.jpg`, `p8_fa_sheet.py`).
+
+**Marine snow: vết vẫn có bằng chứng, cổng lan tỏa bỏ cả frame.** Mỗi lượt nhìn vào vết (7 capture có vết, 909 lượt nhìn × điều kiện) được chấm bằng `dino_surface_b` và ghi quyết định của cổng, ô vết tốt nhất (điểm, điểm chuẩn hóa, hai ngưỡng), median frame và tỷ lệ khối của vết bị hạt che (ảnh suy giảm trừ ảnh gốc).
+
+| Điều kiện | Hit | Bị cổng chặn | Hit nếu bỏ cổng | Tiêu chí cổng kích hoạt | Hạt che ô vết (median) |
+|---|---|---|---|---|---|
+| Gốc | 240 | 25 | 265/274 | > 25% một vùng: 14, > 6 vùng: 10 | 0 |
+| Marine snow 3 | 85 | 185 | 265/274 | > 6 vùng: 175 (median 14 vùng/frame) | 3% |
+| Marine snow 5 | 78 | 188 | 259/274 | > 6 vùng: 183 (median 25,5) | 21% |
+
+- Điểm của ô vết gần như không đổi dưới marine snow (tỷ lệ tuyệt đối 1,03); median frame tăng 1,15-1,77 lần nên điểm chuẩn hóa giảm, nhưng chỉ 1-5 lượt rớt vì ngưỡng tầng. **154/155 (mức 3) và 160/165 (mức 5) lượt mất hit là do cổng lan tỏa**, gần như toàn bộ qua tiêu chí > 6 vùng: hạt tạo nhiều vùng nhỏ vượt ngưỡng (frame gốc median 2 vùng).
+- Ở điều kiện gốc, tiêu chí "một vùng > 25%" chặn chính vết lớn: 15/25 lượt bị chặn là `B_pipe_front_hole_large` (giải thích lỗ lớn bị sót ở seed 106 khi route đi gần).
+
+**Báo nhầm: ba nhóm.**
+- **Mặt đáy trong ROI trụ (17/30 báo nhầm P7):** `geometry.PIER_Z_RANGE` = (-12,0; 1,6) nhưng chân trụ gặp đáy ở z ≈ -10,4 (đo trên ảnh seed 101 tick 8329: -10,36 đến -10,45; hộp vật cản trong `inspection_route.py` cũng dừng ở -10,4). Mọi báo nhầm chân trụ nằm ở z -10,41 đến -10,55, ở mép dưới ảnh, tức mặt đáy và đường tiếp giáp bị coi là mặt trụ. Chỉ thấy ở khoảng cách lớn (2,7-3,0 m, seed 101 bán kính 3,59 m) vì gần hơn thì phần này ít lọt vào ảnh. Là lỗi hình học, không phải lỗi detector.
+- **Rìa tối của quầng đèn trên ống:** phần lớn báo nhầm của tập phát triển cũ (12/20 ở độ đục 4, thêm đèn yếu 4), box nằm ở vùng tối hai bên hoặc mép dưới ống, nơi tín hiệu thấp.
+- **Mép vòng bích mặt sau ống:** một báo nhầm live trên map B.
+
+**Hướng P8.2 rút ra:** (1) cổng lan tỏa không đếm vùng cỡ hạt (hoặc che hạt trước khi đếm) và không chặn một vùng lớn đặc; quy tắc bề mặt k = 3 lượt nhìn đã loại nhiễu ngẫu nhiên giữa các frame, cần đo báo nhầm trên tập phát triển; (2) sửa giới hạn dưới của trụ về mặt đáy rồi calibrate lại ngưỡng; (3) sau đó mới xét mặt nạ tín hiệu thấp cho rìa quầng đèn.
+
 ## Tiêu chí nghiệm thu (bản đầu)
 
 Đo trên **điều kiện môi trường chưa từng dùng** để train hay chọn ngưỡng:
@@ -274,6 +297,7 @@ Theo quy tắc đã đăng ký, không đổi ngưỡng, bank, cổng hay nhãn 
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
 | 2026-10-09 | Live P2 xác nhận nguồn báo nhầm chính là **biên ROI** (đầu ống, mép ống khi nhìn xiên): ROI giới hạn tâm đặc trưng nhưng trường nhìn của đặc trưng rộng hơn. Thêm vào **P3** một lề chấm điểm bên trong ROI theo trường nhìn của đặc trưng, đánh giá trên tập phát triển trước. Báo trùng cùng một vết (hai vị trí cách 2,08 m) để **P5** gộp theo tọa độ bề mặt |
+| 2026-10-15 | **Mở P8** (người dùng duyệt kế hoạch): seed 101-106 chuyển vào tập phát triển; P8.1 chẩn đoán trước khi chọn phương án. Kết quả: mất recall dưới marine snow là do cổng lan tỏa (tiêu chí > 6 vùng), không phải điểm của vết; 17/30 báo nhầm P7 là mặt đáy lọt vào ROI trụ vì `PIER_Z_RANGE` dưới mặt đáy. Heldout P8 cần seed mới; map C đề xuất, chờ người dùng quyết |
 | 2026-10-15 | **Cổng phê duyệt kiểm hash code (D11)**: `approval_gate.SCORING_CODE` (live_service và 16 module project nó nạp), hash sau khi đổi CRLF thành LF. Mặc định v2 cần `code_sha256` trong `acceptance_preregistration.json` (lấy từ chính commit đăng ký `2114d6a`, trùng working tree); cổng v1 cần `code_sha256` trong báo cáo đánh giá B. Báo cáo `patchcore_evaluation_B_v1.json` (2026-09-26) không có hash code, và code chấm điểm đã đổi nhiều từ đó (quy tắc bề mặt, hình học v2), nên cổng v1 không còn tự chọn PatchCore v1 (giao diện mặc định Classical khi tắt v2; vẫn chọn PatchCore bằng tay được). Không sửa file đánh giá hay `patchcore_artifacts/` |
 | 2026-10-15 | **Dashboard mặc định dùng v2 + lề mép ảnh** (người dùng duyệt): dù không đạt nghiệm thu, ứng viên tốt hơn v1.4 ở cả ba chỉ số trên dữ liệu heldout (recall 72,3% so với 58,9%, 0,345 so với 2,89 báo nhầm/100 m). Chỉ bật khi mọi file của ứng viên còn khớp SHA256 trong `acceptance_preregistration.json`; nếu không, quay về PatchCore v1 sau cổng phê duyệt cũ; `--v1` chọn v1. Thêm `--world` để chạy live trên map B |
 | 2026-10-15 | **Kết quả nghiệm thu P7 offline: ứng viên v2 + lề mép ảnh không đạt** vì recall 72,3% (bootstrap 63,5-79,4%) < 90%; báo nhầm 0,345/100 m và FPR mức ô 0,031% đạt. Đối chứng v1.4: 58,9%, 2,89/100 m. Thiếu hụt chủ yếu ở marine snow (8/32). Giữ nguyên kết luận theo đăng ký; không chỉnh gì trên dữ liệu heldout này |
