@@ -1,0 +1,161 @@
+{
+  "created": "2026-10-12T22:56:21+07:00",
+  "cell_m": 0.1,
+  "pool_px": 4,
+  "min_move_m": 0.3,
+  "views_required": 3,
+  "statistic": "k-th highest per-view cell max / frame median score",
+  "hit_rule": "cell max >= pixel threshold AND cell max / frame median >= stratum threshold",
+  "false_cells_per_100m_budget": 0.5,
+  "evaluated_cells": 31968,
+  "surveyed_length_m": 528.9,
+  "cells_per_100m": 6044.7,
+  "alpha_per_cell": 8.271725455509892e-05,
+  "model_dir": "E:\\AUV-Production\\UnderWater_IMP\\auv_inspection\\output\\patchcore_model_v1",
+  "pixel_thresholds_sha256": "5a553b9ee55941bdd09339342a07505fa7646490d38e90a80c0b1970baa5e50f",
+  "score_margin_px": 24,
+  "diffuse_gate": false,
+  "sources": [
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_110540_192827",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "conditions": {
+        "profile": "train",
+        "seed": 11,
+        "pipe_offset_m": 2.329,
+        "pier_radius_m": 2.585,
+        "depth_jitter_m": 0.113,
+        "yaw_jitter_deg": 3.86,
+        "current_mps": [
+          -0.0084,
+          0.035,
+          0.0
+        ],
+        "current_variation_mps": 0.05,
+        "light_intensity": 2098.0,
+        "light_pitch_deg": 3.41,
+        "capture_interval_ticks": [
+          7,
+          13
+        ]
+      },
+      "frames": {
+        "analysed": 532
+      },
+      "evaluated_cells": 9703,
+      "surveyed_length_m": 171.1
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_111452_059585",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "conditions": {
+        "profile": "train",
+        "seed": 12,
+        "pipe_offset_m": 1.986,
+        "pier_radius_m": 2.845,
+        "depth_jitter_m": 0.147,
+        "yaw_jitter_deg": 3.83,
+        "current_mps": [
+          0.0118,
+          0.0689,
+          0.0
+        ],
+        "current_variation_mps": 0.014,
+        "light_intensity": 2149.1,
+        "light_pitch_deg": -0.19,
+        "capture_interval_ticks": [
+          7,
+          13
+        ]
+      },
+      "frames": {
+        "analysed": 566
+      },
+      "evaluated_cells": 12156,
+      "surveyed_length_m": 183.8
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_114918_998711",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "conditions": {
+        "profile": "train",
+        "seed": 13,
+        "pipe_offset_m": 2.15,
+        "pier_radius_m": 2.638,
+        "depth_jitter_m": 0.058,
+        "yaw_jitter_deg": 2.05,
+        "current_mps": [
+          0.0005,
+          -0.0289,
+          0.0
+        ],
+        "current_variation_mps": 0.001,
+        "light_intensity": 2080.0,
+        "light_pitch_deg": 2.45,
+        "capture_interval_ticks": [
+          7,
+          13
+        ]
+      },
+      "frames": {
+        "analysed": 533
+      },
+      "evaluated_cells": 10109,
+      "surveyed_length_m": 173.9
+    }
+  ],
+  "strata": {
+    "pier_0/pier_face": {
+      "threshold": 1.284978,
+      "cells": 11554,
+      "achieved_level": 8.654262224145392e-05,
+      "data_limited": true,
+      "calibration_p50": 1.0638,
+      "calibration_max": 1.285
+    },
+    "pier_1/pier_face": {
+      "threshold": 1.281669,
+      "cells": 10808,
+      "achieved_level": 9.25154963456379e-05,
+      "data_limited": true,
+      "calibration_p50": 1.0593,
+      "calibration_max": 1.2817
+    },
+    "pipe_back/pipe_body": {
+      "threshold": 1.202056,
+      "cells": 3305,
+      "achieved_level": 0.00030248033877797946,
+      "data_limited": true,
+      "calibration_p50": 1.0721,
+      "calibration_max": 1.2021
+    },
+    "pipe_back/pipe_joint": {
+      "threshold": 1.331825,
+      "cells": 1590,
+      "achieved_level": 0.0006285355122564425,
+      "data_limited": true,
+      "calibration_p50": 1.1068,
+      "calibration_max": 1.3318
+    },
+    "pipe_front/pipe_body": {
+      "threshold": 1.214419,
+      "cells": 3206,
+      "achieved_level": 0.0003118178983473651,
+      "data_limited": true,
+      "calibration_p50": 1.0727,
+      "calibration_max": 1.2144
+    },
+    "pipe_front/pipe_joint": {
+      "threshold": 1.341015,
+      "cells": 1505,
+      "achieved_level": 0.0006640106241699867,
+      "data_limited": true,
+      "calibration_p50": 1.1281,
+      "calibration_max": 1.341
+    }
+  },
+  "caveats": [
+    "cells of one run are spatially correlated; runs are the independent units",
+    "conformal level holds only for conditions exchangeable with the calibration runs"
+  ]
+}

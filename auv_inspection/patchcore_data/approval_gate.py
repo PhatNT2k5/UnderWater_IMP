@@ -60,3 +60,19 @@ def approval_matches(model_dir: Path, reference_dataset: Path,
         )
     except (OSError, ValueError, KeyError, TypeError):
         return False
+
+
+def registered_candidate_matches(model_dir: Path, registration_file: Path, root: Path) -> bool:
+    """Detector v2 default: every file of the P7 candidate still has its pre-registered SHA256.
+
+    This checks the artifacts that were scored on held-out data, not that they passed the
+    acceptance criteria (they did not: robustness/acceptance_preregistration.json, P7 result).
+    """
+    try:
+        candidate = json.loads(registration_file.read_text(encoding="utf-8"))["candidate"]
+        if (root / candidate["model_dir"]).resolve() != model_dir.resolve() or not candidate["sha256"]:
+            return False
+        return all((model_dir / name).is_file() and file_sha256(model_dir / name) == digest
+                   for name, digest in candidate["sha256"].items())
+    except (OSError, ValueError, KeyError, TypeError):
+        return False

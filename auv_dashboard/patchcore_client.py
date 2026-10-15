@@ -16,7 +16,10 @@ import numpy as np
 class PatchCoreClient:
     def __init__(self, root: Path, session: Path, model_dir: Path,
                  reference_dataset: Path, thresholds_file: Path,
-                 python_executable: Path | None = None, roi_mode: str = "geometry") -> None:
+                 python_executable: Path | None = None, roi_mode: str = "geometry",
+                 score_margin_px: int = 24, diffuse_gate: bool = True,
+                 alert_rule: str = "track", surface_calibration: Path | None = None,
+                 border_margin: bool = False) -> None:
         executable = python_executable or root / ".venv-patchcore/Scripts/python.exe"
         if not executable.is_file():
             raise FileNotFoundError(f"PatchCore Python not found: {executable}")
@@ -26,7 +29,14 @@ class PatchCoreClient:
         self._responses: Queue[dict | BaseException] = Queue()
         command = [str(executable), "-u", "-m", "auv_inspection.patchcore_data.live_service",
                    str(model_dir), str(reference_dataset), str(thresholds_file),
-                   "--roi-mode", roi_mode]
+                   "--roi-mode", roi_mode, "--score-margin-px", str(score_margin_px),
+                   "--alert-rule", alert_rule]
+        if diffuse_gate:
+            command.append("--diffuse-gate")
+        if surface_calibration is not None:
+            command += ["--surface-calibration", str(surface_calibration)]
+        if border_margin:
+            command.append("--border-margin")
         try:
             self.process = subprocess.Popen(
                 command, cwd=root, stdin=subprocess.PIPE, stdout=subprocess.PIPE,

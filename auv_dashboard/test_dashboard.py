@@ -38,7 +38,7 @@ class DashboardBridgeTests(unittest.TestCase):
                         "VelocitySensor": np.zeros(3)}
 
         class FakeClient:
-            def __init__(self, *_args: object) -> None:
+            def __init__(self, *_args: object, **_options: object) -> None:
                 pass
 
             def analyze(self, _frame: np.ndarray, tick: int, category: str,

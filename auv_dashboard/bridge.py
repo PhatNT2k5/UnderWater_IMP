@@ -136,7 +136,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
         "active": False, "damage_pause": False, "damage_pause_started_at": None,
         "pause": False, "stop": False, "continue": False, "follow": bool(options.get("follow", True)), "keys": set(),
         "evidence": None, "viewport_enabled": False,
-        "analysis_status": "idle", "analysis_tick": None, "runtime_tick": -1,
+        "analysis_status": "idle", "analysis_reason": None, "analysis_tick": None, "runtime_tick": -1,
         "position": [0.0, 0.0, 0.0], "yaw": 0.0, "category": None,
     }
     last_publish = 0.0
@@ -273,7 +273,18 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
                                            analyzed=True, analysis_tick=runtime_tick,
                                            status=response["status"])
                 state["last_patchcore_analysis"] = analysis
+                # One line per analysed frame, so abstentions (diffuse_anomaly, no ROI) are on record.
+                with (session / "patchcore_frames.jsonl").open("a", encoding="utf-8") as log:
+                    log.write(json.dumps({
+                        key: response.get(key) for key in (
+                            "tick", "category", "station", "position_m", "yaw_deg", "status",
+                            "reason", "anomaly_share", "anomaly_spread", "largest_region_share",
+                            "candidate_count", "quality",
+                            "surface_alerts", "processing_ms")
+                    } | {"candidates": len(response["candidates"]),
+                         "alerts": len(response["alerts"])}) + "\n")
                 state["analysis_status"] = response["status"]
+                state["analysis_reason"] = response.get("reason")
                 state["analysis_tick"] = runtime_tick
         state["analysis"] = analysis
         return analysis
@@ -319,6 +330,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
                 "model_dir": response["model_dir"], "threshold": response["threshold"],
                 "processing_ms": response["processing_ms"],
                 "roi_status": response["roi_status"],
+                "surface_alerts": response.get("surface_alerts", []),
                 "event_dir": str(evidence_dir),
             }
             (evidence_dir / "event.json").write_text(json.dumps(event, indent=2),
@@ -400,6 +412,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
             "candidate_count": len(analysis.candidates) if analysis is not None else 0,
             "detector": detector, "analysis_tick": state["analysis_tick"],
             "analysis_status": state["analysis_status"],
+            "analysis_reason": state["analysis_reason"],
         }
         publish_latest(frames, packet)
 
@@ -429,6 +442,11 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
         time.sleep(max(0.0, 1.0 / 30.0 - (time.monotonic() - last_tick)))
         return -1
 
+    alert_rule = str(options.get("patchcore_alert_rule", "track"))
+    # The surface rule de-duplicates per surface region in the service, so the runtime's 2 m
+    # camera re-arm lock would only hide distinct alerts behind an earlier one (P5).
+    rearm_distance_m = (0.0 if detector == "PatchCore" and alert_rule == "surface"
+                        else inspection.CRACK_REARM_DISTANCE_M)
     try:
         if detector == "PatchCore":
             if options["mode"] != "auto":
@@ -437,12 +455,15 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
             patchcore_client = PatchCoreClient(
                 ROOT, session, Path(str(options["patchcore_model"])),
                 Path(str(options["patchcore_reference"])),
-                Path(str(options["patchcore_thresholds"])),
+                Path(str(options["patchcore_thresholds"])), alert_rule=alert_rule,
+                surface_calibration=(Path(str(options["patchcore_surface_calibration"]))
+                                     if options.get("patchcore_surface_calibration") else None),
+                border_margin=bool(options.get("patchcore_border_margin", False)),
             )
         events.put({"type": "status", "text": "Đang khởi động Unreal…"})
         args = argparse.Namespace(
             editor=None, headless=False, steps=int(options["steps"]), mode=str(options["mode"]),
-            move_speed=2.0, yaw_speed=45.0,
+            move_speed=2.0, yaw_speed=45.0, world=options.get("world") or None,
         )
         with (
             patch.object(inspection, "HERE", session),
@@ -455,6 +476,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
             patch.object(inspection, "analyze_frame", analyze),
             patch.object(inspection, "draw_detections", draw),
             patch.object(inspection, "save_damage_event", save_event),
+            patch.object(inspection, "CRACK_REARM_DISTANCE_M", rearm_distance_m),
             patch.object(inspection, "is_key_pressed", is_key_pressed),
             patch.object(inspection.cv2, "imshow", preview),
             patch.object(inspection.cv2, "waitKey", wait_key),

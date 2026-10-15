@@ -34,8 +34,10 @@ from robustness.degradation import Degradation, apply_degradations, parse_degrad
 from robustness.geometric_roi import (  # noqa: E402
     DEFAULT_POSE_SIGMA_M, DEFAULT_POSE_SIGMA_YAW_DEG, category_from_pose)
 from robustness.geometry import load_params, params_dict  # noqa: E402
+from robustness.surface import surface_point  # noqa: E402
+from robustness.surface_evidence import CELL_M, VIEWS_REQUIRED  # noqa: E402
 
-GEOMETRY = load_params()  # calibrated if calibration/geometry_v1.json exists
+GEOMETRY = load_params()  # geometry.CALIBRATION_FILE (v2) if it exists
 from robustness.metrics import fraction, rate_per_100m, surveyed_length_m  # noqa: E402
 
 REARM_DISTANCE_M = 2.0
@@ -43,6 +45,14 @@ MIN_VIEWS_OBSERVABLE = 3
 PATCHCORE_MODEL = INSPECTION / "output/patchcore_model_v1"
 PATCHCORE_REFERENCE = INSPECTION / "output/patchcore_dataset_clean_20260925"
 PATCHCORE_THRESHOLDS = INSPECTION / "output/patchcore_thresholds_v1.json"
+# Detector v2 (P4): each model directory holds its banks, pixel thresholds and surface calibration.
+# "_g2": banks and calibrations rebuilt with geometry v2 (the earlier directories used v1).
+V2_MODELS = {"dino_surface": INSPECTION / "output/detector_v2_dino_s2_aug_g2",
+             "dino_surface_noaug": INSPECTION / "output/detector_v2_dino_s2_noaug_g2",
+             # P4.3: same banks as dino_surface plus a nuisance projection / Mahalanobis whitening.
+             "dino_nfad": INSPECTION / "output/detector_v2_dino_s2_aug_g2_nfad8",
+             "dino_maha": INSPECTION / "output/detector_v2_dino_s2_aug_g2_maha",
+             "dino_nfmaha": INSPECTION / "output/detector_v2_dino_s2_aug_g2_nfmaha"}
 
 
 @dataclass(frozen=True)
@@ -51,6 +61,8 @@ class FrameResult:
     flagged: bool                    # at least one above-threshold candidate (before tracking)
     alert_bbox: list[int] | None     # confirmed alert box in this frame
     category: str | None = None      # structure group the detector used, if it chose one
+    reason: str | None = None        # why an unavailable frame was not analysed, if known
+    more_alert_bboxes: tuple[list[int], ...] = ()  # further new alerts in the same frame
 
 
 Detector = Callable[[np.ndarray, dict], FrameResult]
@@ -79,11 +91,14 @@ def classical_detector() -> Detector:
 
 
 def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
-                       roi_mode: str = "reference") -> Detector:
+                       roi_mode: str = "reference", score_margin_px: int = 0,
+                       diffuse_gate: bool = False, alert_rule: str = "track",
+                       surface_calibration: Path | None = None, border_margin: bool = False) -> Detector:
     """reference: P0/v1.1 ROI and capture categories; geometry: P2 ROI and pose-derived groups."""
     from auv_inspection.patchcore_data.live_service import (
-        analyze_request, create_session, encode_png)
-    session = create_session(model_dir, reference, thresholds, roi_mode)
+        SURFACE_CALIBRATION_FILE, analyze_request, create_session, encode_png)
+    session = create_session(model_dir, reference, thresholds, roi_mode, score_margin_px, diffuse_gate,
+                             alert_rule, surface_calibration or SURFACE_CALIBRATION_FILE, border_margin)
 
     def step(frame: np.ndarray, row: dict) -> FrameResult:
         category = row["category"]
@@ -99,24 +114,51 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
                 request[key] = row[key]
         response = analyze_request(session, request)
         if response["status"] != "ready":
-            return FrameResult(False, False, None, category)
+            return FrameResult(False, False, None, category, response.get("reason"))
         alerts = response["alerts"]
         return FrameResult(True, bool(response["candidates"]),
-                           alerts[0]["bbox_xywh"] if alerts else None, category)
+                           alerts[0]["bbox_xywh"] if alerts else None, category,
+                           more_alert_bboxes=tuple(item["bbox_xywh"] for item in alerts[1:]))
 
+    if alert_rule == "surface":
+        step.rearm_distance_m = 0.0  # mirrors the dashboard, which lifts the 2 m lock for it
+        step.ambiguous_regions = session.evidence.ambiguous_regions  # P6: what a revisit could settle
+        step.surface_cells = lambda: [(key, state.views, state.alert_id is not None)  # P7: cell FPR
+                                      for key, state in session.evidence.cells.items()]
     return step
 
 
-DETECTORS = ("classical", "patchcore", "patchcore_geo")
+DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md",
+             "patchcore_surface", *V2_MODELS, *(f"{name}_b" for name in V2_MODELS))
 
 
 def make_detector(name: str) -> Detector:
-    """classical; patchcore = v1.1 reference ROI; patchcore_geo = P2 geometric ROI."""
+    """classical; patchcore = v1.1 reference ROI; patchcore_geo = P2 geometric ROI;
+    _m adds the P3 scoring margin; _md adds the margin and the diffuse-anomaly gate;
+    patchcore_surface = _md with the P5 surface alert rule (surface_evidence.CALIBRATION_FILE);
+    dino_surface(_noaug) = detector v2 with the same ROI, margin, gate and surface rule;
+    dino_nfad / dino_maha / dino_nfmaha = dino_surface banks with a P4.3 feature transform
+    (nfmaha: the nfad projection, then whitening of the projected bank);
+    a "_b" suffix adds the margin at the image border."""
     if name == "classical":
         return classical_detector()
-    if name in ("patchcore", "patchcore_geo"):
-        return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS,
-                                  "geometry" if name == "patchcore_geo" else "reference")
+    if name == "patchcore":
+        return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "reference")
+    if name in DETECTORS and name.removesuffix("_b") in V2_MODELS:
+        from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
+        model = V2_MODELS[name.removesuffix("_b")]
+        return patchcore_detector(model, PATCHCORE_REFERENCE, model / "pixel_thresholds.json", "geometry",
+                                  DEFAULT_SCORE_MARGIN_PX, True, "surface", model / "surface_calibration.json",
+                                  border_margin=name.endswith("_b"))
+    if name == "patchcore_surface":
+        from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
+        return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "geometry",
+                                  DEFAULT_SCORE_MARGIN_PX, True, "surface")
+    if name.startswith("patchcore_geo") and name in DETECTORS:
+        from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
+        return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "geometry",
+                                  DEFAULT_SCORE_MARGIN_PX if name.endswith(("_m", "_md")) else 0,
+                                  name.endswith("_md"))
     raise ValueError(f"Unknown detector {name!r}; choose from {DETECTORS}")
 
 
@@ -153,6 +195,7 @@ class Score:
     events: list[dict] = field(default_factory=list)
     last_alert: np.ndarray | None = None
     elapsed: list[float] = field(default_factory=list)
+    rearm_m: float = REARM_DISTANCE_M
 
 
 def record(score: Score, result: FrameResult, row: dict, perceived: dict, visible: list[str],
@@ -160,21 +203,25 @@ def record(score: Score, result: FrameResult, row: dict, perceived: dict, visibl
     category = row["category"]
     if result.available:  # skipped frames cost ~0 ms and would hide the real latency
         score.elapsed.append(elapsed_ms)
-    score.status[category]["analysed" if result.available else "unavailable"] += 1
+    status = "analysed" if result.available else "unavailable"
+    if not result.available and result.reason == "diffuse_anomaly":
+        status = "diffuse_anomaly"  # an abstention the operator sees, unlike missing geometry
+    score.status[category][status] += 1
     if result.available and not visible:
         score.negatives += 1
         score.flagged_negatives += result.flagged
     if result.alert_bbox is None:
         return
     believed = np.asarray(perceived["position_m"], float)
-    if score.last_alert is not None and np.linalg.norm(believed - score.last_alert) < REARM_DISTANCE_M:
-        return
-    score.last_alert = believed
     alert_category = result.category or category
-    point = locate_box(result.alert_bbox, believed, float(perceived["yaw_deg"]), alert_category, GEOMETRY)
-    score.events.append({"tick": row["tick"], "category": alert_category, "bbox_xywh": result.alert_bbox,
-                         "world_m": None if point is None else np.round(point, 3).tolist(),
-                         "defect": match_defect(point, alert_category, defects)})
+    for bbox in (result.alert_bbox, *result.more_alert_bboxes):
+        if score.last_alert is not None and np.linalg.norm(believed - score.last_alert) < score.rearm_m:
+            return
+        score.last_alert = believed
+        point = locate_box(bbox, believed, float(perceived["yaw_deg"]), alert_category, GEOMETRY)
+        score.events.append({"tick": row["tick"], "category": alert_category, "bbox_xywh": bbox,
+                             "world_m": None if point is None else np.round(point, 3).tolist(),
+                             "defect": match_defect(point, alert_category, defects)})
 
 
 def evaluate_many(capture: Path, detectors: dict[str, Detector], inventory: Inventory | None,
@@ -193,7 +240,9 @@ def evaluate_many(capture: Path, detectors: dict[str, Detector], inventory: Inve
     defects = inventory.defects if inventory else ()
     views: Counter[str] = Counter()
     positions: dict[str, list[list[float]]] = defaultdict(list)
-    scores = {name: Score() for name in detectors}
+    # A detector may declare its own re-arm distance (the surface rule de-duplicates per region).
+    scores = {name: Score(rearm_m=getattr(detector, "rearm_distance_m", REARM_DISTANCE_M))
+              for name, detector in detectors.items()}
     for row in rows:
         frame = cv2.imread(str(capture / row["image"]), cv2.IMREAD_COLOR)
         if frame is None:
@@ -211,6 +260,8 @@ def evaluate_many(capture: Path, detectors: dict[str, Detector], inventory: Inve
             record(scores[name], result, row, perceived, visible, defects,
                    (time.perf_counter() - start) * 1000)
     observable = [defect.defect_id for defect in defects if views[defect.defect_id] >= MIN_VIEWS_OBSERVABLE]
+    ambiguity = {name: ambiguity_report(detector, defects, length_of(positions))
+                 for name, detector in detectors.items() if hasattr(detector, "ambiguous_regions")}
     length = sum(surveyed_length_m(items) for items in positions.values())
     results = {}
     for name, score in scores.items():
@@ -231,11 +282,46 @@ def evaluate_many(capture: Path, detectors: dict[str, Detector], inventory: Inve
             "processing_ms_median": float(np.median(score.elapsed)) if score.elapsed else None,
             "timing_basis": "analysed_frames_only",
             "events": score.events,
+            **({"ambiguity": ambiguity[name]} if name in ambiguity else {}),
             "caveats": ["capture frames are sampled every few ticks, not every tick as at runtime",
                         "consecutive frames are correlated; Wilson intervals are indicative",
                         "defect visibility is geometric and ignores lighting"],
         }
     return results
+
+
+def length_of(positions: dict[str, list[list[float]]]) -> float:
+    return sum(surveyed_length_m(items) for items in positions.values())
+
+
+def ambiguity_report(detector: Detector, defects: tuple, length_m: float) -> dict:
+    """P6: unresolved surface regions (1..k-1 hits) at the end of a run and the defects they touch."""
+    regions = detector.ambiguous_regions()
+    for region in regions:
+        point = surface_point(np.array([region["centre_uv_m"]]), region["category"], GEOMETRY)[0]
+        region["world_m"] = np.round(point, 3).tolist()
+        region["defect"] = match_defect(point, region["category"], defects)
+    per_100m = {f"hits>={k}": rate_per_100m(sum(r["max_hits"] >= k for r in regions), length_m)
+                for k in (1, 2)}
+    report = {"regions": regions, "regions_per_100m": per_100m,
+              "defects_touched": sorted({r["defect"] for r in regions if r["defect"]})}
+    if hasattr(detector, "surface_cells"):
+        report["clean_cell_fpr"] = clean_cell_fpr(detector.surface_cells(), defects)
+    return report
+
+
+def clean_cell_fpr(cells: list[tuple], defects: tuple) -> dict:
+    """P7 cell-level FPR: clean evaluated cells (>= k views, not on a labelled defect) that alerted."""
+    alerted = evaluated = 0
+    for (category, cell_u, cell_v), views, alert in cells:
+        if views < VIEWS_REQUIRED:
+            continue
+        centre = surface_point(np.array([[(cell_u + 0.5) * CELL_M, (cell_v + 0.5) * CELL_M]]), category, GEOMETRY)[0]
+        if match_defect(centre, category, defects) is not None:
+            continue
+        evaluated += 1
+        alerted += alert
+    return fraction(alerted, evaluated)
 
 
 def evaluate(capture: Path, detector_name: str, detector: Detector, inventory: Inventory | None,

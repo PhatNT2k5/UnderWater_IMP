@@ -13,7 +13,9 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from robustness.defect_inventory import Defect, Inventory  # noqa: E402
 from robustness.evaluate_capture import (  # noqa: E402
-    FrameResult, evaluate, evaluate_many, perceived_pose)
+    FrameResult, clean_cell_fpr, evaluate, evaluate_many, perceived_pose)
+from robustness.evaluate_capture import GEOMETRY  # noqa: E402
+from robustness.surface import surface_uv  # noqa: E402
 
 MAP_HASH = "f" * 64
 DEFECT = Defect("d1", "pipe_front", np.array([0.0, 0.5, -10.3]), 0.6)
@@ -53,6 +55,33 @@ class EvaluateCaptureTests(unittest.TestCase):
         self.assertEqual(result["defects"]["recall"]["rate"], 1.0)
         self.assertEqual(len(result["events"]), 1)  # tick 110 is within 2 m of the first alert
         self.assertEqual(result["false_alerts"], 0)
+
+    def test_surface_style_detector_reports_every_alert_without_rearm_lock(self) -> None:
+        capture = write_capture(Path(self.temp.name), self.xs)
+        on_defect, far_left = [310, 230, 20, 20], [20, 230, 20, 20]
+
+        def step(frame: np.ndarray, row: dict) -> FrameResult:
+            if row["tick"] == 100:   # two new regions in one frame
+                return FrameResult(True, True, on_defect, more_alert_bboxes=(far_left,))
+            if row["tick"] == 110:   # another region 0.3 m later, inside the old 2 m lock
+                return FrameResult(True, True, far_left)
+            return FrameResult(True, False, None)
+
+        step.rearm_distance_m = 0.0
+        result = evaluate(capture, "surface", step, Inventory(MAP_HASH, (DEFECT,)), [], 0)
+        self.assertEqual([event["tick"] for event in result["events"]], [100, 100, 110])
+        self.assertEqual(result["defects"]["detected"], ["d1"])
+        self.assertEqual(result["false_alerts"], 2)
+
+    def test_clean_cell_fpr_skips_defect_cells_and_thin_cells(self) -> None:
+        u, v = surface_uv(DEFECT.world, "pipe_front", GEOMETRY)[0]
+        on_defect = ("pipe_front", int(u // 0.1), int(v // 0.1))
+        cells = [(on_defect, 5, True),                      # alert on the labelled defect: not clean
+                 (("pipe_front", 40, 0), 5, True),          # clean cell that alerted
+                 (("pipe_front", 41, 0), 4, False),         # clean, evaluated
+                 (("pipe_front", 42, 0), 2, True)]          # fewer than k views: not evaluated
+        result = clean_cell_fpr(cells, (DEFECT,))
+        self.assertEqual((result["count"], result["total"]), (1, 2))
 
     def test_alert_away_from_defects_is_a_false_alert(self) -> None:
         capture = write_capture(Path(self.temp.name), self.xs)

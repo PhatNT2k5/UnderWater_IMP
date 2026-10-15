@@ -1,0 +1,66 @@
+{
+  "map": "/Game/AUVInspection/Maps/AUVInspection_PatchCoreB_20260926_v3",
+  "map_sha256": "3bee29b80b4e7b7dc899de5f5d2d58e48a0bf3678205f477f0b60dbc97c991c1",
+  "status": "reviewed",
+  "method": "P7 held-out labels, traced 2026-10-14 before any detector ran on map B. Blind scan of contact sheets (every 2nd frame, all four structure groups) of capture_test_mixed_20261014_193119_450647 (seed 105) found five visible defects and nothing on pipe_back or pier_0. Each defect was traced by eye on two full-resolution frames of that capture (cracks: the two visible end points; holes: left and right edge of the dark area at mid-height) and converted to world points with calibration/geometry_v2.json; the two views agree within 0.04 m and the stored segment is their mean. Radius 0.35 m as for the map A segments. The traced positions match the decal placements written by create_validation_maps.py / finalize_validation_b.py (UE x -450, 0, 350, 850 cm on the pipe front, (990, 550, -820) cm on pier 1), which were used only to cross-check, not to set coordinates. No detector output of any kind was viewed.",
+  "revisions": [
+    "2026-10-14: status proposed -> reviewed; the user approved the labels after reviewing the overlay sheets (output/p7_mapB_label_review/, seed 105 and seed 106 frames) and locked them before any detector ran on map B."
+  ],
+  "defects": [
+    {
+      "id": "B_pipe_front_crack_1",
+      "category": "pipe_front",
+      "world_m": [-4.196, 0.415, -10.377],
+      "end_m": [-4.768, 0.248, -9.952],
+      "radius_m": 0.35,
+      "sources": {
+        "s105_tick_580_trace": [[-4.189, 0.415, -10.377], [-4.774, 0.243, -9.948]],
+        "s105_tick_587_trace": [[-4.202, 0.415, -10.377], [-4.762, 0.252, -9.955]]
+      }
+    },
+    {
+      "id": "B_pipe_front_hole_small",
+      "category": "pipe_front",
+      "world_m": [0.233, 0.417, -10.223],
+      "end_m": [-0.048, 0.416, -10.222],
+      "radius_m": 0.35,
+      "sources": {
+        "s105_tick_735_trace": [[0.242, 0.416, -10.22], [-0.036, 0.416, -10.219]],
+        "s105_tick_747_trace": [[0.224, 0.418, -10.226], [-0.06, 0.417, -10.226]]
+      }
+    },
+    {
+      "id": "B_pipe_front_crack_2",
+      "category": "pipe_front",
+      "world_m": [3.906, 0.411, -10.195],
+      "end_m": [3.344, 0.421, -10.256],
+      "radius_m": 0.35,
+      "sources": {
+        "s105_tick_847_trace": [[3.917, 0.411, -10.194], [3.353, 0.421, -10.256]],
+        "s105_tick_854_trace": [[3.895, 0.411, -10.195], [3.334, 0.421, -10.257]]
+      }
+    },
+    {
+      "id": "B_pipe_front_hole_large",
+      "category": "pipe_front",
+      "world_m": [9.13, 0.421, -10.256],
+      "end_m": [8.224, 0.422, -10.26],
+      "radius_m": 0.35,
+      "sources": {
+        "s105_tick_1014_trace": [[9.137, 0.421, -10.257], [8.22, 0.422, -10.26]],
+        "s105_tick_1024_trace": [[9.123, 0.421, -10.256], [8.227, 0.422, -10.259]]
+      }
+    },
+    {
+      "id": "B_pier_1_crack",
+      "category": "pier_1",
+      "world_m": [10.28, -5.622, -8.599],
+      "end_m": [9.678, -5.622, -7.92],
+      "radius_m": 0.35,
+      "sources": {
+        "s105_tick_7568_trace": [[10.262, -5.622, -8.598], [9.666, -5.622, -7.93]],
+        "s105_tick_7598_trace": [[10.297, -5.622, -8.6], [9.69, -5.622, -7.911]]
+      }
+    }
+  ]
+}
