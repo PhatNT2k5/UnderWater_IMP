@@ -16,7 +16,7 @@ from tkinter import ttk
 from PIL import ImageGrab
 import win32api
 
-from auv_inspection.patchcore_data.approval_gate import approval_matches
+from auv_inspection.patchcore_data.approval_gate import approval_matches, registered_candidate_matches
 from .bridge import INSPECTION, ROOT, run_worker
 from .viewport import UnrealViewport
 from .widgets import COLORS, FONT, CameraTile, RouteMap
@@ -30,6 +30,10 @@ PATCHCORE_THRESHOLDS = ROOT / "auv_inspection/output/patchcore_thresholds_v1.jso
 # P5: alert after 3 separated views of one surface cell (needs robustness/calibration/surface_v2.json).
 PATCHCORE_ALERT_RULE = "surface"
 PATCHCORE_EVALUATION = ROOT / "auv_inspection/output/patchcore_evaluation_B_v1.json"
+# P7 candidate (v2 + border margin): default when its files still match the pre-registered SHA256.
+DEFAULT_V2_MODEL = ROOT / "auv_inspection/output/detector_v2_dino_s2_aug_g2"
+PREREGISTRATION = ROOT / "auv_inspection/robustness/acceptance_preregistration.json"
+MAPS_PREFIX = "/Game/AUVInspection/Maps/"
 
 
 def v2_files(model_dir: Path) -> dict[str, Path]:
@@ -43,6 +47,10 @@ def v2_files(model_dir: Path) -> dict[str, Path]:
     return {**files, "patchcore_border_margin": True}
 
 
+def default_v2_model() -> Path | None:
+    return DEFAULT_V2_MODEL if registered_candidate_matches(DEFAULT_V2_MODEL, PREREGISTRATION, ROOT) else None
+
+
 def default_detector() -> str:
     return ("PatchCore" if approval_matches(
         PATCHCORE_MODEL, PATCHCORE_REFERENCE,
@@ -52,10 +60,14 @@ def default_detector() -> str:
 
 class Dashboard:
     def __init__(self, root: tk.Tk, steps: int = 60000, smoke_test: bool = False,
-                 v2_model: Path | None = None) -> None:
+                 v2_model: Path | None = None, world: str | None = None) -> None:
         self.root, self.steps, self.smoke_test = root, steps, smoke_test
-        # Opt-in detector v2; the default stays PatchCore v1 behind its approval gate.
+        # Detector v2 when given (run_dashboard picks the registered P7 candidate by default);
+        # without it PatchCore v1 behind its approval gate.
         self.v2_model = v2_model
+        if world is not None and (not world.startswith(MAPS_PREFIX) or ".." in world):
+            raise ValueError(f"World must be a map under {MAPS_PREFIX}: {world}")
+        self.world = world
         self.patchcore_files = (v2_files(v2_model) if v2_model else
                                 {"patchcore_model": PATCHCORE_MODEL, "patchcore_thresholds": PATCHCORE_THRESHOLDS})
         self.context = mp.get_context("spawn")
@@ -308,6 +320,7 @@ class Dashboard:
                for key, value in self.patchcore_files.items()},
             "patchcore_reference": str(PATCHCORE_REFERENCE),
             "patchcore_alert_rule": PATCHCORE_ALERT_RULE,
+            "world": self.world,
         }), name="AUV-dashboard-worker")
         self.worker.start()
 

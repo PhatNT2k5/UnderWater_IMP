@@ -8,7 +8,7 @@ import unittest
 
 from auv_inspection.patchcore_data.approval_gate import (
     MODEL_FILES, REFERENCE_FILES, approval_matches, file_sha256,
-    model_fingerprint, reference_fingerprint,
+    model_fingerprint, reference_fingerprint, registered_candidate_matches,
 )
 
 
@@ -64,6 +64,27 @@ class ApprovalGateTests(unittest.TestCase):
             evaluation.write_text(json.dumps(result), encoding="utf-8")
             self.assertFalse(approval_matches(model, reference, thresholds, evaluation))
 
+
+    def test_registered_candidate_needs_its_directory_and_every_hash(self) -> None:
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            model = root / "out" / "v2"
+            model.mkdir(parents=True)
+            for name in ("config.json", "pixel_thresholds.json"):
+                (model / name).write_text(name, encoding="utf-8")
+            registration = root / "registration.json"
+            registration.write_text(json.dumps({"candidate": {
+                "model_dir": "out/v2",
+                "sha256": {name: file_sha256(model / name) for name in ("config.json", "pixel_thresholds.json")},
+            }}), encoding="utf-8")
+            self.assertTrue(registered_candidate_matches(model, registration, root))
+            self.assertFalse(registered_candidate_matches(root / "out", registration, root))
+
+            (model / "pixel_thresholds.json").write_text("changed", encoding="utf-8")
+            self.assertFalse(registered_candidate_matches(model, registration, root))
+            (model / "pixel_thresholds.json").unlink()
+            self.assertFalse(registered_candidate_matches(model, registration, root))
+            self.assertFalse(registered_candidate_matches(model, root / "missing.json", root))
 
 if __name__ == "__main__":
     unittest.main()

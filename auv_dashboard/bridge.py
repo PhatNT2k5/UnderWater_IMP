@@ -463,7 +463,7 @@ def run_worker(commands: object, frames: object, events: object, options: dict[s
         events.put({"type": "status", "text": "Đang khởi động Unreal…"})
         args = argparse.Namespace(
             editor=None, headless=False, steps=int(options["steps"]), mode=str(options["mode"]),
-            move_speed=2.0, yaw_speed=45.0,
+            move_speed=2.0, yaw_speed=45.0, world=options.get("world") or None,
         )
         with (
             patch.object(inspection, "HERE", session),
