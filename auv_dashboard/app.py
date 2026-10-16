@@ -37,6 +37,7 @@ MAPS_PREFIX = "/Game/AUVInspection/Maps/"
 # P8 development candidate (dino_floor_bgsr): pier floor model + live_service --p8-rules. Opt-in until
 # P8 is pre-registered and accepted.
 P8_MODEL = ROOT / "auv_inspection/output/detector_v2_dino_s2_aug_g2_floor"
+P8_REGISTRATION = ROOT / "auv_inspection/robustness/acceptance_preregistration_p8.json"
 
 
 def v2_files(model_dir: Path, p8_rules: bool = False) -> dict[str, Path | bool]:
@@ -52,6 +53,14 @@ def v2_files(model_dir: Path, p8_rules: bool = False) -> dict[str, Path | bool]:
 
 def default_v2_model() -> Path | None:
     return DEFAULT_V2_MODEL if registered_candidate_matches(DEFAULT_V2_MODEL, PREREGISTRATION, ROOT) else None
+
+
+def default_v2() -> tuple[Path | None, bool]:
+    """(model, P8 rules) of the newest pre-registered candidate whose files and scoring code still
+    match its registration: P8, then P7; (None, False) leaves the v1 approval gate."""
+    if registered_candidate_matches(P8_MODEL, P8_REGISTRATION, ROOT):
+        return P8_MODEL, True
+    return default_v2_model(), False
 
 
 def default_detector() -> str:

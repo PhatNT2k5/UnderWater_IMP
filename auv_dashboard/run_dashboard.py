@@ -32,11 +32,12 @@ def main() -> None:
     if args.steps <= 0:
         parser.error("--steps must be positive")
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    from auv_dashboard.app import MAPS_PREFIX, P8_MODEL, Dashboard, default_v2_model
+    from auv_dashboard.app import MAPS_PREFIX, P8_MODEL, Dashboard, default_v2
     if args.p8 and args.v1:
         parser.error("--p8 runs detector v2; it cannot be combined with --v1")
     if args.world and (not args.world.startswith(MAPS_PREFIX) or ".." in args.world):
         parser.error(f"--world must name a map under {MAPS_PREFIX}")
+    p8_rules = args.p8
     if args.v1:
         v2_model = None
     elif args.v2_model:
@@ -44,15 +45,15 @@ def main() -> None:
     elif args.p8:
         v2_model = P8_MODEL
     else:
-        v2_model = default_v2_model()
+        v2_model, p8_rules = default_v2()
         if v2_model is None:
-            logging.warning("Detector v2 files or scoring code differ from the P7 pre-registration; "
+            logging.warning("Detector v2 files or scoring code differ from the P8 and P7 pre-registrations; "
                             "falling back to the PatchCore v1 approval gate")
     logging.info("Detector v2: %s%s; world: %s", v2_model or "off (v1 approval gate, else Classical)",
-                 " with P8 rules" if args.p8 else "", args.world or "scenario default")
+                 " with P8 rules" if p8_rules else "", args.world or "scenario default")
     ctypes.windll.user32.SetProcessDPIAware()
     root = tk.Tk()
-    dashboard = Dashboard(root, args.steps, args.smoke_test, v2_model, args.world, args.p8)
+    dashboard = Dashboard(root, args.steps, args.smoke_test, v2_model, args.world, p8_rules)
     if args.autostart or args.smoke_test:
         root.after(500, dashboard.start)
     root.mainloop()
