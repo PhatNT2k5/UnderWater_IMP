@@ -124,5 +124,12 @@
   },
   "map_C_labels": "defect positions traced only from the held-out map C capture images (no detector output viewed), checked on the second map C capture, reviewed by the user and locked (sha256 recorded) before any detector is scored on map C; the decal inventory only cross-checks",
   "live": "dashboard runs on map A and map C after the offline report",
-  "no_changes": "no threshold, bank, geometry, margin, gate, evidence or rule change after this registration; any change starts a new registration and needs new held-out data"
+  "no_changes": "no threshold, bank, geometry, margin, gate, evidence or rule change after this registration; any change starts a new registration and needs new held-out data",
+  "map_C_labels_locked": {
+    "locked": "2026-10-17",
+    "file": "auv_inspection/robustness/inventories/map_C.json",
+    "sha256": "2de6f4f446c387b0ffa4528360e05ce63046575ed35e07a8737ebdc91471ce13",
+    "defects": 6,
+    "note": "traced from seed 205 images only, checked on seed 206, approved by the user before any detector ran on map C"
+  }
 }

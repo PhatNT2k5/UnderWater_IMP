@@ -1,0 +1,257 @@
+{
+  "map": "/Game/AUVInspection/Maps/AUVInspection_PatchCoreC_20261016_v1",
+  "map_sha256": "66be9e0399a16eb072a9d651c0fbde5d119b3ee98ee2c9a8e35f83c1efdcd4dd",
+  "status": "reviewed",
+  "method": "P8 held-out labels, traced 2026-10-17 before any detector ran on map C. Blind scan of contact sheets (every 2nd frame, all four structure groups) of capture_test_mixed_20261016_231835_292297 (seed 205) found six visible defects. Each was traced by eye on two full-resolution frames of that capture and converted to world points with calibration/geometry_v2.json; the stored segment is the mean of the two views. Cracks: two traced landmarks along the crack (C_pipe_front_crack_1: its two forks, the faint ends leave the pipe silhouette; C_pier_0_crack: visible left and right tips on two frontal frames, the faint left tip differs by 0.18 m between views); holes: left and right edge of the dark area at mid-height. Radius 0.35 m as for maps A and B. The positions match the decal placements of create_validation_map_c.py (output/validation_C_inventory.json), used only to cross-check. No detector output of any kind was viewed. The pier 0 crack decal also paints a short line onto the adjacent +x face at the corner (seen in corner views, e.g. seed 205 tick 3911); back-projected it lies 0.13-0.23 m from the C_pier_0_crack segment, inside its radius, so it is part of that defect, not a separate one.",
+  "revisions": [
+    "2026-10-17: status proposed -> reviewed; the user approved the labels after reviewing the overlay sheets (output/p8_mapC_labels/review/, seed 205 and seed 206 frames) and locked them before any detector ran on map C."
+  ],
+  "defects": [
+    {
+      "id": "C_pipe_front_crack_1",
+      "category": "pipe_front",
+      "world_m": [
+        -13.276,
+        0.408,
+        -10.404
+      ],
+      "end_m": [
+        -13.509,
+        0.382,
+        -10.114
+      ],
+      "radius_m": 0.35,
+      "sources": {
+        "s205_tick_312_trace": [
+          [
+            -13.263,
+            0.408,
+            -10.407
+          ],
+          [
+            -13.502,
+            0.382,
+            -10.113
+          ]
+        ],
+        "s205_tick_327_trace": [
+          [
+            -13.289,
+            0.409,
+            -10.401
+          ],
+          [
+            -13.515,
+            0.383,
+            -10.115
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C_pipe_front_crack_2",
+      "category": "pipe_front",
+      "world_m": [
+        4.738,
+        0.421,
+        -10.332
+      ],
+      "end_m": [
+        4.344,
+        0.396,
+        -10.445
+      ],
+      "radius_m": 0.35,
+      "sources": {
+        "s205_tick_905_trace": [
+          [
+            4.739,
+            0.421,
+            -10.332
+          ],
+          [
+            4.356,
+            0.395,
+            -10.445
+          ]
+        ],
+        "s205_tick_922_trace": [
+          [
+            4.738,
+            0.421,
+            -10.331
+          ],
+          [
+            4.332,
+            0.396,
+            -10.444
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C_pipe_back_crack",
+      "category": "pipe_back",
+      "world_m": [
+        10.18,
+        -0.279,
+        -9.977
+      ],
+      "end_m": [
+        10.599,
+        -0.42,
+        -10.246
+      ],
+      "radius_m": 0.35,
+      "sources": {
+        "s205_tick_1683_trace": [
+          [
+            10.175,
+            -0.284,
+            -9.981
+          ],
+          [
+            10.59,
+            -0.42,
+            -10.243
+          ]
+        ],
+        "s205_tick_1697_trace": [
+          [
+            10.185,
+            -0.275,
+            -9.973
+          ],
+          [
+            10.608,
+            -0.421,
+            -10.249
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C_pipe_back_hole",
+      "category": "pipe_back",
+      "world_m": [
+        -7.69,
+        -0.412,
+        -10.198
+      ],
+      "end_m": [
+        -7.458,
+        -0.412,
+        -10.198
+      ],
+      "radius_m": 0.35,
+      "sources": {
+        "s205_tick_2264_trace": [
+          [
+            -7.708,
+            -0.409,
+            -10.188
+          ],
+          [
+            -7.472,
+            -0.41,
+            -10.188
+          ]
+        ],
+        "s205_tick_2293_trace": [
+          [
+            -7.673,
+            -0.414,
+            -10.209
+          ],
+          [
+            -7.443,
+            -0.414,
+            -10.209
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C_pier_0_crack",
+      "category": "pier_0",
+      "world_m": [
+        -10.176,
+        -7.378,
+        -6.839
+      ],
+      "end_m": [
+        -9.212,
+        -7.378,
+        -7.103
+      ],
+      "radius_m": 0.35,
+      "sources": {
+        "s205_tick_3775_trace": [
+          [
+            -10.091,
+            -7.378,
+            -6.867
+          ],
+          [
+            -9.229,
+            -7.378,
+            -7.103
+          ]
+        ],
+        "s205_tick_3796_trace": [
+          [
+            -10.26,
+            -7.378,
+            -6.811
+          ],
+          [
+            -9.195,
+            -7.378,
+            -7.103
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C_pier_1_crack",
+      "category": "pier_1",
+      "world_m": [
+        10.704,
+        -5.622,
+        -6.764
+      ],
+      "end_m": [
+        10.244,
+        -5.622,
+        -6.022
+      ],
+      "radius_m": 0.35,
+      "sources": {
+        "s205_tick_7168_trace": [
+          [
+            10.713,
+            -5.622,
+            -6.811
+          ],
+          [
+            10.239,
+            -5.622,
+            -6.012
+          ]
+        ],
+        "s205_tick_7187_trace": [
+          [
+            10.695,
+            -5.622,
+            -6.717
+          ],
+          [
+            10.248,
+            -5.622,
+            -6.031
+          ]
+        ]
+      }
+    }
+  ]
+}
