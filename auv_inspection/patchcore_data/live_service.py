@@ -80,6 +80,7 @@ class Session:
     gate_min_region_px: int = 0              # P8 gate: ignore smaller above-threshold regions
     gate_region_share: bool = True           # P8 gate drops the single-large-region rule
     evidence_min_region_px: int = 0          # P8: only regions this large can give surface hits
+    gate_spread_all_regions: bool = False    # P8: gate spread over all regions, count over large ones
 
 
 def create_session(model_dir: Path, reference_dataset: Path,
@@ -88,7 +89,8 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    alert_rule: str = "track",
                    surface_calibration: Path = SURFACE_CALIBRATION_FILE,
                    border_margin: bool = False, gate_min_region_px: int = 0,
-                   gate_region_share: bool = True, evidence_min_region_px: int = 0) -> Session:
+                   gate_region_share: bool = True, evidence_min_region_px: int = 0,
+                   gate_spread_all_regions: bool = False) -> Session:
     if score_margin_px < 0 or gate_min_region_px < 0 or evidence_min_region_px < 0:
         raise ValueError("score_margin_px and the region sizes must be non-negative")
     if alert_rule not in ALERT_RULES:
@@ -123,7 +125,8 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    evidence=(surface_evidence(surface_calibration, thresholds_file, thresholds)
                              if alert_rule == "surface" else None),
                    scorer=scorer, gate_min_region_px=gate_min_region_px,
-                   gate_region_share=gate_region_share, evidence_min_region_px=evidence_min_region_px)
+                   gate_region_share=gate_region_share, evidence_min_region_px=evidence_min_region_px,
+                   gate_spread_all_regions=gate_spread_all_regions)
 
 
 def model_geometry(model_dir: Path) -> GeometryParams:
@@ -184,9 +187,13 @@ def above_threshold_shape(scores: np.ndarray, threshold: float,
 
 def is_diffuse(scores: np.ndarray, threshold: float, candidates: list,
                relative_threshold: float | None = None, min_region_px: int = 0,
-               region_share: bool = True) -> tuple[bool, dict[str, float]]:
-    """`min_region_px` and `region_share=False` give the P8 gate (see GATE_MIN_REGION_PX)."""
+               region_share: bool = True, spread_all_regions: bool = False) -> tuple[bool, dict[str, float]]:
+    """`min_region_px` and `region_share=False` give the P8 gate (see GATE_MIN_REGION_PX);
+    `spread_all_regions` keeps the spread over regions of every size, as in the original gate, so
+    only the region count ignores particle-sized regions."""
     shape = above_threshold_shape(scores, threshold, relative_threshold, min_region_px)
+    if spread_all_regions and min_region_px:
+        shape["anomaly_spread"] = above_threshold_shape(scores, threshold, relative_threshold)["anomaly_spread"]
     regions = len(candidates) if relative_threshold is None and not min_region_px else shape["regions"]
     diffuse = (shape["anomaly_spread"] > DIFFUSE_MAX_SHARE or regions > DIFFUSE_MAX_CANDIDATES
                or (region_share and shape["largest_region_share"] > DIFFUSE_MAX_REGION_SHARE))
@@ -298,7 +305,8 @@ def score_request(session: Session, request: dict, frame: np.ndarray,
         relative = (session.evidence.calibration.lowest_threshold(category)
                     if session.evidence is not None else None)
         diffuse, shape = is_diffuse(scores, session.thresholds[category], candidates, relative,
-                                    session.gate_min_region_px, session.gate_region_share)
+                                    session.gate_min_region_px, session.gate_region_share,
+                                    session.gate_spread_all_regions)
         if diffuse:
             # Not "clean" and not a defect: widespread anomaly (environment or large-area damage)
             # is reported for the operator and leaves the tracker untouched.
@@ -419,6 +427,8 @@ def main() -> None:
                         help=f"P8 gate: ignore smaller above-threshold regions (P8 uses {GATE_MIN_REGION_PX})")
     parser.add_argument("--no-gate-region-share", action="store_true",
                         help="P8 gate: do not abstain on one large above-threshold region")
+    parser.add_argument("--gate-spread-all-regions", action="store_true",
+                        help="P8 gate: spread over regions of every size, region count over large ones")
     parser.add_argument("--evidence-min-region-px", type=int, default=0,
                         help=f"P8: smaller hit-level regions give no surface evidence (P8 uses {GATE_MIN_REGION_PX})")
     args = parser.parse_args()
@@ -426,7 +436,7 @@ def main() -> None:
                          args.roi_mode, args.score_margin_px, args.diffuse_gate,
                          args.alert_rule, args.surface_calibration, args.border_margin,
                          args.gate_min_region_px, not args.no_gate_region_share,
-                         args.evidence_min_region_px))
+                         args.evidence_min_region_px, args.gate_spread_all_regions))
 
 
 if __name__ == "__main__":

@@ -109,6 +109,18 @@ class DiffuseTests(unittest.TestCase):
                                                 min_region_px=live_service.GATE_MIN_REGION_PX,
                                                 region_share=False)[0])
 
+    def test_spread_over_all_regions_still_abstains_on_dense_particles(self) -> None:
+        scores = np.zeros((480, 640), np.float32)
+        for row in range(0, 480, 10):            # dense particles: 3072 spots, 8% of the frame
+            for col in range(0, 640, 10):
+                scores[row:row + 5, col:col + 5] = 70.0
+        gate = dict(relative_threshold=0.0, min_region_px=live_service.GATE_MIN_REGION_PX, region_share=False)
+        self.assertFalse(live_service.is_diffuse(scores, 60.0, [], **gate)[0])
+        diffuse, shape = live_service.is_diffuse(scores, 60.0, [], spread_all_regions=True, **gate)
+        self.assertTrue(diffuse)
+        self.assertGreater(shape["anomaly_spread"], 0.05)
+        self.assertEqual(shape["regions"], 0)
+
     def test_p8_gate_keeps_one_large_region(self) -> None:
         scores = np.zeros((100, 100), np.float32)
         scores[:30, :] = 70.0                   # a large hole seen up close
