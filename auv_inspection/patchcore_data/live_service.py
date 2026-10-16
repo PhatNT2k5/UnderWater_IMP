@@ -427,11 +427,18 @@ def main() -> None:
                         help=f"P8 gate: ignore smaller above-threshold regions (P8 uses {GATE_MIN_REGION_PX})")
     parser.add_argument("--no-gate-region-share", action="store_true",
                         help="P8 gate: do not abstain on one large above-threshold region")
+    parser.add_argument("--p8-rules", action="store_true",
+                        help="P8 candidate rules: the P8 gate (regions counted from GATE_MIN_REGION_PX, no "
+                             "single-large-region rule, spread over all regions) and evidence only from regions "
+                             "of at least GATE_MIN_REGION_PX; overrides the separate gate/evidence options")
     parser.add_argument("--gate-spread-all-regions", action="store_true",
                         help="P8 gate: spread over regions of every size, region count over large ones")
     parser.add_argument("--evidence-min-region-px", type=int, default=0,
                         help=f"P8: smaller hit-level regions give no surface evidence (P8 uses {GATE_MIN_REGION_PX})")
     args = parser.parse_args()
+    if args.p8_rules:
+        args.gate_min_region_px = args.evidence_min_region_px = GATE_MIN_REGION_PX
+        args.no_gate_region_share = args.gate_spread_all_regions = True
     serve(create_session(args.model_dir, args.reference_dataset, args.thresholds_file,
                          args.roi_mode, args.score_margin_px, args.diffuse_gate,
                          args.alert_rule, args.surface_calibration, args.border_margin,
