@@ -29,6 +29,19 @@ class GridCacheTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 reloaded.put(13, "pier_0", grid.astype(np.float16))
 
+    def test_saves_from_two_runs_are_merged(self) -> None:
+        with TemporaryDirectory() as folder:
+            path = Path(folder) / "c.npz"
+            first, second = GridCache(path), GridCache(path)   # both opened before either saves
+            first.put(1, "pipe_front", np.ones((2, 2), np.float32))
+            second.put(2, "pipe_front", np.zeros((2, 2), np.float32))
+            first.save()
+            second.save()
+            merged = GridCache(path)
+            self.assertIsNotNone(merged.get(1, "pipe_front"))
+            self.assertIsNotNone(merged.get(2, "pipe_front"))
+            self.assertEqual(list(Path(folder).glob("*.tmp.npz")), [])
+
 
 if __name__ == "__main__":
     unittest.main()

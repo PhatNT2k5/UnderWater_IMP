@@ -40,7 +40,11 @@ class GridCache:
         if not self.dirty:
             return
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = self.path.with_name(self.path.name + ".tmp.npz")
+        if self.path.is_file():  # another run may have saved entries since this cache was loaded
+            with np.load(self.path) as data:
+                for key in data.files:
+                    self.grids.setdefault(key, data[key])
+        temporary = self.path.with_name(f"{self.path.name}.{os.getpid()}.tmp.npz")  # one per process
         np.savez_compressed(temporary, **self.grids)
         os.replace(temporary, self.path)
         self.dirty = False

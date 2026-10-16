@@ -345,7 +345,7 @@ Phát lại một capture qua detector (tùy chọn suy giảm ảnh theo seed +
 
 ### `auv_inspection/robustness/benchmark.py`
 
-P8: `--score-cache <thư mục>` đặt `evaluate_capture.SCORE_CACHE_DIR`. `robustness/score_cache.py`: `GridCache(path)` (`.npz` nén, khóa `<tick>_<nhóm>`, `get`/`put` chỉ nhận float32 để phát lại chính xác, đếm hit/miss, `save()` ghi file tạm rồi đổi tên), `cache_path(dir, capture, điều kiện, seed, khóa)`; chỉ dùng cho thí nghiệm offline, không dùng ở runtime. Cache tập phát triển P8: `auv_inspection/output/p8_score_cache/` (gitignored). Test `robustness/tests/test_score_cache.py`.
+P8: `--score-cache <thư mục>` đặt `evaluate_capture.SCORE_CACHE_DIR`. `robustness/score_cache.py`: `GridCache(path)` (`.npz` nén, khóa `<tick>_<nhóm>`, `get`/`put` chỉ nhận float32 để phát lại chính xác, đếm hit/miss, `save()` gộp các mục mà lượt khác đã lưu vào cùng file, ghi file tạm riêng theo PID rồi đổi tên, để nhiều tiến trình song song không làm mất mục của nhau), `cache_path(dir, capture, điều kiện, seed, khóa)`; chỉ dùng cho thí nghiệm offline, không dùng ở runtime. Cache tập phát triển P8: `auv_inspection/output/p8_score_cache/` (gitignored). Test `robustness/tests/test_score_cache.py`.
 
 Chạy lưới detector × capture × điều kiện (`DEFAULT_CONDITIONS`: gốc, độ đục 2/4, marine snow 3/5, đèn yếu 4, mờ chuyển động 3); mỗi kết quả một JSON riêng, đã có thì dùng lại; ghi `summary.json` và `summary.md`. Mỗi (capture, điều kiện) chạy mọi detector còn thiếu trong một lượt `evaluate_many` (suy giảm một lần); detector mới mỗi lượt để không rò trạng thái tracker; `--pose-noise` thêm hậu tố vào tên file; bảng có cột `pose_noise` và `diffuse_share` (tỷ lệ frame bị cổng P3 trả `diffuse_anomaly`).
 
@@ -864,6 +864,7 @@ Checklist trước khi bàn giao:
 
 ## 10. Nhật ký cập nhật tài liệu
 
+- `2026-10-16`: `score_cache.GridCache.save()` gộp với file trên đĩa và dùng file tạm theo PID (hai tiến trình đã ghi cùng file cache khi chạy song song); test `test_saves_from_two_runs_are_merged`. 71 file cache hiện có đều đọc được.
 - `2026-10-16`: P8.2. `detector_v2/scorer.py` tách `grid()`/`expand()`, thêm `grid_cache_key()`; `robustness/score_cache.py` mới; harness `SCORE_CACHE_DIR` và hậu tố `g`/`r`; `benchmark.py --score-cache`; `live_service.without_small_hits()`, `evidence_min_region_px`. 132 test `.venv-patchcore` pass (1 bỏ qua). Đang nạp cache bằng lượt `dino_floor_b` trên 12 capture phát triển.
 - `2026-10-15`: Kết quả P8.2 phần 1 (`benchmark_p8_dev`, `benchmark_p8_dev_floor`, `output/p8_diagnosis/p8_compare.py`) ghi vào `GENERALIZATION_PLAN.md`. Chỉ đổi tài liệu.
 - `2026-10-15`: P8.2 code: cổng P8 tùy chọn trong `live_service` (`GATE_MIN_REGION_PX`, `min_region_px`, `region_share`, CLI), `model_geometry()`; `geometry.GeometryParams.pier_floor_z`, `calibration/geometry_v3.json`; `derive_model` loại `geometry`; `calibrate_pixel` dùng geometry của model; harness `_bg`, `dino_floor`; model `detector_v2_dino_s2_aug_g2_floor`. 130 test `.venv-patchcore` pass (1 bỏ qua). Hệ quả D11: hash code chấm điểm khác đăng ký P7 nên `default_v2_model()` trả None (dashboard về cổng v1 → Classical; `--v2-model` vẫn chạy được). Benchmark `benchmark_p8_dev` / `benchmark_p8_dev_floor` đang chạy.
