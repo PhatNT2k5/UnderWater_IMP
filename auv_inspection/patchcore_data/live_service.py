@@ -79,6 +79,7 @@ class Session:
     scorer: Scorer | None = None             # detector v2 (P4) instead of PatchCore
     gate_min_region_px: int = 0              # P8 gate: ignore smaller above-threshold regions
     gate_region_share: bool = True           # P8 gate drops the single-large-region rule
+    evidence_min_region_px: int = 0          # P8: only regions this large can give surface hits
 
 
 def create_session(model_dir: Path, reference_dataset: Path,
@@ -87,9 +88,9 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    alert_rule: str = "track",
                    surface_calibration: Path = SURFACE_CALIBRATION_FILE,
                    border_margin: bool = False, gate_min_region_px: int = 0,
-                   gate_region_share: bool = True) -> Session:
-    if score_margin_px < 0 or gate_min_region_px < 0:
-        raise ValueError("score_margin_px and gate_min_region_px must be non-negative")
+                   gate_region_share: bool = True, evidence_min_region_px: int = 0) -> Session:
+    if score_margin_px < 0 or gate_min_region_px < 0 or evidence_min_region_px < 0:
+        raise ValueError("score_margin_px and the region sizes must be non-negative")
     if alert_rule not in ALERT_RULES:
         raise ValueError(f"alert_rule must be one of {ALERT_RULES}")
     if alert_rule == "surface" and roi_mode != "geometry":
@@ -122,7 +123,7 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    evidence=(surface_evidence(surface_calibration, thresholds_file, thresholds)
                              if alert_rule == "surface" else None),
                    scorer=scorer, gate_min_region_px=gate_min_region_px,
-                   gate_region_share=gate_region_share)
+                   gate_region_share=gate_region_share, evidence_min_region_px=evidence_min_region_px)
 
 
 def model_geometry(model_dir: Path) -> GeometryParams:
@@ -306,12 +307,31 @@ def score_request(session: Session, request: dict, frame: np.ndarray,
     return identity, roi, scores, candidates
 
 
+def without_small_hits(scores: np.ndarray, threshold: float, relative_threshold: float,
+                       min_region_px: int) -> np.ndarray:
+    """Copy of `scores` in which hit-level regions (absolute AND relative, as the gate counts them)
+    smaller than `min_region_px` are capped just below the pixel threshold: the cells are still
+    viewed, but such regions cannot be evidence (P8: particle-sized clutter)."""
+    finite = np.isfinite(scores)
+    above = finite & (scores >= threshold) & (scores >= relative_threshold * float(np.median(scores[finite])))
+    _, labels, stats, _ = cv2.connectedComponentsWithStats(above.astype(np.uint8), connectivity=8)
+    small = np.isin(labels, 1 + np.flatnonzero(stats[1:, cv2.CC_STAT_AREA] < min_region_px)) & above
+    capped = scores.copy()
+    capped[small] = np.nextafter(np.float32(threshold), np.float32(-np.inf))
+    return capped
+
+
 def surface_step(session: Session, scores: np.ndarray, category: str, position_m: np.ndarray,
                  yaw_deg: float) -> tuple[list[Candidate], list[SurfaceAlert]]:
     """Add the frame to the surface evidence; new alerts with their image box in this frame."""
     if session.evidence is None or session.geometry is None:
         raise ValueError("Surface alert rule needs SurfaceEvidence and GeometryParams")
-    values, keys_u, keys_v = frame_cells(scores, position_m, yaw_deg, category, session.geometry)
+    evidence_scores = scores
+    if session.evidence_min_region_px:
+        evidence_scores = without_small_hits(scores, session.thresholds[category],
+                                             session.evidence.calibration.lowest_threshold(category),
+                                             session.evidence_min_region_px)
+    values, keys_u, keys_v = frame_cells(evidence_scores, position_m, yaw_deg, category, session.geometry)
     new_alerts, _ = session.evidence.observe(position_m, values)
     boxes = []
     for alert in new_alerts:
@@ -399,11 +419,14 @@ def main() -> None:
                         help=f"P8 gate: ignore smaller above-threshold regions (P8 uses {GATE_MIN_REGION_PX})")
     parser.add_argument("--no-gate-region-share", action="store_true",
                         help="P8 gate: do not abstain on one large above-threshold region")
+    parser.add_argument("--evidence-min-region-px", type=int, default=0,
+                        help=f"P8: smaller hit-level regions give no surface evidence (P8 uses {GATE_MIN_REGION_PX})")
     args = parser.parse_args()
     serve(create_session(args.model_dir, args.reference_dataset, args.thresholds_file,
                          args.roi_mode, args.score_margin_px, args.diffuse_gate,
                          args.alert_rule, args.surface_calibration, args.border_margin,
-                         args.gate_min_region_px, not args.no_gate_region_share))
+                         args.gate_min_region_px, not args.no_gate_region_share,
+                         args.evidence_min_region_px))
 
 
 if __name__ == "__main__":

@@ -38,6 +38,8 @@ from robustness.surface import surface_point  # noqa: E402
 from robustness.surface_evidence import CELL_M, VIEWS_REQUIRED  # noqa: E402
 
 GEOMETRY = load_params()  # geometry.CALIBRATION_FILE (v2) if it exists
+# P8: directory of cached detector-v2 token grids (robustness.score_cache); None scores live.
+SCORE_CACHE_DIR: Path | None = None
 from robustness.metrics import fraction, rate_per_100m, surveyed_length_m  # noqa: E402
 
 REARM_DISTANCE_M = 2.0
@@ -96,13 +98,32 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
                        roi_mode: str = "reference", score_margin_px: int = 0,
                        diffuse_gate: bool = False, alert_rule: str = "track",
                        surface_calibration: Path | None = None, border_margin: bool = False,
-                       gate_min_region_px: int = 0, gate_region_share: bool = True) -> Detector:
+                       gate_min_region_px: int = 0, gate_region_share: bool = True,
+                       evidence_min_region_px: int = 0) -> Detector:
     """reference: P0/v1.1 ROI and capture categories; geometry: P2 ROI and pose-derived groups."""
     from auv_inspection.patchcore_data.live_service import (
         SURFACE_CALIBRATION_FILE, analyze_request, create_session, encode_png)
     session = create_session(model_dir, reference, thresholds, roi_mode, score_margin_px, diffuse_gate,
                              alert_rule, surface_calibration or SURFACE_CALIBRATION_FILE, border_margin,
-                             gate_min_region_px, gate_region_share)
+                             gate_min_region_px, gate_region_share, evidence_min_region_px)
+    cache_state: dict = {"cache": None, "tick": None}
+    grid_key: str | None = None
+    if session.scorer is not None:
+        from auv_inspection.detector_v2.scorer import expand, grid_cache_key
+        live_scorer = session.scorer
+
+        def cached(frame: np.ndarray, roi: np.ndarray, category: str) -> np.ndarray:
+            cache = cache_state["cache"]
+            if cache is None:
+                return live_scorer(frame, roi, category)
+            grid = cache.get(cache_state["tick"], category)
+            if grid is None:
+                grid = live_scorer.grid(frame, category)
+                cache.put(cache_state["tick"], category, grid)
+            return expand(grid, frame.shape[:2], roi)
+
+        session.scorer = cached
+        grid_key = grid_cache_key(model_dir)
 
     def step(frame: np.ndarray, row: dict) -> FrameResult:
         category = row["category"]
@@ -110,6 +131,7 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
             category = category_from_pose(np.asarray(row["position_m"]), row["yaw_deg"], session.geometry)
             if category is None:
                 return FrameResult(False, False, None)
+        cache_state["tick"] = int(row["tick"])
         request = {"tick": row["tick"], "category": category, "station": row["station"],
                    "position_m": row["position_m"], "yaw_deg": row["yaw_deg"],
                    "camera_png_b64": encode_png(frame)}
@@ -124,6 +146,21 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
                            alerts[0]["bbox_xywh"] if alerts else None, category,
                            more_alert_bboxes=tuple(item["bbox_xywh"] for item in alerts[1:]))
 
+    if grid_key is not None:
+        from robustness.score_cache import GridCache
+
+        def open_cache(path_for: Callable[[str], Path]) -> None:
+            cache_state["cache"] = GridCache(path_for(grid_key))
+
+        def close_cache() -> tuple[int, int]:
+            cache = cache_state["cache"]
+            cache_state["cache"] = None
+            if cache is None:
+                return 0, 0
+            cache.save()
+            return cache.hits, cache.misses
+
+        step.open_score_cache, step.close_score_cache = open_cache, close_cache
     if alert_rule == "surface":
         step.rearm_distance_m = 0.0  # mirrors the dashboard, which lifts the 2 m lock for it
         step.ambiguous_regions = session.evidence.ambiguous_regions  # P6: what a revisit could settle
@@ -134,7 +171,7 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
 
 DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md",
              "patchcore_surface", *V2_MODELS, *(f"{name}_b" for name in V2_MODELS),
-             *(f"{name}_bg" for name in V2_MODELS))
+             *(f"{name}_{suffix}" for name in V2_MODELS for suffix in ("bg", "br", "bgr")))
 
 
 def make_detector(name: str) -> Detector:
@@ -144,22 +181,26 @@ def make_detector(name: str) -> Detector:
     dino_surface(_noaug) = detector v2 with the same ROI, margin, gate and surface rule;
     dino_nfad / dino_maha / dino_nfmaha = dino_surface banks with a P4.3 feature transform
     (nfmaha: the nfad projection, then whitening of the projected bank);
-    a "_b" suffix adds the margin at the image border, "_bg" also the P8 gate
-    (live_service.GATE_MIN_REGION_PX, no single-large-region rule)."""
+    a "_b" suffix adds the margin at the image border; after it "g" adds the P8 gate
+    (live_service.GATE_MIN_REGION_PX, no single-large-region rule) and "r" lets only hit regions of
+    at least GATE_MIN_REGION_PX give surface evidence ("_bg", "_br", "_bgr")."""
     if name == "classical":
         return classical_detector()
     if name == "patchcore":
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "reference")
-    base = name.removesuffix("_bg").removesuffix("_b")
+    head, _, flags = name.rpartition("_b")
+    base = head if head in V2_MODELS else name
     if name in DETECTORS and base in V2_MODELS:
         from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX, GATE_MIN_REGION_PX
         model = V2_MODELS[base]
-        p8_gate = name.endswith("_bg")
+        p8_gate = base != name and "g" in flags
         return patchcore_detector(model, PATCHCORE_REFERENCE, model / "pixel_thresholds.json", "geometry",
                                   DEFAULT_SCORE_MARGIN_PX, True, "surface", model / "surface_calibration.json",
-                                  border_margin=name.endswith(("_b", "_bg")),
+                                  border_margin=base != name,
                                   gate_min_region_px=GATE_MIN_REGION_PX if p8_gate else 0,
-                                  gate_region_share=not p8_gate)
+                                  gate_region_share=not p8_gate,
+                                  evidence_min_region_px=(GATE_MIN_REGION_PX if base != name and "r" in flags
+                                                          else 0))
     if name == "patchcore_surface":
         from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "geometry",
@@ -253,6 +294,12 @@ def evaluate_many(capture: Path, detectors: dict[str, Detector], inventory: Inve
     # A detector may declare its own re-arm distance (the surface rule de-duplicates per region).
     scores = {name: Score(rearm_m=getattr(detector, "rearm_distance_m", REARM_DISTANCE_M))
               for name, detector in detectors.items()}
+    if SCORE_CACHE_DIR is not None:
+        from robustness.score_cache import cache_path
+        condition = "+".join(f"{item.factor}{item.severity}" for item in degradations) or "none"
+        for detector in detectors.values():
+            if hasattr(detector, "open_score_cache"):
+                detector.open_score_cache(lambda key: cache_path(SCORE_CACHE_DIR, capture, condition, seed, key))
     for row in rows:
         frame = cv2.imread(str(capture / row["image"]), cv2.IMREAD_COLOR)
         if frame is None:
@@ -269,6 +316,9 @@ def evaluate_many(capture: Path, detectors: dict[str, Detector], inventory: Inve
             result = detector(frame, perceived)
             record(scores[name], result, row, perceived, visible, defects,
                    (time.perf_counter() - start) * 1000)
+    for detector in detectors.values():
+        if hasattr(detector, "close_score_cache"):
+            detector.close_score_cache()
     observable = [defect.defect_id for defect in defects if views[defect.defect_id] >= MIN_VIEWS_OBSERVABLE]
     ambiguity = {name: ambiguity_report(detector, defects, length_of(positions))
                  for name, detector in detectors.items() if hasattr(detector, "ambiguous_regions")}

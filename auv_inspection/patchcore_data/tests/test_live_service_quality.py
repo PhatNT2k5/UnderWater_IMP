@@ -115,6 +115,18 @@ class DiffuseTests(unittest.TestCase):
         self.assertTrue(live_service.is_diffuse(scores, 60.0, [])[0])
         self.assertFalse(live_service.is_diffuse(scores, 60.0, [], min_region_px=196, region_share=False)[0])
 
+    def test_small_hit_regions_give_no_evidence(self) -> None:
+        scores = np.full((480, 640), 1.0, np.float32)
+        scores[10:15, 10:15] = 70.0              # particle-sized, 25 px
+        scores[200:216, 100:300] = 70.0          # crack-sized, 3200 px
+        scores[300:305, 300:305] = 40.0          # below the pixel threshold, left as it is
+        capped = live_service.without_small_hits(scores, 60.0, 1.5, live_service.GATE_MIN_REGION_PX)
+        self.assertLess(capped[10:15, 10:15].max(), 60.0)
+        self.assertGreater(capped[10:15, 10:15].min(), 59.99)
+        np.testing.assert_array_equal(capped[200:216, 100:300], 70.0)
+        np.testing.assert_array_equal(capped[300:305, 300:305], 40.0)
+        self.assertEqual(scores[10, 10], 70.0)   # the input is not modified
+
     def test_many_candidate_regions_are_diffuse(self) -> None:
         many = [Candidate((0, 0, 1, 1), (0.0, 0.0), 70.0, 1)] * 7
         self.assertTrue(live_service.is_diffuse(np.zeros((10, 10)), 60.0, many)[0])

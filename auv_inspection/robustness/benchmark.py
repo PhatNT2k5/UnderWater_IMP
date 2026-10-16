@@ -101,10 +101,15 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--pose-noise", type=float, nargs=2, default=(0.0, 0.0),
                         metavar=("SIGMA_M", "SIGMA_YAW_DEG"))
+    parser.add_argument("--score-cache", type=Path,
+                        help="P8: read/write detector-v2 token grids here (robustness.score_cache)")
     args = parser.parse_args()
     captures = [(capture, inventory) for capture, inventory in args.mixed] + [(c, None) for c in args.clean]
     if not captures:
         parser.error("Give at least one --mixed or --clean capture")
+    if args.score_cache:
+        from robustness import evaluate_capture as harness  # the module run() uses
+        harness.SCORE_CACHE_DIR = args.score_cache
     run(captures, args.detector or list(DETECTORS), args.condition or list(DEFAULT_CONDITIONS),
         args.destination, args.seed, tuple(args.pose_noise))
 
