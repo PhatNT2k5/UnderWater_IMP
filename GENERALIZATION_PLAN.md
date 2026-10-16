@@ -300,6 +300,24 @@ Tập phát triển P8 = seed 1-6 cũ + seed 101-106 của P7 (đã xem nên kh�
 - **Giới hạn dưới của trụ làm đúng việc của nó:** báo nhầm "trụ dưới -10 m" 17 → 0, recall không đổi (166 so với 167, chênh 1 lượt mờ chuyển động). Có thể áp dụng độc lập với cổng.
 - Vết sót ngoài marine snow gần như chỉ còn mờ chuyển động 3 (6-7 lượt).
 
+## Kết quả P8.2 phần 2: biến thể từ cache lưới token (2026-10-16, tập phát triển 12 capture)
+
+`dino_floor_b` chạy trực tiếp và nạp cache (`output/p8_score_cache/`, 84 file); `dino_floor_br`, `dino_floor_bgr` phát lại từ cache (`output/benchmark_p8_dev_variants/`). Quy tắc chọn chốt trước: recall cao nhất với báo nhầm ≤ 1/100 m gộp trên tập phát triển.
+
+| Detector | Recall | Báo nhầm | /100 m | FPR ô |
+|---|---|---|---|---|
+| `dino_surface_b` (ứng viên P7) | 129/175 (73,7%) | 50 | 0,29 | 0,026% |
+| `dino_floor_b` (giới hạn trụ) | 128/175 (73,1%) | 33 | 0,19 | 0,005% |
+| `dino_floor_br` (+ bằng chứng chỉ từ vùng ≥ 196 px) | 123/175 (70,3%) | 4 | 0,02 | 0,0004% |
+| `dino_floor_bgr` (+ cổng P8 + bằng chứng ≥ 196 px) | 163/175 (93,1%) | 306 | 1,78 | 0,20% |
+| `dino_floor_bg` (cổng P8, phần 1) | 166/175 (94,9%) | 950 | 5,54 | 0,67% |
+
+`dino_floor_bgr` theo điều kiện: gốc 25/25, 1 báo nhầm; độ đục 2 25/25, 3; độ đục 4 22/25, 14; marine snow 3 **25/25, 20**; marine snow 5 24/25, **253**; đèn yếu 4 25/25, 4; mờ chuyển động 3 17/25, 11.
+
+- Lọc bằng chứng theo vùng ≥ 196 px chặn gần hết báo nhầm còn lại khi giữ cổng cũ (33 → 4) nhưng mất 5 lượt vết (độ đục 4, độ đục 2, đèn yếu): vết xa, mảnh tạo vùng nhỏ.
+- Kết hợp với cổng P8 thì giữ được phần lớn lợi ích recall (93,1%) và giảm báo nhầm 3 lần so với cổng P8 đơn (950 → 306). Ngoài marine snow 5 còn 53 báo nhầm (≈ 0,36/100 m); marine snow 5 một mình 253 (10,3/100 m): hạt dày đặc chồng lên nhau thành vùng ≥ 196 px.
+- Theo quy tắc chọn, `dino_floor_bgr` chưa đạt (1,78 > 1/100 m); trong các biến thể đạt, `dino_floor_b` có recall cao nhất (73,1%).
+
 ## Tiêu chí nghiệm thu (bản đầu)
 
 Đo trên **điều kiện môi trường chưa từng dùng** để train hay chọn ngưỡng:
