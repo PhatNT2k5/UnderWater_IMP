@@ -20,7 +20,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Xong offline** (ứng viên: v2 + lề mép ảnh; P4.3 kết hợp NFAD + Mahalanobis 42/63, 17 không hơn; trước đó P4.3: NFAD 55/63 vết, 30 báo nhầm; Mahalanobis 40/63, 5 báo nhầm, xem Kết quả P4.3; phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt). Live: map A 3/3, 0 báo nhầm; map B 4/5, 2 báo nhầm theo quy tắc (1 trong 2 nằm trên vết khi xem ảnh). Cổng hash code xong (D11) | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
-| P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Offline: đạt** (`dino_floor_bgsr`: recall 92,9%, 0,92 báo nhầm/100 m, FPR ô 0,071% trên heldout seed 201-206 gồm map C); còn live map A/C | Xem Kết quả P8 | Xem Kết quả P8.1 |
+| P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Offline: đạt** (`dino_floor_bgsr`: recall 92,9%, 0,92 báo nhầm/100 m, FPR ô 0,071% trên heldout seed 201-206 gồm map C); live: map A 3/3, 0 báo nhầm; map C 5/6, 1 báo nhầm theo quy tắc (cảnh báo đó nằm trên vết nứt trụ 1 khi xem ảnh) | Xem Kết quả P8 | Xem Kết quả P8.1 |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
 
@@ -338,6 +338,12 @@ Lưu ý (không đổi kết luận):
 - Recall thấp nhất ở mờ chuyển động 3 (14/18) và marine snow 5 (13/18), như trên tập phát triển.
 - Map C mới (khác vị trí vết, có vết mặt sau) không làm giảm recall so với tập phát triển (92,9% so với 90,9%).
 - Đây là kết quả offline; live trên map A và map C theo đăng ký là bước tiếp theo.
+
+**Live P8 (2026-10-17, dashboard mặc định = ứng viên P8 vì file và code khớp đăng ký: model `_floor`, quy tắc P8; điều kiện gốc; route 359/359):**
+- Map A (`auv_dashboard/output/session_20261017_132937_134819/`): **3/3 vết, 0 báo nhầm** (tick 399 `A_pipe_front_1` 0,33 m; 651 `A_pipe_front_2` 0,17 m; 3282 `A_pier_0_1` 0,07 m).
+- Map C (`session_20261017_134438_158445/`, unreal.log xác nhận `AUVInspection_PatchCoreC_20261016_v1`): 6 cảnh báo; theo quy tắc chấm (tâm box qua `locate_box`, nhãn đã khóa): **5/6 vết, 1 báo nhầm**. Khớp: tick 57 `C_pipe_front_crack_1` 0,14 m; 1044 `C_pipe_front_crack_2` 0,08 m; 2019 `C_pipe_back_crack` 0,12 m; 2781 `C_pipe_back_hole` 0,17 m; 4269 `C_pier_0_crack` 0,08 m. Tick 7221 `pier_1`: tâm box cách `C_pier_1_crack` 0,38 m > 0,35 m, nhưng ảnh annotated cho thấy box nằm trên chính vết nứt và ô bề mặt của cảnh báo (u, v) = (-6,15; 0,65) cách đoạn nhãn 0,13 m (cùng hiện tượng ở map B P7: định vị tâm box trên mặt trụ nhìn xiên). Theo quy tắc: 5/6, 1 báo nhầm; theo xem ảnh: 6/6, 0 báo nhầm. Nhãn không sửa.
+- 0 frame `diffuse_anomaly` ở cả hai lượt (cổng cũ: 79-94 mỗi lượt), phù hợp với cổng P8. Median 229 ms (A) / 237 ms (C) mỗi frame, p90 242/256 ms.
+- Tiêu chí live (ít nhất 1 cảnh báo đi trọn vòng) đạt trên cả hai map.
 
 ## Tiêu chí nghiệm thu (bản đầu)
 
