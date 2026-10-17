@@ -20,7 +20,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Xong offline** (ứng viên: v2 + lề mép ảnh; P4.3 kết hợp NFAD + Mahalanobis 42/63, 17 không hơn; trước đó P4.3: NFAD 55/63 vết, 30 báo nhầm; Mahalanobis 40/63, 5 báo nhầm, xem Kết quả P4.3; phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt). Live: map A 3/3, 0 báo nhầm; map B 4/5, 2 báo nhầm theo quy tắc (1 trong 2 nằm trên vết khi xem ảnh). Cổng hash code xong (D11) | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
-| P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Đang làm** (ứng viên `dino_floor_bgsr`: 90,9% / 0,74 trên tập phát triển; đã đăng ký trước; chờ capture heldout seed 201-206) | Xem Kết quả P8.1 |
+| P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Offline: đạt** (`dino_floor_bgsr`: recall 92,9%, 0,92 báo nhầm/100 m, FPR ô 0,071% trên heldout seed 201-206 gồm map C); còn live map A/C | Xem Kết quả P8 | Xem Kết quả P8.1 |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
 
@@ -320,6 +320,25 @@ Tập phát triển P8 = seed 1-6 cũ + seed 101-106 của P7 (đã xem nên kh�
 
 **`dino_floor_bgsr`** (cổng P8 nhưng độ phân tán tính trên mọi vùng như cổng cũ, số vùng chỉ đếm vùng ≥ 196 px, bằng chứng chỉ từ vùng ≥ 196 px, giới hạn trụ): **159/175 (90,9%, bootstrap 87,8-93,8%), 127 báo nhầm, 0,74/100 m (0,39-1,15), FPR ô 0,043% (Wilson trên 0,047%)**; seed 101-106: 90,2%, 0,82/100 m; map B 90,0%, 0,76/100 m. Theo điều kiện: gốc 25/25, 1; độ đục 2 25/25, 3; độ đục 4 22/25, 14; marine snow 3 25/25, 19; marine snow 5 20/25, 75 (cổng bỏ 25% frame); đèn yếu 4 25/25, 4; mờ chuyển động 3 17/25, 11. Đây là biến thể duy nhất đạt quy tắc chọn với recall ≥ 90% **trên tập phát triển**; tham số không dò theo kết quả (196 px từ độ phân giải token, độ phân tán 5% của cổng cũ) nhưng biến thể được chọn sau khi xem kết quả tập phát triển nên cần heldout mới. Điểm yếu còn lại: mờ chuyển động 3 (8 lượt sót) và marine snow 5 (75 báo nhầm, 5 lượt sót).
 
+## Kết quả P8: nghiệm thu offline trên dữ liệu heldout mới (2026-10-17)
+
+Theo đúng đăng ký trước (`robustness/acceptance_preregistration_p8.json`, code `64e21e9`; SHA256 artifact, hash code chấm điểm và harness khớp trước khi chấm; nhãn map C khóa `2de6f4f4...` trước khi detector nào chạy trên map C). 6 capture seed 201-206 (map A 201/202, map sạch 203/204, map C 205/206), 7 điều kiện, 42 lượt mỗi detector, `auv_inspection/output/benchmark_p8_acceptance/`, báo cáo `acceptance_report.json`.
+
+| Tiêu chí (gộp mọi điều kiện) | Ngưỡng | Ứng viên `dino_floor_bgsr` | Đối chứng `dino_surface_b` |
+|---|---|---|---|
+| Recall theo vết vật lý | ≥ 90% | **92,9%** (117/126; bootstrap 95%: 91,4-94,3%) **đạt** | 71,4% (90/126; 64,0-79,4%) không đạt |
+| Báo nhầm /100 m | ≤ 1 | **0,92** (80 trên 8,69 km; 0,50-1,33) **đạt** | 0,25 đạt |
+| FPR mức ô (cận trên Wilson 95%) | ≤ 5% | **0,071%** (353/555.483 ô) **đạt** | 0,015% đạt |
+| **Kết luận** | | **Đạt nghiệm thu offline** | Không đạt |
+
+Ứng viên theo điều kiện (recall, báo nhầm): gốc 18/18, 2; độ đục 2 18/18, 4; độ đục 4 18/18, 5; marine snow 3 18/18, 12; **marine snow 5 13/18, 52**; đèn yếu 4 18/18, 5; **mờ chuyển động 3 14/18, 0**. Theo map: A 39/42, C 78/84 (6 vết, gồm 3 vết đầu tiên ở mặt sau ống/trụ: 12-14/14 mỗi vết).
+
+Lưu ý (không đổi kết luận):
+- Đạt sát nút về báo nhầm: cận trên bootstrap 1,33/100 m vượt 1. Marine snow 5 chiếm 52/80 báo nhầm (4,2/100 m; riêng map sạch seed 203 có 23); bỏ điều kiện này thì 0,38/100 m. Mọi báo nhầm của ứng viên nằm trên ống (41 mặt trước, 39 mặt sau), không còn ở chân trụ.
+- Recall thấp nhất ở mờ chuyển động 3 (14/18) và marine snow 5 (13/18), như trên tập phát triển.
+- Map C mới (khác vị trí vết, có vết mặt sau) không làm giảm recall so với tập phát triển (92,9% so với 90,9%).
+- Đây là kết quả offline; live trên map A và map C theo đăng ký là bước tiếp theo.
+
 ## Tiêu chí nghiệm thu (bản đầu)
 
 Đo trên **điều kiện môi trường chưa từng dùng** để train hay chọn ngưỡng:
@@ -339,6 +358,7 @@ Tập phát triển P8 = seed 1-6 cũ + seed 101-106 của P7 (đã xem nên kh�
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
 | 2026-10-09 | Live P2 xác nhận nguồn báo nhầm chính là **biên ROI** (đầu ống, mép ống khi nhìn xiên): ROI giới hạn tâm đặc trưng nhưng trường nhìn của đặc trưng rộng hơn. Thêm vào **P3** một lề chấm điểm bên trong ROI theo trường nhìn của đặc trưng, đánh giá trên tập phát triển trước. Báo trùng cùng một vết (hai vị trí cách 2,08 m) để **P5** gộp theo tọa độ bề mặt |
+| 2026-10-17 | **Kết quả nghiệm thu P8 offline: ứng viên `dino_floor_bgsr` đạt** cả ba tiêu chí đã đăng ký (recall 92,9%, bootstrap 91,4-94,3%; 0,92 báo nhầm/100 m, bootstrap 0,50-1,33; FPR mức ô 0,071%). Đối chứng P7: 71,4%, 0,25. Biên báo nhầm sát (marine snow 5: 52/80). Không đổi gì sau khi xem kết quả |
 | 2026-10-17 | **Khóa nhãn map C** (`robustness/inventories/map_C.json`, SHA256 `2de6f4f4...`, mục `map_C_labels_locked` trong đăng ký P8): 6 vết vẽ chỉ từ ảnh seed 205, kiểm trên seed 206, người dùng duyệt trước khi detector nào chạy trên map C |
 | 2026-10-16 | **Đăng ký trước P8** (`auv_inspection/robustness/acceptance_preregistration_p8.json`, code `64e21e9`, người dùng duyệt): ứng viên `dino_floor_bgsr`, đối chứng `dino_surface_b`, SHA256 artifact và code chấm điểm/harness, heldout mới seed 201-202 (map A), 203-204 (map sạch), 205-206 (map C); 7 điều kiện; tiêu chí như P7; không đổi gì sau đăng ký. Dashboard mặc định ứng viên P8 khi khớp hồ sơ |
 | 2026-10-16 | **Map C cho heldout P8** (người dùng duyệt): `create_validation_map_c.py` tạo `AUVInspection_PatchCoreC_20261016_v1` từ map A, 6 vết ở vị trí chưa dùng (2 mặt trước ống, 2 mặt sau ống, mặt sau trụ 0, mặt trước trụ 1 ở độ cao mới). Thứ tự: tạo map C → đăng ký trước P8 (artifact, hash code, seed, map) → capture heldout → vẽ nhãn C từ ảnh và khóa → chấm |
