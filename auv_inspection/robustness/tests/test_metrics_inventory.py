@@ -9,7 +9,8 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from robustness.defect_inventory import (  # noqa: E402
-    Defect, defects_in_view, load_inventory, locate_box, match_defect)
+    Defect, defects_in_view, load_inventory, locate_box, locate_event, match_defect)
+from robustness.geometry import DEFAULT_PARAMS, load_params  # noqa: E402
 from robustness.metrics import rate_per_100m, surveyed_length_m, wilson_interval  # noqa: E402
 
 INVENTORY = Path(__file__).resolve().parents[1] / "inventories" / "map_A.json"
@@ -61,6 +62,21 @@ class InventoryTests(unittest.TestCase):
         self.assertEqual(defects_in_view(defects, np.array([0.0, 2.0, -10.3]), -90.0, "pipe_front"), ["d1"])
         self.assertEqual(defects_in_view(defects, np.array([5.0, 2.0, -10.3]), -90.0, "pipe_front"), [])
 
+
+    def test_event_location_uses_the_calibrated_geometry_by_default(self) -> None:
+        import json
+        from tempfile import TemporaryDirectory
+        event = {"bbox_xywh": [310, 230, 20, 20], "position_m": [10.0, -3.2, -6.3], "yaw_deg": -90.0,
+                 "category": "pier_1", "tick": 1}
+        with TemporaryDirectory() as folder:
+            path = Path(folder) / "event.json"
+            path.write_text(json.dumps(event), encoding="utf-8")
+            _, calibrated = locate_event(path)
+            _, uncalibrated = locate_event(path, params=DEFAULT_PARAMS)
+        expected = locate_box(event["bbox_xywh"], np.array(event["position_m"]), -90.0, "pier_1", load_params())
+        np.testing.assert_allclose(calibrated, expected)
+        self.assertAlmostEqual(calibrated[1], -6.5 + load_params().pier_half_width_m, places=6)
+        self.assertAlmostEqual(uncalibrated[1], -6.5 + DEFAULT_PARAMS.pier_half_width_m, places=6)
 
 if __name__ == "__main__":
     unittest.main()
