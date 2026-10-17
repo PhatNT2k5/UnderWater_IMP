@@ -81,6 +81,7 @@ class Session:
     gate_region_share: bool = True           # P8 gate drops the single-large-region rule
     evidence_min_region_px: int = 0          # P8: only regions this large can give surface hits
     gate_spread_all_regions: bool = False    # P8: gate spread over all regions, count over large ones
+    strict_thresholds: dict[str, float] | None = None  # P9: absolute-only hit level per group
 
 
 def create_session(model_dir: Path, reference_dataset: Path,
@@ -90,7 +91,8 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    surface_calibration: Path = SURFACE_CALIBRATION_FILE,
                    border_margin: bool = False, gate_min_region_px: int = 0,
                    gate_region_share: bool = True, evidence_min_region_px: int = 0,
-                   gate_spread_all_regions: bool = False) -> Session:
+                   gate_spread_all_regions: bool = False,
+                   strict_thresholds_file: Path | None = None) -> Session:
     if score_margin_px < 0 or gate_min_region_px < 0 or evidence_min_region_px < 0:
         raise ValueError("score_margin_px and the region sizes must be non-negative")
     if alert_rule not in ALERT_RULES:
@@ -106,6 +108,14 @@ def create_session(model_dir: Path, reference_dataset: Path,
                   for category in CATEGORIES}
     if any(not np.isfinite(value) for value in thresholds.values()):
         raise ValueError("Non-finite category threshold")
+    strict = None
+    if strict_thresholds_file is not None:
+        strict_file = json.loads(strict_thresholds_file.read_text(encoding="utf-8"))
+        if Path(strict_file["model_dir"]).resolve() != model_dir.resolve() or strict_file.get("kind") != "strict":
+            raise ValueError("Strict thresholds refer to a different model or are not strict thresholds")
+        strict = {category: float(strict_file["groups"][category]["threshold"]) for category in CATEGORIES}
+        if any(strict[c] < thresholds[c] for c in CATEGORIES):
+            raise ValueError("A strict threshold below the pixel threshold would loosen the hit rule")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     scorer = load_scorer(model_dir, device) if is_v2_model(model_dir) else None
     if scorer is not None and roi_mode != "geometry":
@@ -122,11 +132,11 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    geometry=model_geometry(model_dir) if roi_mode == "geometry" else None,
                    score_margin_px=score_margin_px, border_margin=border_margin,
                    diffuse_gate=diffuse_gate,
-                   evidence=(surface_evidence(surface_calibration, thresholds_file, thresholds)
+                   evidence=(surface_evidence(surface_calibration, thresholds_file, thresholds, strict)
                              if alert_rule == "surface" else None),
                    scorer=scorer, gate_min_region_px=gate_min_region_px,
                    gate_region_share=gate_region_share, evidence_min_region_px=evidence_min_region_px,
-                   gate_spread_all_regions=gate_spread_all_regions)
+                   gate_spread_all_regions=gate_spread_all_regions, strict_thresholds=strict)
 
 
 def model_geometry(model_dir: Path) -> GeometryParams:
@@ -141,12 +151,12 @@ def model_geometry(model_dir: Path) -> GeometryParams:
     return load_params(path)
 
 
-def surface_evidence(calibration_file: Path, thresholds_file: Path,
-                     thresholds: dict[str, float]) -> SurfaceEvidence:
+def surface_evidence(calibration_file: Path, thresholds_file: Path, thresholds: dict[str, float],
+                     strict_thresholds: dict[str, float] | None = None) -> SurfaceEvidence:
     calibration = load_calibration(calibration_file)
     if calibration.pixel_thresholds_sha256 != hashlib.sha256(thresholds_file.read_bytes()).hexdigest():
         raise ValueError("Surface calibration was made with a different pixel threshold file")
-    return SurfaceEvidence(calibration, thresholds)
+    return SurfaceEvidence(calibration, thresholds, strict_thresholds)
 
 
 def interior(roi: np.ndarray, margin_px: int, image_border: bool = False) -> np.ndarray:
@@ -162,17 +172,29 @@ def interior(roi: np.ndarray, margin_px: int, image_border: bool = False) -> np.
     return distance >= margin_px
 
 
+def hit_mask(scores: np.ndarray, threshold: float, relative_threshold: float | None = None,
+             strict_threshold: float | None = None) -> np.ndarray:
+    """Pixels at hit level: above the threshold (and the relative test when given), or at or above the
+    strict threshold (P9)."""
+    finite = np.isfinite(scores)
+    above = finite & (scores >= threshold)
+    if relative_threshold is not None:
+        above &= scores >= relative_threshold * float(np.median(scores[finite]))
+    if strict_threshold is not None:
+        above |= finite & (scores >= strict_threshold)
+    return above
+
+
 def above_threshold_shape(scores: np.ndarray, threshold: float,
-                          relative_threshold: float | None = None, min_region_px: int = 0) -> dict[str, float]:
+                          relative_threshold: float | None = None, min_region_px: int = 0,
+                          strict_threshold: float | None = None) -> dict[str, float]:
     """Shares of the scored ROI above threshold: in total, outside the largest region, largest region.
 
     With `relative_threshold` a pixel must also reach that multiple of the frame's median score,
     i.e. count as a surface-rule hit, so a global score shift does not read as a diffuse anomaly.
     """
     finite = np.isfinite(scores)
-    above = finite & (scores >= threshold)
-    if relative_threshold is not None:
-        above &= scores >= relative_threshold * float(np.median(scores[finite]))
+    above = hit_mask(scores, threshold, relative_threshold, strict_threshold)
     _, _, stats, _ = cv2.connectedComponentsWithStats(above.astype(np.uint8), connectivity=8)
     areas = stats[1:, cv2.CC_STAT_AREA]
     if min_region_px:
@@ -187,13 +209,15 @@ def above_threshold_shape(scores: np.ndarray, threshold: float,
 
 def is_diffuse(scores: np.ndarray, threshold: float, candidates: list,
                relative_threshold: float | None = None, min_region_px: int = 0,
-               region_share: bool = True, spread_all_regions: bool = False) -> tuple[bool, dict[str, float]]:
+               region_share: bool = True, spread_all_regions: bool = False,
+               strict_threshold: float | None = None) -> tuple[bool, dict[str, float]]:
     """`min_region_px` and `region_share=False` give the P8 gate (see GATE_MIN_REGION_PX);
     `spread_all_regions` keeps the spread over regions of every size, as in the original gate, so
     only the region count ignores particle-sized regions."""
-    shape = above_threshold_shape(scores, threshold, relative_threshold, min_region_px)
+    shape = above_threshold_shape(scores, threshold, relative_threshold, min_region_px, strict_threshold)
     if spread_all_regions and min_region_px:
-        shape["anomaly_spread"] = above_threshold_shape(scores, threshold, relative_threshold)["anomaly_spread"]
+        shape["anomaly_spread"] = above_threshold_shape(scores, threshold, relative_threshold,
+                                                        strict_threshold=strict_threshold)["anomaly_spread"]
     regions = len(candidates) if relative_threshold is None and not min_region_px else shape["regions"]
     diffuse = (shape["anomaly_spread"] > DIFFUSE_MAX_SHARE or regions > DIFFUSE_MAX_CANDIDATES
                or (region_share and shape["largest_region_share"] > DIFFUSE_MAX_REGION_SHARE))
@@ -306,7 +330,8 @@ def score_request(session: Session, request: dict, frame: np.ndarray,
                     if session.evidence is not None else None)
         diffuse, shape = is_diffuse(scores, session.thresholds[category], candidates, relative,
                                     session.gate_min_region_px, session.gate_region_share,
-                                    session.gate_spread_all_regions)
+                                    session.gate_spread_all_regions,
+                                    session.strict_thresholds[category] if session.strict_thresholds else None)
         if diffuse:
             # Not "clean" and not a defect: widespread anomaly (environment or large-area damage)
             # is reported for the operator and leaves the tracker untouched.
@@ -316,12 +341,11 @@ def score_request(session: Session, request: dict, frame: np.ndarray,
 
 
 def without_small_hits(scores: np.ndarray, threshold: float, relative_threshold: float,
-                       min_region_px: int) -> np.ndarray:
+                       min_region_px: int, strict_threshold: float | None = None) -> np.ndarray:
     """Copy of `scores` in which hit-level regions (absolute AND relative, as the gate counts them)
     smaller than `min_region_px` are capped just below the pixel threshold: the cells are still
     viewed, but such regions cannot be evidence (P8: particle-sized clutter)."""
-    finite = np.isfinite(scores)
-    above = finite & (scores >= threshold) & (scores >= relative_threshold * float(np.median(scores[finite])))
+    above = hit_mask(scores, threshold, relative_threshold, strict_threshold)
     _, labels, stats, _ = cv2.connectedComponentsWithStats(above.astype(np.uint8), connectivity=8)
     small = np.isin(labels, 1 + np.flatnonzero(stats[1:, cv2.CC_STAT_AREA] < min_region_px)) & above
     capped = scores.copy()
@@ -338,7 +362,8 @@ def surface_step(session: Session, scores: np.ndarray, category: str, position_m
     if session.evidence_min_region_px:
         evidence_scores = without_small_hits(scores, session.thresholds[category],
                                              session.evidence.calibration.lowest_threshold(category),
-                                             session.evidence_min_region_px)
+                                             session.evidence_min_region_px,
+                                             session.strict_thresholds[category] if session.strict_thresholds else None)
     values, keys_u, keys_v = frame_cells(evidence_scores, position_m, yaw_deg, category, session.geometry)
     new_alerts, _ = session.evidence.observe(position_m, values)
     boxes = []
@@ -431,6 +456,8 @@ def main() -> None:
                         help="P8 candidate rules: the P8 gate (regions counted from GATE_MIN_REGION_PX, no "
                              "single-large-region rule, spread over all regions) and evidence only from regions "
                              "of at least GATE_MIN_REGION_PX; overrides the separate gate/evidence options")
+    parser.add_argument("--strict-thresholds", type=Path,
+                        help="P9: absolute-only hit thresholds (calibrate_pixel --strict output)")
     parser.add_argument("--gate-spread-all-regions", action="store_true",
                         help="P8 gate: spread over regions of every size, region count over large ones")
     parser.add_argument("--evidence-min-region-px", type=int, default=0,
@@ -443,7 +470,8 @@ def main() -> None:
                          args.roi_mode, args.score_margin_px, args.diffuse_gate,
                          args.alert_rule, args.surface_calibration, args.border_margin,
                          args.gate_min_region_px, not args.no_gate_region_share,
-                         args.evidence_min_region_px, args.gate_spread_all_regions))
+                         args.evidence_min_region_px, args.gate_spread_all_regions,
+                         args.strict_thresholds))
 
 
 if __name__ == "__main__":

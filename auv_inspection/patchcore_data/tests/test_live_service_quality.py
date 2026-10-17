@@ -139,6 +139,15 @@ class DiffuseTests(unittest.TestCase):
         np.testing.assert_array_equal(capped[300:305, 300:305], 40.0)
         self.assertEqual(scores[10, 10], 70.0)   # the input is not modified
 
+    def test_hit_mask_adds_strict_pixels_regardless_of_the_relative_test(self) -> None:
+        scores = np.full((10, 10), 50.0, np.float32)    # median 50: relative 1.5 needs >= 75
+        scores[0, 0], scores[1, 1], scores[2, 2] = 70.0, 80.0, 95.0
+        relative_only = live_service.hit_mask(scores, 60.0, 1.5)
+        self.assertEqual(relative_only.sum(), 2)          # 80 and 95
+        with_strict = live_service.hit_mask(scores, 60.0, 1.5, strict_threshold=70.0)
+        self.assertEqual(with_strict.sum(), 3)            # 70 joins as a strict hit
+        self.assertTrue(live_service.hit_mask(scores, 60.0, None, 90.0)[0, 0])
+
     def test_many_candidate_regions_are_diffuse(self) -> None:
         many = [Candidate((0, 0, 1, 1), (0.0, 0.0), 70.0, 1)] * 7
         self.assertTrue(live_service.is_diffuse(np.zeros((10, 10)), 60.0, many)[0])

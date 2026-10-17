@@ -82,6 +82,16 @@ class SurfaceRuleTests(unittest.TestCase):
         self.assertEqual(grid[0, 0], 5.0)
         self.assertTrue(np.isnan(grid[1, 1]))
 
+    def test_strict_threshold_makes_a_high_absolute_score_a_hit_alone(self) -> None:
+        state = evidence()
+        state.strict_thresholds = {group: 90.0 for group in PIXEL}
+        cell = ("pipe_front", 5, 0)
+        for step in range(VIEWS_REQUIRED - 1):
+            self.assertEqual(state.observe(moved(step), {cell: (95.0, 1.0)})[0], [])  # relative too low, strict hit
+        self.assertEqual(state.observe(moved(VIEWS_REQUIRED - 1), {cell: (85.0, 1.0)})[0], [])  # below strict
+        self.assertEqual(len(state.observe(moved(VIEWS_REQUIRED), {cell: (90.0, 1.0)})[0]), 1)
+        self.assertEqual(evidence().strict_thresholds, None)
+
     def test_alert_needs_k_separated_views_above_threshold(self) -> None:
         state = evidence()
         cell = ("pipe_front", 5, 0)

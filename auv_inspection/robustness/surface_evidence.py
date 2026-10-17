@@ -149,7 +149,12 @@ class SurfaceAlert:
     surface_uv_m: tuple[float, float]
 
 
-def is_hit(value: CellValue, pixel_threshold: float, stratum_threshold: float) -> bool:
+def is_hit(value: CellValue, pixel_threshold: float, stratum_threshold: float,
+           strict_threshold: float | None = None) -> bool:
+    """Absolute AND relative; with a strict threshold (P9) an absolute score at or above it is a hit
+    on its own: a frame-wide score rise (motion blur) lowers the relative value of a real defect."""
+    if strict_threshold is not None and value[0] >= strict_threshold:
+        return True
     return value[0] >= pixel_threshold and value[1] >= stratum_threshold
 
 
@@ -157,6 +162,7 @@ def is_hit(value: CellValue, pixel_threshold: float, stratum_threshold: float) -
 class SurfaceEvidence:
     calibration: SurfaceCalibration
     pixel_thresholds: dict[str, float]      # locked per-group PatchCore thresholds
+    strict_thresholds: dict[str, float] | None = None  # P9: absolute-only hit level per group
     cells: dict[CellKey, CellState] = field(default_factory=dict)
     alerts: list[SurfaceAlert] = field(default_factory=list)
 
@@ -173,7 +179,8 @@ class SurfaceEvidence:
                 continue
             state.last_position = position
             state.views += 1
-            if is_hit(value, self.pixel_thresholds[key[0]], self.calibration.threshold(key)):
+            strict = self.strict_thresholds[key[0]] if self.strict_thresholds else None
+            if is_hit(value, self.pixel_thresholds[key[0]], self.calibration.threshold(key), strict):
                 state.hits += 1
                 if state.hits == VIEWS_REQUIRED and state.alert_id is None:
                     reached.append(key)
