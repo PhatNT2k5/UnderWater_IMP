@@ -21,7 +21,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt). Live: map A 3/3, 0 báo nhầm; map B 4/5, 2 báo nhầm theo quy tắc (1 trong 2 nằm trên vết khi xem ảnh). Cổng hash code xong (D11) | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
 | P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Offline: đạt** (`dino_floor_bgsr`: recall 92,9%, 0,92 báo nhầm/100 m, FPR ô 0,071% trên heldout seed 201-206 gồm map C); live: map A 3/3, 0 báo nhầm; map C 6/6, 0 báo nhầm (chấm lại bằng geometry v2) | Xem Kết quả P8 | Xem Kết quả P8.1 |
-| P9 | Mờ chuyển động 3 và marine snow 5 (vòng mới, đăng ký và heldout mới) | **Đang làm** (P9.1 chẩn đoán xong; P9.2 mục 1 ngưỡng chặt bị bác bỏ: 69,7% / 5,25) | Xem Kết quả P9.1 |
+| P9 | Mờ chuyển động 3 và marine snow 5 (vòng mới, đăng ký và heldout mới) | **Đang làm** (P9.1 chẩn đoán xong; P9.2 mục 1 ngưỡng chặt bị bác bỏ: 69,7% / 5,25; mục 2 bằng chứng theo nhiễu: 77,7% / 0,09, không thắng ứng viên P8) | Xem Kết quả P9.1 |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
 
@@ -373,6 +373,21 @@ Ngưỡng chặt (`calibrate_pixel --strict`, model `_floor`): mỗi ô sạch c
 | `dino_floor_bgsrh` | 122/175 (69,7%) | 901 | 5,25 | 5,9% | 33,0% |
 
 Mờ chuyển động 3: 11/25 (trước 17/25), 311 báo nhầm, cổng bỏ 63% frame; độ đục 4: 13/25, 315 báo nhầm, cổng 50%; marine snow 5: 0/25, cổng 96%. Nguyên nhân: dưới suy giảm mức 3-5 điểm tuyệt đối của **cả bề mặt sạch** vượt 1,2 lần ngưỡng pixel, nên mọi ô thành hit, cổng bỏ phần lớn frame và phần còn lại sinh báo nhầm (đúng điều P5 đã thấy khi dùng riêng ngưỡng tuyệt đối). Ngưỡng calibrate ở mức suy giảm 1 không đại diện cho mức 3. **Quyết định: không dùng hướng này.** Mờ chuyển động cần một phép chuẩn hóa khác (ví dụ theo nền cục bộ) chứ không nới tiêu chí tương đối.
+
+## Kết quả P9.2 mục 2: bằng chứng theo mức nhiễu của frame (2026-10-17, tập phát triển 12 capture)
+
+`dino_floor_bgsrn` = ứng viên P8 + `NoiseModel` (trọng số hit min(1, log q / log base), q = tỷ lệ ô hit của frame ở xa ô hơn 0,6 m; base = 1,04×10⁻⁴ từ 3 capture calibration sạch), phát lại từ cache (`output/benchmark_p9_dev/`).
+
+| Detector | Recall | Báo nhầm | /100 m | FPR ô |
+|---|---|---|---|---|
+| `dino_floor_bgsr` (ứng viên P8) | 159/175 (90,9%) | 127 | 0,74 | 0,043% |
+| `dino_floor_bgsrn` | 136/175 (77,7%) | **15** | **0,09** | 0,002% |
+
+Theo điều kiện (recall, báo nhầm): gốc 24/25, 1; độ đục 2 21/25, 3; độ đục 4 22/25, 2; marine snow 3 23/25, 6; **marine snow 5 7/25, 0** (trước 20/25, 75); đèn yếu 4 24/25, 3; mờ chuyển động 3 15/25, 0.
+
+- Báo nhầm giảm 8 lần (marine snow 5: 75 → 0) nhưng recall giảm 13 điểm, mạnh nhất ở marine snow 5 (20 → 7) và độ đục 2 (25 → 21): hit của vết trong frame nhiễu bị giảm trọng số như hit giả, mà vết trên ống chỉ có 4-6 lượt nhìn.
+- Tỷ lệ cơ sở lấy trên capture calibration (profile train, sạch, 1,04×10⁻⁴) thấp hơn nhiều so với frame heldout bình thường (0,26% ở điều kiện gốc, P9.1), nên cả frame bình thường cũng bị giảm trọng số.
+- Theo quy tắc chọn (recall cao nhất với ≤ 1 báo nhầm/100 m) `dino_floor_bgsr` vẫn thắng. Biến thể này không thay ứng viên P8.
 
 ## Tiêu chí nghiệm thu (bản đầu)
 
