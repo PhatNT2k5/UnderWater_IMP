@@ -173,7 +173,7 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
 
 DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md",
              "patchcore_surface", *V2_MODELS, *(f"{name}_b" for name in V2_MODELS),
-             *(f"{name}_{suffix}" for name in V2_MODELS for suffix in ("bg", "br", "bgr", "bgsr", "bgsrh", "bgsrn")))
+             *(f"{name}_{suffix}" for name in V2_MODELS for suffix in ("bg", "br", "bgr", "bgsr", "bgsrh", "bgsrn", "bgsrq")))
 
 
 def make_detector(name: str) -> Detector:
@@ -187,8 +187,9 @@ def make_detector(name: str) -> Detector:
     (live_service.GATE_MIN_REGION_PX, no single-large-region rule) and "r" lets only hit regions of
     at least GATE_MIN_REGION_PX give surface evidence; "s" keeps the gate's spread over regions of
     every size; "h" (P9) adds the strict absolute-only hit thresholds of <model>/strict_thresholds.json
-    and "n" (P9) the frame-adaptive evidence of <model>/noise_calibration.json
-    ("_bg", "_br", "_bgr", "_bgsr", "_bgsrh", "_bgsrn")."""
+    and "n" (P9) the frame-adaptive evidence of <model>/noise_calibration.json ("q": the base rate
+    pooled over severity-1 degradations, noise_calibration_severity1.json)
+    ("_bg", "_br", "_bgr", "_bgsr", "_bgsrh", "_bgsrn", "_bgsrq")."""
     if name == "classical":
         return classical_detector()
     if name == "patchcore":
@@ -210,7 +211,8 @@ def make_detector(name: str) -> Detector:
                                   strict_thresholds=(model / "strict_thresholds.json" if base != name and "h" in flags
                                                      else None),
                                   noise_calibration=(model / "noise_calibration.json" if base != name and "n" in flags
-                                                     else None))
+                                                     else model / "noise_calibration_severity1.json"
+                                                     if base != name and "q" in flags else None))
     if name == "patchcore_surface":
         from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
         return patchcore_detector(PATCHCORE_MODEL, PATCHCORE_REFERENCE, PATCHCORE_THRESHOLDS, "geometry",

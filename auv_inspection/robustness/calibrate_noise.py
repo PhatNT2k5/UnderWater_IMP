@@ -31,7 +31,10 @@ REFERENCE = ROOT / "auv_inspection/output/patchcore_dataset_clean_20260925"
 RADIUS_M = 0.6  # the alert merge radius: hits nearer than this to a cell can be the same defect
 
 
-def calibrate(model_dir: Path, captures: list[Path], destination: Path, p8_rules: bool) -> dict:
+def calibrate(model_dir: Path, captures: list[Path], destination: Path, p8_rules: bool,
+              severity1: bool = False) -> dict:
+    """With `severity1` every frame is scored once per degradation factor at severity 1 (the bank's
+    augmentation level) and the rate is pooled over all of them."""
     from auv_inspection.patchcore_data.live_service import (
         DEFAULT_SCORE_MARGIN_PX, GATE_MIN_REGION_PX, create_session, score_request, without_small_hits)
     if destination.exists():
@@ -42,9 +45,12 @@ def calibrate(model_dir: Path, captures: list[Path], destination: Path, p8_rules
     session = create_session(model_dir, REFERENCE, thresholds_file, "geometry", DEFAULT_SCORE_MARGIN_PX, True,
                              "surface", model_dir / "surface_calibration.json", border_margin=True, **rules)
     calibration = session.evidence.calibration
+    from robustness.degradation import PIPELINE_ORDER, Degradation, apply_degradations
+    from auv_inspection.detector_v2.build_bank import AUGMENT_SEVERITY
+    variants = [Degradation(factor, AUGMENT_SEVERITY) for factor in PIPELINE_ORDER] if severity1 else [None]
     cells = hits = frames = gated = 0
     sources = []
-    for capture in captures:
+    for capture, degradation in ((c, d) for c in captures for d in variants):
         report = json.loads((capture / "report.json").read_text(encoding="utf-8"))
         if report.get("scene_state") != "clean" or report.get("dataset_role") != "calibration":
             raise ValueError(f"Noise calibration needs clean calibration captures: {capture}")
@@ -57,6 +63,8 @@ def calibrate(model_dir: Path, captures: list[Path], destination: Path, p8_rules
             request = {"tick": row["tick"], "category": category, "station": row["station"],
                        "position_m": row["position_m"], "yaw_deg": yaw}
             frame = cv2.imread(str(capture / row["image"]), cv2.IMREAD_COLOR)
+            if degradation is not None:
+                frame = apply_degradations(frame, [degradation], int(row["tick"]))
             response, _, scores, _ = score_request(session, request, frame, time.perf_counter())
             if scores is None:
                 gated += response.get("reason") == "diffuse_anomaly"
@@ -70,8 +78,8 @@ def calibrate(model_dir: Path, captures: list[Path], destination: Path, p8_rules
             capture_hits += sum(is_hit(v, session.thresholds[category], calibration.threshold(k)) for k, v in values.items())
         cells += capture_cells
         hits += capture_hits
-        sources.append({"capture": str(capture), "map_sha256": report.get("map_sha256"), "cell_views": capture_cells,
-                        "hits": capture_hits})
+        sources.append({"capture": str(capture), "degradation": degradation.factor if degradation else None,
+                        "map_sha256": report.get("map_sha256"), "cell_views": capture_cells, "hits": capture_hits})
         print(json.dumps({**sources[-1], "seconds": round(time.time() - start)}), flush=True)
     if hits == 0:
         raise ValueError("No clean hits: the base rate cannot be estimated")
@@ -79,6 +87,7 @@ def calibrate(model_dir: Path, captures: list[Path], destination: Path, p8_rules
               "method": "pooled per-view hit rate of clean calibration cells under the runtime rules",
               "base_hit_rate": hits / cells, "radius_m": RADIUS_M, "cell_views": cells, "hits": hits,
               "frames": frames, "frames_gated": gated, "p8_rules": p8_rules,
+              "severity1": severity1,
               "pixel_thresholds_sha256": hashlib.sha256(thresholds_file.read_bytes()).hexdigest(),
               "sources": sources}
     destination.write_text(json.dumps(result, indent=2), encoding="utf-8")
@@ -90,10 +99,14 @@ def main() -> None:
     parser.add_argument("model_dir", type=Path)
     parser.add_argument("captures", nargs="+", type=Path)
     parser.add_argument("--p8-rules", action="store_true", help="Score with the P8 gate and evidence rules")
+    parser.add_argument("--severity1", action="store_true",
+                        help="Pool the rate over every degradation factor at severity 1; default output "
+                             "<model_dir>/noise_calibration_severity1.json")
     parser.add_argument("--output", type=Path, help="Default: <model_dir>/noise_calibration.json")
     args = parser.parse_args()
-    result = calibrate(args.model_dir, args.captures, args.output or args.model_dir / "noise_calibration.json",
-                       args.p8_rules)
+    default = "noise_calibration_severity1.json" if args.severity1 else "noise_calibration.json"
+    result = calibrate(args.model_dir, args.captures, args.output or args.model_dir / default,
+                       args.p8_rules, args.severity1)
     print(json.dumps({key: result[key] for key in ("base_hit_rate", "cell_views", "hits", "frames_gated")}))
 
 
