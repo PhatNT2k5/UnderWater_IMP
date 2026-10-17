@@ -16,7 +16,7 @@ from robustness.geometry import load_params  # noqa: E402
 from robustness.surface import render_uv, surface_point, surface_uv  # noqa: E402
 from robustness.surface_evidence import (  # noqa: E402
     CELL_M, MERGE_RADIUS_M, MIN_MOVE_M, POOL_PX, VIEWS_REQUIRED, SurfaceCalibration,
-    SurfaceEvidence, element_of, load_calibration, pooled)
+    NoiseModel, SurfaceEvidence, element_of, load_calibration, pooled)
 
 PARAMS = load_params()
 PIXEL = {"pipe_front": 60.0, "pipe_back": 60.0, "pier_0": 60.0, "pier_1": 60.0}
@@ -81,6 +81,41 @@ class SurfaceRuleTests(unittest.TestCase):
         self.assertEqual(grid.shape, (2, 2))
         self.assertEqual(grid[0, 0], 5.0)
         self.assertTrue(np.isnan(grid[1, 1]))
+
+    def test_strict_threshold_makes_a_high_absolute_score_a_hit_alone(self) -> None:
+        state = evidence()
+        state.strict_thresholds = {group: 90.0 for group in PIXEL}
+        cell = ("pipe_front", 5, 0)
+        for step in range(VIEWS_REQUIRED - 1):
+            self.assertEqual(state.observe(moved(step), {cell: (95.0, 1.0)})[0], [])  # relative too low, strict hit
+        self.assertEqual(state.observe(moved(VIEWS_REQUIRED - 1), {cell: (85.0, 1.0)})[0], [])  # below strict
+        self.assertEqual(len(state.observe(moved(VIEWS_REQUIRED), {cell: (90.0, 1.0)})[0]), 1)
+        self.assertEqual(evidence().strict_thresholds, None)
+
+    def test_noise_model_keeps_clean_frames_and_discounts_noisy_ones(self) -> None:
+        noise = NoiseModel(base_rate=0.01, radius_m=0.6)
+        cell = ("pipe_front", 0, 0)
+        near = [("pipe_front", 1, 0), ("pipe_front", 0, 2)]           # same defect (< 0.6 m)
+        self.assertEqual(noise.weights([cell, *near], 1000)[cell], 1.0)  # own neighbourhood ignored
+        far = [("pipe_front", 20 + i, 0) for i in range(99)]          # 99 far hits in 1000 cells: q ~ 0.1
+        weight = noise.weights([cell, *far], 1000)[cell]
+        self.assertAlmostEqual(weight, np.log(0.099) / np.log(0.01), places=6)
+        self.assertLess(weight, 0.51)
+        other_group = [("pier_0", 0, i) for i in range(99)]          # other structures count as far
+        self.assertLess(noise.weights([cell, *other_group], 1000)[cell], 0.51)
+
+    def test_noisy_frames_need_more_views(self) -> None:
+        state = evidence()
+        state.noise = NoiseModel(base_rate=0.01)
+        cell = ("pipe_front", 5, 0)
+        clutter = {("pipe_front", 40 + i, 0): HIT for i in range(9)}   # 9 far hits in 10 cells: q = 0.9
+        for step in range(VIEWS_REQUIRED + 2):
+            self.assertEqual(state.observe(moved(step), {cell: HIT, **clutter})[0], [])
+        clean = evidence()
+        clean.noise = NoiseModel(base_rate=0.01)
+        for step in range(VIEWS_REQUIRED - 1):
+            self.assertEqual(clean.observe(moved(step), {cell: HIT})[0], [])
+        self.assertEqual(len(clean.observe(moved(VIEWS_REQUIRED), {cell: HIT})[0]), 1)  # clean: k views as before
 
     def test_alert_needs_k_separated_views_above_threshold(self) -> None:
         state = evidence()

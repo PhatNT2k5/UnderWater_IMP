@@ -1,0 +1,126 @@
+{
+  "created": "2026-10-15",
+  "dataset": "patchcore_dataset_clean_20260925",
+  "dataset_sha256": "955019a54bc76ef0c87acc5b602dc24c1cf000158684122a38d292c904fd079b",
+  "grid_step_px": 4,
+  "fitted": [
+    "pipe_radius_m",
+    "pipe_axis_z",
+    "pier_half_width_m",
+    "camera_lateral_m",
+    "camera_pitch_deg"
+  ],
+  "fixed": {
+    "camera_forward_m": 0.41,
+    "camera_up_m": 0.09
+  },
+  "params": {
+    "pipe_radius_m": 0.423,
+    "pipe_axis_z": -10.2943,
+    "pier_half_width_m": 0.8781,
+    "camera_lateral_m": -0.207,
+    "camera_forward_m": 0.41,
+    "camera_up_m": 0.09,
+    "camera_pitch_deg": 0.0054,
+    "pier_floor_z": -10.35
+  },
+  "optimizer": {
+    "method": "Powell",
+    "loss": 0.06695,
+    "evaluations": 206
+  },
+  "before": {
+    "fit": {
+      "pipe_front": {
+        "frames": 61,
+        "iou_median": 0.8361,
+        "iou_p10": 0.7995
+      },
+      "pipe_back": {
+        "frames": 56,
+        "iou_median": 0.8409,
+        "iou_p10": 0.7777
+      },
+      "pier_0": {
+        "frames": 83,
+        "iou_median": 0.8033,
+        "iou_p10": 0.7066
+      },
+      "pier_1": {
+        "frames": 83,
+        "iou_median": 0.823,
+        "iou_p10": 0.7636
+      }
+    },
+    "validate": {
+      "pipe_front": {
+        "frames": 45,
+        "iou_median": 0.8361,
+        "iou_p10": 0.8226
+      },
+      "pipe_back": {
+        "frames": 51,
+        "iou_median": 0.8411,
+        "iou_p10": 0.7706
+      },
+      "pier_0": {
+        "frames": 85,
+        "iou_median": 0.816,
+        "iou_p10": 0.7704
+      },
+      "pier_1": {
+        "frames": 88,
+        "iou_median": 0.8326,
+        "iou_p10": 0.7642
+      }
+    }
+  },
+  "after": {
+    "fit": {
+      "pipe_front": {
+        "frames": 61,
+        "iou_median": 1.0,
+        "iou_p10": 0.9301
+      },
+      "pipe_back": {
+        "frames": 56,
+        "iou_median": 1.0,
+        "iou_p10": 0.925
+      },
+      "pier_0": {
+        "frames": 83,
+        "iou_median": 0.8878,
+        "iou_p10": 0.7578
+      },
+      "pier_1": {
+        "frames": 83,
+        "iou_median": 0.8866,
+        "iou_p10": 0.8258
+      }
+    },
+    "validate": {
+      "pipe_front": {
+        "frames": 45,
+        "iou_median": 1.0,
+        "iou_p10": 0.8959
+      },
+      "pipe_back": {
+        "frames": 51,
+        "iou_median": 0.9996,
+        "iou_p10": 0.9548
+      },
+      "pier_0": {
+        "frames": 85,
+        "iou_median": 0.8889,
+        "iou_p10": 0.8084
+      },
+      "pier_1": {
+        "frames": 88,
+        "iou_median": 0.9011,
+        "iou_p10": 0.8058
+      }
+    }
+  },
+  "derived_from": "geometry_v2.json (all fitted and fixed values unchanged)",
+  "pier_floor_note": "P8: pier ROI stops at the pier/seabed junction. Measured on capture_test_mixed_20261014_190240_145151 tick 8329 (pier_1 face): junction at z -10.36 to -10.45 (back-projected pixels); the route's pier obstacle box also ends at -10.4. Floor set just above the highest junction point so the junction line and seabed stay out of the ROI. All 17 pier false alerts of the P7 candidate lie at z -10.41 to -10.55."
+}

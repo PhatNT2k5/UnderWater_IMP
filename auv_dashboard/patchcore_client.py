@@ -19,7 +19,7 @@ class PatchCoreClient:
                  python_executable: Path | None = None, roi_mode: str = "geometry",
                  score_margin_px: int = 24, diffuse_gate: bool = True,
                  alert_rule: str = "track", surface_calibration: Path | None = None,
-                 border_margin: bool = False) -> None:
+                 border_margin: bool = False, p8_rules: bool = False) -> None:
         executable = python_executable or root / ".venv-patchcore/Scripts/python.exe"
         if not executable.is_file():
             raise FileNotFoundError(f"PatchCore Python not found: {executable}")
@@ -37,6 +37,8 @@ class PatchCoreClient:
             command += ["--surface-calibration", str(surface_calibration)]
         if border_margin:
             command.append("--border-margin")
+        if p8_rules:
+            command.append("--p8-rules")
         try:
             self.process = subprocess.Popen(
                 command, cwd=root, stdin=subprocess.PIPE, stdout=subprocess.PIPE,

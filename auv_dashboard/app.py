@@ -34,9 +34,13 @@ PATCHCORE_EVALUATION = ROOT / "auv_inspection/output/patchcore_evaluation_B_v1.j
 DEFAULT_V2_MODEL = ROOT / "auv_inspection/output/detector_v2_dino_s2_aug_g2"
 PREREGISTRATION = ROOT / "auv_inspection/robustness/acceptance_preregistration.json"
 MAPS_PREFIX = "/Game/AUVInspection/Maps/"
+# P8 development candidate (dino_floor_bgsr): pier floor model + live_service --p8-rules. Opt-in until
+# P8 is pre-registered and accepted.
+P8_MODEL = ROOT / "auv_inspection/output/detector_v2_dino_s2_aug_g2_floor"
+P8_REGISTRATION = ROOT / "auv_inspection/robustness/acceptance_preregistration_p8.json"
 
 
-def v2_files(model_dir: Path) -> dict[str, Path]:
+def v2_files(model_dir: Path, p8_rules: bool = False) -> dict[str, Path | bool]:
     """Detector v2 (P4) directory: banks, its own pixel thresholds and surface calibration."""
     files = {"patchcore_model": model_dir, "patchcore_thresholds": model_dir / "pixel_thresholds.json",
              "patchcore_surface_calibration": model_dir / "surface_calibration.json"}
@@ -44,11 +48,19 @@ def v2_files(model_dir: Path) -> dict[str, Path]:
     if missing:
         raise FileNotFoundError(f"Detector v2 files missing: {missing}")
     # Margin at the image border too: halved v2 false alerts on the six-capture dev set (P4).
-    return {**files, "patchcore_border_margin": True}
+    return {**files, "patchcore_border_margin": True, "patchcore_p8_rules": p8_rules}
 
 
 def default_v2_model() -> Path | None:
     return DEFAULT_V2_MODEL if registered_candidate_matches(DEFAULT_V2_MODEL, PREREGISTRATION, ROOT) else None
+
+
+def default_v2() -> tuple[Path | None, bool]:
+    """(model, P8 rules) of the newest pre-registered candidate whose files and scoring code still
+    match its registration: P8, then P7; (None, False) leaves the v1 approval gate."""
+    if registered_candidate_matches(P8_MODEL, P8_REGISTRATION, ROOT):
+        return P8_MODEL, True
+    return default_v2_model(), False
 
 
 def default_detector() -> str:
@@ -60,7 +72,7 @@ def default_detector() -> str:
 
 class Dashboard:
     def __init__(self, root: tk.Tk, steps: int = 60000, smoke_test: bool = False,
-                 v2_model: Path | None = None, world: str | None = None) -> None:
+                 v2_model: Path | None = None, world: str | None = None, p8_rules: bool = False) -> None:
         self.root, self.steps, self.smoke_test = root, steps, smoke_test
         # Detector v2 when given (run_dashboard picks the registered P7 candidate by default);
         # without it PatchCore v1 behind its approval gate.
@@ -68,7 +80,10 @@ class Dashboard:
         if world is not None and (not world.startswith(MAPS_PREFIX) or ".." in world):
             raise ValueError(f"World must be a map under {MAPS_PREFIX}: {world}")
         self.world = world
-        self.patchcore_files = (v2_files(v2_model) if v2_model else
+        if p8_rules and v2_model is None:
+            raise ValueError("P8 rules need a detector v2 model")
+        self.p8_rules = p8_rules
+        self.patchcore_files = (v2_files(v2_model, p8_rules) if v2_model else
                                 {"patchcore_model": PATCHCORE_MODEL, "patchcore_thresholds": PATCHCORE_THRESHOLDS})
         self.context = mp.get_context("spawn")
         self.worker: mp.Process | None = None

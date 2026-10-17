@@ -37,6 +37,9 @@ class GeometryParams:
     camera_forward_m: float = 0.0
     camera_up_m: float = 0.0
     camera_pitch_deg: float = 0.0   # positive looks down
+    # Lowest pier height scored. The default reaches below the seabed; geometry_v3 (P8) stops at
+    # the measured pier/seabed junction so seabed pixels stay out of the pier ROI.
+    pier_floor_z: float = PIER_Z_RANGE[0]
 
 
 DEFAULT_PARAMS = GeometryParams()
@@ -123,7 +126,7 @@ def pipe_hits(origin: np.ndarray, rays: np.ndarray, params: GeometryParams) -> n
 
 def pier_hits(origin: np.ndarray, rays: np.ndarray, pier_index: int, params: GeometryParams) -> np.ndarray:
     center_x, half = PIER_CENTERS_X[pier_index], params.pier_half_width_m
-    low = np.array([center_x - half, PIER_Y - half, PIER_Z_RANGE[0]])
+    low = np.array([center_x - half, PIER_Y - half, params.pier_floor_z])
     high = np.array([center_x + half, PIER_Y + half, PIER_Z_RANGE[1]])
     safe = np.where(np.abs(rays) < 1e-12, 1e-12, rays)
     t1, t2 = (low - origin) / safe, (high - origin) / safe

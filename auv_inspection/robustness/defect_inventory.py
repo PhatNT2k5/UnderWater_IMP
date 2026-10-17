@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
-from robustness.geometry import DEFAULT_PARAMS, GeometryParams, in_view, pixel_to_surface
+from robustness.geometry import DEFAULT_PARAMS, GeometryParams, in_view, load_params, pixel_to_surface
 
 
 @dataclass(frozen=True)
@@ -69,13 +69,20 @@ def locate_box(bbox_xywh: list[int], camera: np.ndarray, yaw_deg: float, categor
     return None if hit is None else hit.world
 
 
-def locate_event(event_json: Path, default_yaw_deg: float = -90.0) -> tuple[str, np.ndarray | None]:
-    """Classical events store no yaw; pipe-front scans always hold -90 degrees."""
+def locate_event(event_json: Path, default_yaw_deg: float = -90.0,
+                 params: GeometryParams | None = None) -> tuple[str, np.ndarray | None]:
+    """Classical events store no yaw; pipe-front scans always hold -90 degrees.
+
+    `params` defaults to the calibrated geometry (`load_params()`, the one the harness and the labels
+    use); until 2026-10-17 it silently used the uncalibrated DEFAULT_PARAMS, which put live alerts on a
+    0.5 m pipe / 0.95 m pier and up to ~0.3 m away from where the harness places the same box.
+    """
     event = json.loads(event_json.read_text(encoding="utf-8"))
     yaw = event.get("yaw_deg")
     category = event_category(event)
     return category, locate_box(event["bbox_xywh"], np.asarray(event["position_m"], float),
-                                default_yaw_deg if yaw is None else float(yaw), category)
+                                default_yaw_deg if yaw is None else float(yaw), category,
+                                params if params is not None else load_params())
 
 
 def match_defect(point: np.ndarray | None, category: str,

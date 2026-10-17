@@ -90,6 +90,64 @@ class DiffuseTests(unittest.TestCase):
         scores[::4, ::4] = 120.0                # scattered spots well above 1.5 x median
         self.assertTrue(live_service.is_diffuse(scores, 60.0, [], relative_threshold=1.5)[0])
 
+    def test_p8_gate_ignores_particle_sized_regions(self) -> None:
+        scores = np.zeros((480, 640), np.float32)
+        for row in range(20, 460, 40):         # 132 particle-sized spots of 25 px
+            for col in range(20, 620, 50):
+                scores[row:row + 5, col:col + 5] = 70.0
+        scores[200:216, 100:300] = 70.0         # one crack-like region of 3200 px
+        self.assertTrue(live_service.is_diffuse(scores, 60.0, [], relative_threshold=0.0)[0])
+        diffuse, shape = live_service.is_diffuse(scores, 60.0, [], relative_threshold=0.0,
+                                                 min_region_px=live_service.GATE_MIN_REGION_PX,
+                                                 region_share=False)
+        self.assertFalse(diffuse)
+        self.assertEqual(shape["regions"], 1)
+        self.assertEqual(shape["anomaly_spread"], 0.0)
+        for top in range(0, 480, 60):           # eight further large regions are still diffuse
+            scores[top:top + 15, 500:520] = 70.0
+        self.assertTrue(live_service.is_diffuse(scores, 60.0, [], relative_threshold=0.0,
+                                                min_region_px=live_service.GATE_MIN_REGION_PX,
+                                                region_share=False)[0])
+
+    def test_spread_over_all_regions_still_abstains_on_dense_particles(self) -> None:
+        scores = np.zeros((480, 640), np.float32)
+        for row in range(0, 480, 10):            # dense particles: 3072 spots, 8% of the frame
+            for col in range(0, 640, 10):
+                scores[row:row + 5, col:col + 5] = 70.0
+        gate = dict(relative_threshold=0.0, min_region_px=live_service.GATE_MIN_REGION_PX, region_share=False)
+        self.assertFalse(live_service.is_diffuse(scores, 60.0, [], **gate)[0])
+        diffuse, shape = live_service.is_diffuse(scores, 60.0, [], spread_all_regions=True, **gate)
+        self.assertTrue(diffuse)
+        self.assertGreater(shape["anomaly_spread"], 0.05)
+        self.assertEqual(shape["regions"], 0)
+
+    def test_p8_gate_keeps_one_large_region(self) -> None:
+        scores = np.zeros((100, 100), np.float32)
+        scores[:30, :] = 70.0                   # a large hole seen up close
+        self.assertTrue(live_service.is_diffuse(scores, 60.0, [])[0])
+        self.assertFalse(live_service.is_diffuse(scores, 60.0, [], min_region_px=196, region_share=False)[0])
+
+    def test_small_hit_regions_give_no_evidence(self) -> None:
+        scores = np.full((480, 640), 1.0, np.float32)
+        scores[10:15, 10:15] = 70.0              # particle-sized, 25 px
+        scores[200:216, 100:300] = 70.0          # crack-sized, 3200 px
+        scores[300:305, 300:305] = 40.0          # below the pixel threshold, left as it is
+        capped = live_service.without_small_hits(scores, 60.0, 1.5, live_service.GATE_MIN_REGION_PX)
+        self.assertLess(capped[10:15, 10:15].max(), 60.0)
+        self.assertGreater(capped[10:15, 10:15].min(), 59.99)
+        np.testing.assert_array_equal(capped[200:216, 100:300], 70.0)
+        np.testing.assert_array_equal(capped[300:305, 300:305], 40.0)
+        self.assertEqual(scores[10, 10], 70.0)   # the input is not modified
+
+    def test_hit_mask_adds_strict_pixels_regardless_of_the_relative_test(self) -> None:
+        scores = np.full((10, 10), 50.0, np.float32)    # median 50: relative 1.5 needs >= 75
+        scores[0, 0], scores[1, 1], scores[2, 2] = 70.0, 80.0, 95.0
+        relative_only = live_service.hit_mask(scores, 60.0, 1.5)
+        self.assertEqual(relative_only.sum(), 2)          # 80 and 95
+        with_strict = live_service.hit_mask(scores, 60.0, 1.5, strict_threshold=70.0)
+        self.assertEqual(with_strict.sum(), 3)            # 70 joins as a strict hit
+        self.assertTrue(live_service.hit_mask(scores, 60.0, None, 90.0)[0, 0])
+
     def test_many_candidate_regions_are_diffuse(self) -> None:
         many = [Candidate((0, 0, 1, 1), (0.0, 0.0), 70.0, 1)] * 7
         self.assertTrue(live_service.is_diffuse(np.zeros((10, 10)), 60.0, many)[0])

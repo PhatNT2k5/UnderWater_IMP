@@ -145,5 +145,28 @@ class BankRuleTests(unittest.TestCase):
         self.assertEqual(calls[0][0].severity, build_bank.AUGMENT_SEVERITY)
 
 
+class GeometryModelTests(unittest.TestCase):
+    def test_geometry_model_reuses_banks_and_names_its_roi_geometry(self) -> None:
+        from auv_inspection.detector_v2 import derive_model
+        from auv_inspection.patchcore_data.live_service import model_geometry
+        with TemporaryDirectory() as folder:
+            base, derived = Path(folder) / "base", Path(folder) / "floor"
+            base.mkdir()
+            (base / "config.json").write_text(json.dumps({"model": scorer.MODEL_KIND}), encoding="utf-8")
+            self.assertEqual(model_geometry(base).pier_floor_z, -12.0)  # default calibration (v2)
+            with self.assertRaises(ValueError):
+                derive_model.derive(base, derived, "geometry", [], 8, 0.1, 10)
+            config = derive_model.derive(base, derived, "geometry", [], 8, 0.1, 10,
+                                         geometry_file="auv_inspection/robustness/calibration/geometry_v3.json")
+            self.assertEqual(Path(config["bank_dir"]), base.resolve())
+            self.assertNotIn("transform_file", config)
+            self.assertFalse((derived / "transforms.pt").exists())
+            self.assertAlmostEqual(model_geometry(derived).pier_floor_z, -10.35)
+            config["geometry_file"] = "missing/geometry.json"
+            (derived / "config.json").write_text(json.dumps(config), encoding="utf-8")
+            with self.assertRaises(FileNotFoundError):
+                model_geometry(derived)
+
+
 if __name__ == "__main__":
     unittest.main()

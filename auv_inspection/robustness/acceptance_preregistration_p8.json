@@ -1,0 +1,135 @@
+{
+  "registered": "2026-10-16T22:55:41+07:00",
+  "code_commit": "64e21e9bd9e72f71a815523a933ae6e63a8176c4",
+  "purpose": "P8 acceptance on held-out captures nobody has looked at, including the new map C; everything below is fixed before the data exist",
+  "candidate": {
+    "harness_name": "dino_floor_bgsr",
+    "description": "DINOv2 ViT-S/14 kNN, banks of the P7 candidate, geometric ROI with geometry_v3 (pier ROI stops at the seabed, z -10.35), 24 px score margin incl. image border, P8 gate (regions counted from 196 px, no single-large-region rule, spread over all regions > 5%), surface evidence only from hit regions of at least 196 px, surface rule k = 3",
+    "model_dir": "auv_inspection/output/detector_v2_dino_s2_aug_g2_floor",
+    "live": "auv_dashboard/run_dashboard.py (default while files and scoring code match this registration) or --p8; live_service --p8-rules",
+    "sha256": {
+      "config.json": "0c8b8e10204f2dc6403c7b05ac47239aea6a77484cd0d04a5a1cf2a73d3bc429",
+      "pixel_thresholds.json": "0f7f24b9ef897b4efadfc7e942a5be46851e93f5b2ca424f0660334e0cb0df55",
+      "surface_calibration.json": "d9b7221a277f59b31f2583284ab6823258db769977181b3a2cc4d1abfec5cdeb",
+      "../detector_v2_dino_s2_aug_g2/pipe_front_bank.pt": "f8ca2192d6fdb0e28272af1d99aa4c14a673d704a199b03ce6be085e93163f01",
+      "../detector_v2_dino_s2_aug_g2/pipe_back_bank.pt": "e37126634da29a318e12c9dd91de808f8fce32bc3a3aad1661903e695eb9fc11",
+      "../detector_v2_dino_s2_aug_g2/pier_0_bank.pt": "36554a8442adc8ed4ee40a097bcf99978fdb5a651c9ee167966b084173a29d44",
+      "../detector_v2_dino_s2_aug_g2/pier_1_bank.pt": "2ee53a6dba81b3cb8c76263020a3a81e80b6f48a5dc3e926bfb4a7235c110b4f",
+      "../../robustness/calibration/geometry_v3.json": "266f35a8328a86ea8f3b77908d90620f67c66ebf655a733d3fa3db5a99e02c3c"
+    }
+  },
+  "baseline": {
+    "harness_name": "dino_surface_b",
+    "description": "P7 candidate (not accepted in P7)",
+    "model_dir": "auv_inspection/output/detector_v2_dino_s2_aug_g2",
+    "sha256": {
+      "config.json": "7ed6e8b9cce0ac3189794edb373afc630326762e0672b7344f35176410c998fc",
+      "pipe_front_bank.pt": "f8ca2192d6fdb0e28272af1d99aa4c14a673d704a199b03ce6be085e93163f01",
+      "pipe_back_bank.pt": "e37126634da29a318e12c9dd91de808f8fce32bc3a3aad1661903e695eb9fc11",
+      "pier_0_bank.pt": "36554a8442adc8ed4ee40a097bcf99978fdb5a651c9ee167966b084173a29d44",
+      "pier_1_bank.pt": "2ee53a6dba81b3cb8c76263020a3a81e80b6f48a5dc3e926bfb4a7235c110b4f",
+      "pixel_thresholds.json": "c2dda9c1961279116ec46e253755fbd3ea1659ffc008a2577516c696d718c6ce",
+      "surface_calibration.json": "cf86f7ec3adeef970423c2ccfd6fb013ec267d3ab276b5319fd2794dc7fb941e"
+    }
+  },
+  "code_sha256": {
+    "auv_inspection/detector_v2/__init__.py": "38bb549650e2ad11aa548be9dcf3a5d733c11a51317bd8e9fe52b88b5bbe09e2",
+    "auv_inspection/detector_v2/features.py": "984382eeabe7c8986de108196ae79a7602d4e1e60478020cb30b556af24efe55",
+    "auv_inspection/detector_v2/scorer.py": "80f233a0f0e791a2284346a5f6f996749f365c2ba28476f1d073801a734726da",
+    "auv_inspection/detector_v2/transforms.py": "8ebbf21979428b2df9e56a9f559b168f9a328494a8f98b140df434fcc6c0f023",
+    "auv_inspection/inspection_route.py": "2b904495fb7e089daa638421e03e23c09c625c607550865c1bf6c7120e7342c9",
+    "auv_inspection/patchcore_data/__init__.py": "e569d2bd65197e484e2a13572eaecbd85da964c333bde97681740b19909bc886",
+    "auv_inspection/patchcore_data/alerts.py": "465a7cfb1722281abdc808301b233e00036c1ed0eba251065d4a689968a4a637",
+    "auv_inspection/patchcore_data/live_roi.py": "407ac81f66ee5784f328535dd59f8b4176b8687c2c54d28d9306ac9c900d100e",
+    "auv_inspection/patchcore_data/live_service.py": "a3d61426bab621864afec2b158b5f4eb2424c4e911723813a5988cc60beef9d2",
+    "auv_inspection/patchcore_data/model.py": "5b6a8e1f9093b14ae7887f697d3e33056ed084b400923faf911941cc133b84cb",
+    "auv_inspection/patchcore_data/predict.py": "9581c141e7bbe6a4cdeef1124a2a773dc294a52861c623e052e8db4c8df0cf63",
+    "auv_inspection/robustness/__init__.py": "158b3826463ae5f551f1287fe1ec2dd48fe83959114daab9f251f5a0b7a2cb5f",
+    "auv_inspection/robustness/geometric_roi.py": "b3d4b22ef4682328b6cedd253f0bcf45c5456fa26d5f0bbcf90ad171a3341f92",
+    "auv_inspection/robustness/geometry.py": "2fc484a28b058ccbea96e17b9d4a22136dc89913b66cf8fc0b913a0be8448069",
+    "auv_inspection/robustness/quality.py": "2042ce3c401b1eb2f1c9d036d4e5ce3cbc98d0b4bee4172091867756210fbf72",
+    "auv_inspection/robustness/surface.py": "151d38d0212f2848c02cee3d9f675356678f6c5e6d1176f4f948dcf266b99257",
+    "auv_inspection/robustness/surface_evidence.py": "a6e0c021d60aa5a5109fff6bc7c3ff3775d925c6285f7c8f5d70fee9e112147f"
+  },
+  "code_sha256_note": "approval_gate.SCORING_CODE, CRLF normalised to LF; the dashboard default requires them",
+  "harness_sha256": {
+    "auv_inspection/robustness/evaluate_capture.py": "8a2d9f33ae4e3d8ce87e1a8ec30ca91c447268470c72416d2f78fd6e77da5146",
+    "auv_inspection/robustness/benchmark.py": "05bc44c70d1eb9f65d3d36e41ee90313d827bca75c9d96f8c5d26ebdb14a0307",
+    "auv_inspection/robustness/acceptance.py": "311ad9e920dd654f2132c688ccb9344ef058dcee4f5efc6ce7baac416176b448",
+    "auv_inspection/robustness/score_cache.py": "4cf92651bf74f6f3718602d13c683584495fb70ccbe78c2684a31ed6ea619485",
+    "auv_inspection/robustness/defect_inventory.py": "e0b11d90833fa2e8a42c89f69ca248da18f2e07114b819dee8913d318f600bc8",
+    "auv_inspection/robustness/degradation.py": "e2f7bd1c705aa9a62c1e5e882c93013f250aa8a144ee9166ec81653d1ca39ec1",
+    "auv_inspection/robustness/metrics.py": "181aeb44dbabfc9f24c7298f4bcb2f13285669909a3f2d0261d16be991b8f818"
+  },
+  "shared_sha256": {
+    "geometry_v2.json": "97f8e6f6d3c017844c8da8eccb18f1bbad58d78383a55fc031d57eae5c965856",
+    "map_A.json": "a478738d1335512643b9f2b134aeac57ddba2ba89c3e39840e31b4fecd824690",
+    "map_B.json": "ecedd4f0371edbc03ce8f18f5f41c86f7d394b6e99857b9abbc2a81d0ce17464"
+  },
+  "development_set": {
+    "captures": "held-out seeds 1-6 (P4-P6) and 101-106 (P7), now development data",
+    "selection_rule": "highest recall with <= 1 false alert per 100 m pooled (fixed before the variants)",
+    "candidate_result": {
+      "recall": "159/175 (90.9%, bootstrap 87.8-93.8%)",
+      "false_alerts_per_100m": 0.74,
+      "cell_fpr_wilson95_upper": 0.000473
+    },
+    "baseline_result": {
+      "recall": "129/175 (73.7%)",
+      "false_alerts_per_100m": 0.29
+    }
+  },
+  "data": {
+    "profile": "heldout",
+    "map_A_seeds": [
+      201,
+      202
+    ],
+    "clean_map_seeds": [
+      203,
+      204
+    ],
+    "map_C_seeds": [
+      205,
+      206
+    ],
+    "maps": {
+      "A": "/Game/AUVInspection/Maps/AUVInspection",
+      "clean": "/Game/AUVInspection/Maps/AUVInspection_PatchCoreClean_20260926_v3",
+      "C": "/Game/AUVInspection/Maps/AUVInspection_PatchCoreC_20261016_v1"
+    },
+    "map_sha256": {
+      "A": "daba22ece60400aa19e5e2676a0005af51d19d105f5e03f6bce611948dc361d2",
+      "clean": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "C": "66be9e0399a16eb072a9d651c0fbde5d119b3ee98ee2c9a8e35f83c1efdcd4dd"
+    },
+    "map_C_decal_inventory_sha256": "9b104ef97a998b9a64a05cf02c65da6ab946d2a4ec49da20d1e348e12e670939",
+    "never_used_for": "training, calibration, development or label tuning"
+  },
+  "conditions": [
+    "none",
+    "turbidity:2",
+    "turbidity:4",
+    "marine_snow:3",
+    "marine_snow:5",
+    "illumination:4",
+    "motion_blur:3"
+  ],
+  "degradation_seed": 0,
+  "criteria": {
+    "recall_min": 0.9,
+    "false_alerts_per_100m_max": 1.0,
+    "cell_fpr_wilson95_upper_max": 0.05,
+    "definitions": "robustness/acceptance.py docstring; pooled over all conditions and all held-out captures; recall over observable physical defect occurrences (defect x capture x condition, >= 3 views); bootstrap over captures for uncertainty"
+  },
+  "map_C_labels": "defect positions traced only from the held-out map C capture images (no detector output viewed), checked on the second map C capture, reviewed by the user and locked (sha256 recorded) before any detector is scored on map C; the decal inventory only cross-checks",
+  "live": "dashboard runs on map A and map C after the offline report",
+  "no_changes": "no threshold, bank, geometry, margin, gate, evidence or rule change after this registration; any change starts a new registration and needs new held-out data",
+  "map_C_labels_locked": {
+    "locked": "2026-10-17",
+    "file": "auv_inspection/robustness/inventories/map_C.json",
+    "sha256": "2de6f4f446c387b0ffa4528360e05ce63046575ed35e07a8737ebdc91471ce13",
+    "defects": 6,
+    "note": "traced from seed 205 images only, checked on seed 206, approved by the user before any detector ran on map C"
+  }
+}

@@ -11,7 +11,7 @@ import numpy as np
 
 from auv_inspection.crack_detection import CrackTracker, analyze_frame
 
-from .approval_gate import file_sha256, model_fingerprint, reference_fingerprint
+from .approval_gate import code_hashes, file_sha256, model_fingerprint, reference_fingerprint
 from .alerts import Candidate
 from .calibrate import detected_defects, detect_events, load_labels, load_maps, load_scored, visible_ids
 from .model import CATEGORIES
@@ -124,6 +124,8 @@ def evaluate(clean_dataset: Path, clean_scores: Path, mixed_dataset: Path,
         "thresholds": str(thresholds_file.resolve()), "model_dir": model_dir,
         "thresholds_sha256": file_sha256(thresholds_file),
         "model_sha256": model_fingerprint(Path(model_dir)),
+        # D11: the dashboard gate also requires the scoring code evaluated here.
+        "code_sha256": code_hashes(Path(__file__).resolve().parents[2]),
         "reference_dataset": str(reference_dataset),
         "reference_sha256": reference_fingerprint(reference_dataset),
         "clean_dataset": str(clean_dataset.resolve()),

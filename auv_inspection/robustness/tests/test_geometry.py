@@ -1,6 +1,7 @@
 """Pinhole camera and structure intersections used to localize alerts."""
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 import sys
 import unittest
@@ -52,6 +53,23 @@ class GeometryTests(unittest.TestCase):
         height, angle = surface_coordinates(hit.world, "pier_0")
         self.assertAlmostEqual(height, -6.8)
         self.assertAlmostEqual(angle, 90.0)
+
+    def test_pier_floor_cuts_the_pier_below_the_seabed(self) -> None:
+        camera = np.array([-10.0, -6.5 + 2.8, -9.6])
+        low_pixel = (320, 470)                  # bottom of the image: the pier below z -10.35
+        below = pixel_to_surface(*low_pixel, camera, -90.0, "pier_0")
+        self.assertLess(below.world[2], -10.35)
+        floored = replace(DEFAULT_PARAMS, pier_floor_z=-10.35)
+        self.assertIsNone(pixel_to_surface(*low_pixel, camera, -90.0, "pier_0", floored))
+        above = pixel_to_surface(320, 240, camera, -90.0, "pier_0", floored)
+        np.testing.assert_allclose(above.world, [-10.0, -6.5 + 0.95, -9.6], atol=1e-6)
+
+    def test_geometry_v3_only_adds_the_pier_floor(self) -> None:
+        calibration = Path(__file__).resolve().parents[1] / "calibration"
+        v2, v3 = load_params(calibration / "geometry_v2.json"), load_params(calibration / "geometry_v3.json")
+        self.assertEqual(v2.pier_floor_z, DEFAULT_PARAMS.pier_floor_z)
+        self.assertEqual(replace(v3, pier_floor_z=v2.pier_floor_z), v2)
+        self.assertAlmostEqual(v3.pier_floor_z, -10.35)
 
     def test_rays_missing_the_structure_return_none(self) -> None:
         self.assertIsNone(pixel_to_surface(320, 5, FRONT_CAMERA, FRONT_YAW, "pipe_front"))

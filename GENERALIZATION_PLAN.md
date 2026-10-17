@@ -19,7 +19,9 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P5 | Ngưỡng conformal + tích lũy bằng chứng trên bề mặt | **Xong** (live `session_20261012_164927_783087`: **3/3 vết, 0 báo nhầm, 0 báo trùng**) | Quy tắc k = 3 lượt nhìn trên ô 10 cm, hit = ngưỡng pixel AND ngưỡng tương đối theo tầng (thân ống / mối nối / mặt trụ), calibrate conformal trên 3 capture sạch train mới. Tập phát triển: 0 báo nhầm ở 12/14 lượt (v1.3: 30), marine snow 3 vẫn 19-21/100 m; xem mục Kết quả P5 |
 | P4 | Detector v2: DINOv2, bank nhiều điều kiện, Mahalanobis, loại nhiễu (có ablation) | **Xong offline** (ứng viên: v2 + lề mép ảnh; P4.3 kết hợp NFAD + Mahalanobis 42/63, 17 không hơn; trước đó P4.3: NFAD 55/63 vết, 30 báo nhầm; Mahalanobis 40/63, 5 báo nhầm, xem Kết quả P4.3; phần 4: tập phát triển 6 capture, v2 + lề mép ảnh 48/63 vết, 20 báo nhầm trên 42 lượt, ngoài marine snow 93%; live `session_20261013_091452_126695`: 3/3 vết, 1 báo nhầm; Mahalanobis/NFAD/SPARC chưa làm) | `detector_v2/` (DINOv2 ViT-S/14, kNN cosine, bank coreset, calibration ngưỡng pixel v2), tích hợp vào service; DINOv2 21,5 ms (scale 1) / 114 ms (scale 2) trên RTX 3050, peak 73-120 MiB |
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
-| P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt). Live: map A 3/3, 0 báo nhầm; map B 4/5, 2 báo nhầm theo quy tắc (1 trong 2 nằm trên vết khi xem ảnh). Còn cổng hash code | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
+| P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt). Live: map A 3/3, 0 báo nhầm; map B 4/5, 2 báo nhầm theo quy tắc (1 trong 2 nằm trên vết khi xem ảnh). Cổng hash code xong (D11) | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
+| P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Offline: đạt** (`dino_floor_bgsr`: recall 92,9%, 0,92 báo nhầm/100 m, FPR ô 0,071% trên heldout seed 201-206 gồm map C); live: map A 3/3, 0 báo nhầm; map C 6/6, 0 báo nhầm (chấm lại bằng geometry v2) | Xem Kết quả P8 | Xem Kết quả P8.1 |
+| P9 | Mờ chuyển động 3 và marine snow 5 (vòng mới, đăng ký và heldout mới) | **Dừng** (không biến thể nào thắng ứng viên P8 trên tập phát triển: ngưỡng chặt 69,7% / 5,25; bằng chứng theo nhiễu 77,7-78,9% / 0,09) | Xem Kết quả P9.1 |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
 
@@ -255,6 +257,141 @@ Theo quy tắc đã đăng ký, không đổi ngưỡng, bank, cổng hay nhãn 
 - Thời gian xử lý median 296 ms (map A) / 275 ms (map B), p90 ≈ 316 ms; 79 / 94 frame `diffuse_anomaly`.
 - Tiêu chí live của P7 (ít nhất 1 cảnh báo đi trọn vòng) đạt trên cả hai map; không thay đổi kết luận offline (không đạt recall).
 
+## Kết quả P8.1: chẩn đoán lỗi của ứng viên P7 (2026-10-15, offline, không sửa gì)
+
+Tập phát triển P8 = seed 1-6 cũ + seed 101-106 của P7 (đã xem nên không còn là heldout). Kết quả và script: `auv_inspection/output/p8_diagnosis/` (`defect_views.jsonl`, `p8_diag_views.py`, bảng ảnh báo nhầm `*_false_alerts_*.jpg`, `p8_fa_sheet.py`).
+
+**Marine snow: vết vẫn có bằng chứng, cổng lan tỏa bỏ cả frame.** Mỗi lượt nhìn vào vết (7 capture có vết, 909 lượt nhìn × điều kiện) được chấm bằng `dino_surface_b` và ghi quyết định của cổng, ô vết tốt nhất (điểm, điểm chuẩn hóa, hai ngưỡng), median frame và tỷ lệ khối của vết bị hạt che (ảnh suy giảm trừ ảnh gốc).
+
+| Điều kiện | Hit | Bị cổng chặn | Hit nếu bỏ cổng | Tiêu chí cổng kích hoạt | Hạt che ô vết (median) |
+|---|---|---|---|---|---|
+| Gốc | 240 | 25 | 265/274 | > 25% một vùng: 14, > 6 vùng: 10 | 0 |
+| Marine snow 3 | 85 | 185 | 265/274 | > 6 vùng: 175 (median 14 vùng/frame) | 3% |
+| Marine snow 5 | 78 | 188 | 259/274 | > 6 vùng: 183 (median 25,5) | 21% |
+
+- Điểm của ô vết gần như không đổi dưới marine snow (tỷ lệ tuyệt đối 1,03); median frame tăng 1,15-1,77 lần nên điểm chuẩn hóa giảm, nhưng chỉ 1-5 lượt rớt vì ngưỡng tầng. **154/155 (mức 3) và 160/165 (mức 5) lượt mất hit là do cổng lan tỏa**, gần như toàn bộ qua tiêu chí > 6 vùng: hạt tạo nhiều vùng nhỏ vượt ngưỡng (frame gốc median 2 vùng).
+- Ở điều kiện gốc, tiêu chí "một vùng > 25%" chặn chính vết lớn: 15/25 lượt bị chặn là `B_pipe_front_hole_large` (giải thích lỗ lớn bị sót ở seed 106 khi route đi gần).
+
+**Báo nhầm: ba nhóm.**
+- **Mặt đáy trong ROI trụ (17/30 báo nhầm P7):** `geometry.PIER_Z_RANGE` = (-12,0; 1,6) nhưng chân trụ gặp đáy ở z ≈ -10,4 (đo trên ảnh seed 101 tick 8329: -10,36 đến -10,45; hộp vật cản trong `inspection_route.py` cũng dừng ở -10,4). Mọi báo nhầm chân trụ nằm ở z -10,41 đến -10,55, ở mép dưới ảnh, tức mặt đáy và đường tiếp giáp bị coi là mặt trụ. Chỉ thấy ở khoảng cách lớn (2,7-3,0 m, seed 101 bán kính 3,59 m) vì gần hơn thì phần này ít lọt vào ảnh. Là lỗi hình học, không phải lỗi detector.
+- **Rìa tối của quầng đèn trên ống:** phần lớn báo nhầm của tập phát triển cũ (12/20 ở độ đục 4, thêm đèn yếu 4), box nằm ở vùng tối hai bên hoặc mép dưới ống, nơi tín hiệu thấp.
+- **Mép vòng bích mặt sau ống:** một báo nhầm live trên map B.
+
+**Hướng P8.2 rút ra:** (1) cổng lan tỏa không đếm vùng cỡ hạt (hoặc che hạt trước khi đếm) và không chặn một vùng lớn đặc; quy tắc bề mặt k = 3 lượt nhìn đã loại nhiễu ngẫu nhiên giữa các frame, cần đo báo nhầm trên tập phát triển; (2) sửa giới hạn dưới của trụ về mặt đáy rồi calibrate lại ngưỡng; (3) sau đó mới xét mặt nạ tín hiệu thấp cho rìa quầng đèn.
+
+## Kết quả P8.2 phần 1: cổng P8 và giới hạn dưới của trụ (2026-10-15, tập phát triển 12 capture)
+
+12 capture (seed 1-6, 101-106) × 7 điều kiện = 84 lượt mỗi detector; `auv_inspection/output/benchmark_p8_dev/` (`dino_surface_b` chép từ P6/P7 vì code chấm điểm của nó không đổi, `dino_surface_bg`), `benchmark_p8_dev_floor/` (`dino_floor_bg`); so sánh bằng `output/p8_diagnosis/p8_compare.py`.
+
+| Detector | Recall | Báo nhầm | /100 m | FPR ô | Frame bị cổng |
+|---|---|---|---|---|---|
+| `dino_surface_b` (ứng viên P7) | 129/175 (73,7%) | 50 | 0,29 | 0,026% | 14,7% |
+| `dino_surface_bg` (cổng P8) | 167/175 (95,4%) | 967 | 5,63 | 0,68% | 2,4% |
+| `dino_floor_bg` (cổng P8 + giới hạn trụ) | 166/175 (94,9%) | 950 | 5,54 | 0,67% | 2,4% |
+
+| Điều kiện | b: recall / báo nhầm | bg: recall / báo nhầm |
+|---|---|---|
+| Gốc | 24/25 / 11 | 25/25 / 20 |
+| Độ đục 2 / 4 | 24/25 / 7; 23/25 / 17 | 25/25 / 32; 24/25 / 57 |
+| Marine snow 3 / 5 | 7/25 / 6; 7/25 / 4 | 25/25 / 472; 24/25 / 333 |
+| Đèn yếu 4 | 25/25 / 5 | 25/25 / 32 |
+| Mờ chuyển động 3 | 19/25 / 0 | 19/25 / 21 |
+
+- **Cổng P8 không dùng được như vậy.** Nó lấy lại gần hết vết dưới marine snow (14 → 49/50) và lỗ lớn, nhưng báo nhầm tăng 19 lần (nhiều nhất ở marine snow, 805 trên thân ống, và cả ở mọi điều kiện khác). Cổng cũ hóa ra đang làm phần lớn việc chặn báo nhầm: các frame bị nó bỏ là các frame mà quy tắc bề mặt gom được hit giả qua nhiều lượt nhìn. Box báo nhầm dưới marine snow không chứa nhiều hạt hơn mức trung bình của frame (1,5% so với 1,6% pixel), nên báo nhầm không nằm trên hạt mà là do điểm của cả frame bị đẩy lên.
+- **Giới hạn dưới của trụ làm đúng việc của nó:** báo nhầm "trụ dưới -10 m" 17 → 0, recall không đổi (166 so với 167, chênh 1 lượt mờ chuyển động). Có thể áp dụng độc lập với cổng.
+- Vết sót ngoài marine snow gần như chỉ còn mờ chuyển động 3 (6-7 lượt).
+
+## Kết quả P8.2 phần 2: biến thể từ cache lưới token (2026-10-16, tập phát triển 12 capture)
+
+`dino_floor_b` chạy trực tiếp và nạp cache (`output/p8_score_cache/`, 84 file); `dino_floor_br`, `dino_floor_bgr` phát lại từ cache (`output/benchmark_p8_dev_variants/`). Quy tắc chọn chốt trước: recall cao nhất với báo nhầm ≤ 1/100 m gộp trên tập phát triển.
+
+| Detector | Recall | Báo nhầm | /100 m | FPR ô |
+|---|---|---|---|---|
+| `dino_surface_b` (ứng viên P7) | 129/175 (73,7%) | 50 | 0,29 | 0,026% |
+| `dino_floor_b` (giới hạn trụ) | 128/175 (73,1%) | 33 | 0,19 | 0,005% |
+| `dino_floor_br` (+ bằng chứng chỉ từ vùng ≥ 196 px) | 123/175 (70,3%) | 4 | 0,02 | 0,0004% |
+| `dino_floor_bgr` (+ cổng P8 + bằng chứng ≥ 196 px) | 163/175 (93,1%) | 306 | 1,78 | 0,20% |
+| `dino_floor_bg` (cổng P8, phần 1) | 166/175 (94,9%) | 950 | 5,54 | 0,67% |
+
+`dino_floor_bgr` theo điều kiện: gốc 25/25, 1 báo nhầm; độ đục 2 25/25, 3; độ đục 4 22/25, 14; marine snow 3 **25/25, 20**; marine snow 5 24/25, **253**; đèn yếu 4 25/25, 4; mờ chuyển động 3 17/25, 11.
+
+- Lọc bằng chứng theo vùng ≥ 196 px chặn gần hết báo nhầm còn lại khi giữ cổng cũ (33 → 4) nhưng mất 5 lượt vết (độ đục 4, độ đục 2, đèn yếu): vết xa, mảnh tạo vùng nhỏ.
+- Kết hợp với cổng P8 thì giữ được phần lớn lợi ích recall (93,1%) và giảm báo nhầm 3 lần so với cổng P8 đơn (950 → 306). Ngoài marine snow 5 còn 53 báo nhầm (≈ 0,36/100 m); marine snow 5 một mình 253 (10,3/100 m): hạt dày đặc chồng lên nhau thành vùng ≥ 196 px.
+- Theo quy tắc chọn, `dino_floor_bgr` chưa đạt (1,78 > 1/100 m); trong các biến thể đạt, `dino_floor_b` có recall cao nhất (73,1%).
+
+**`dino_floor_bgsr`** (cổng P8 nhưng độ phân tán tính trên mọi vùng như cổng cũ, số vùng chỉ đếm vùng ≥ 196 px, bằng chứng chỉ từ vùng ≥ 196 px, giới hạn trụ): **159/175 (90,9%, bootstrap 87,8-93,8%), 127 báo nhầm, 0,74/100 m (0,39-1,15), FPR ô 0,043% (Wilson trên 0,047%)**; seed 101-106: 90,2%, 0,82/100 m; map B 90,0%, 0,76/100 m. Theo điều kiện: gốc 25/25, 1; độ đục 2 25/25, 3; độ đục 4 22/25, 14; marine snow 3 25/25, 19; marine snow 5 20/25, 75 (cổng bỏ 25% frame); đèn yếu 4 25/25, 4; mờ chuyển động 3 17/25, 11. Đây là biến thể duy nhất đạt quy tắc chọn với recall ≥ 90% **trên tập phát triển**; tham số không dò theo kết quả (196 px từ độ phân giải token, độ phân tán 5% của cổng cũ) nhưng biến thể được chọn sau khi xem kết quả tập phát triển nên cần heldout mới. Điểm yếu còn lại: mờ chuyển động 3 (8 lượt sót) và marine snow 5 (75 báo nhầm, 5 lượt sót).
+
+## Kết quả P8: nghiệm thu offline trên dữ liệu heldout mới (2026-10-17)
+
+Theo đúng đăng ký trước (`robustness/acceptance_preregistration_p8.json`, code `64e21e9`; SHA256 artifact, hash code chấm điểm và harness khớp trước khi chấm; nhãn map C khóa `2de6f4f4...` trước khi detector nào chạy trên map C). 6 capture seed 201-206 (map A 201/202, map sạch 203/204, map C 205/206), 7 điều kiện, 42 lượt mỗi detector, `auv_inspection/output/benchmark_p8_acceptance/`, báo cáo `acceptance_report.json`.
+
+| Tiêu chí (gộp mọi điều kiện) | Ngưỡng | Ứng viên `dino_floor_bgsr` | Đối chứng `dino_surface_b` |
+|---|---|---|---|
+| Recall theo vết vật lý | ≥ 90% | **92,9%** (117/126; bootstrap 95%: 91,4-94,3%) **đạt** | 71,4% (90/126; 64,0-79,4%) không đạt |
+| Báo nhầm /100 m | ≤ 1 | **0,92** (80 trên 8,69 km; 0,50-1,33) **đạt** | 0,25 đạt |
+| FPR mức ô (cận trên Wilson 95%) | ≤ 5% | **0,071%** (353/555.483 ô) **đạt** | 0,015% đạt |
+| **Kết luận** | | **Đạt nghiệm thu offline** | Không đạt |
+
+Ứng viên theo điều kiện (recall, báo nhầm): gốc 18/18, 2; độ đục 2 18/18, 4; độ đục 4 18/18, 5; marine snow 3 18/18, 12; **marine snow 5 13/18, 52**; đèn yếu 4 18/18, 5; **mờ chuyển động 3 14/18, 0**. Theo map: A 39/42, C 78/84 (6 vết, gồm 3 vết đầu tiên ở mặt sau ống/trụ: 12-14/14 mỗi vết).
+
+Lưu ý (không đổi kết luận):
+- Đạt sát nút về báo nhầm: cận trên bootstrap 1,33/100 m vượt 1. Marine snow 5 chiếm 52/80 báo nhầm (4,2/100 m; riêng map sạch seed 203 có 23); bỏ điều kiện này thì 0,38/100 m. Mọi báo nhầm của ứng viên nằm trên ống (41 mặt trước, 39 mặt sau), không còn ở chân trụ.
+- Recall thấp nhất ở mờ chuyển động 3 (14/18) và marine snow 5 (13/18), như trên tập phát triển.
+- Map C mới (khác vị trí vết, có vết mặt sau) không làm giảm recall so với tập phát triển (92,9% so với 90,9%).
+- Đây là kết quả offline; live trên map A và map C theo đăng ký là bước tiếp theo.
+
+**Live P8 (2026-10-17, dashboard mặc định = ứng viên P8 vì file và code khớp đăng ký: model `_floor`, quy tắc P8; điều kiện gốc; route 359/359):**
+- Map A (`auv_dashboard/output/session_20261017_132937_134819/`): **3/3 vết, 0 báo nhầm** (tick 399 `A_pipe_front_1` 0,33 m; 651 `A_pipe_front_2` 0,17 m; 3282 `A_pier_0_1` 0,07 m).
+- Map C (`session_20261017_134438_158445/`, unreal.log xác nhận `AUVInspection_PatchCoreC_20261016_v1`): 6 cảnh báo; theo quy tắc chấm (tâm box qua `locate_box`, nhãn đã khóa): **5/6 vết, 1 báo nhầm**. Khớp: tick 57 `C_pipe_front_crack_1` 0,14 m; 1044 `C_pipe_front_crack_2` 0,08 m; 2019 `C_pipe_back_crack` 0,12 m; 2781 `C_pipe_back_hole` 0,17 m; 4269 `C_pier_0_crack` 0,08 m. Tick 7221 `pier_1`: tâm box cách `C_pier_1_crack` 0,38 m > 0,35 m, nhưng ảnh annotated cho thấy box nằm trên chính vết nứt và ô bề mặt của cảnh báo (u, v) = (-6,15; 0,65) cách đoạn nhãn 0,13 m (cùng hiện tượng ở map B P7: định vị tâm box trên mặt trụ nhìn xiên). Theo quy tắc: 5/6, 1 báo nhầm; theo xem ảnh: 6/6, 0 báo nhầm. Nhãn không sửa.
+- 0 frame `diffuse_anomaly` ở cả hai lượt (cổng cũ: 79-94 mỗi lượt), phù hợp với cổng P8. Median 229 ms (A) / 237 ms (C) mỗi frame, p90 242/256 ms.
+- Tiêu chí live (ít nhất 1 cảnh báo đi trọn vòng) đạt trên cả hai map.
+
+**Sửa 2026-10-17 (chấm lại live):** các số live P7/P8 ở trên được chấm bằng `defect_inventory.locate_event()`, hàm này khi đó dùng geometry mặc định chưa hiệu chỉnh (ống bán kính 0,5 m, trụ nửa cạnh 0,95 m, không offset camera) thay vì geometry v2 của harness và của nhãn. Chấm lại bằng `robustness/score_live_session.py` (geometry v2): live P7 map A 3/3, 0 báo nhầm (0,20/0,04/0,12 m); **live P7 map B 5/5 vết, 1 báo nhầm** (tick 7596 khớp `B_pier_1_crack` 0,05 m; còn tick 2352 mép vòng bích mặt sau ống là báo nhầm thật); live P8 map A 3/3, 0 báo nhầm (0,20/0,04/0,11 m); **live P8 map C 6/6 vết, 0 báo nhầm** (tick 7221 khớp `C_pier_1_crack` 0,08 m; các cảnh báo khác 0,03-0,13 m). Kết quả nghiệm thu offline P7/P8 không bị ảnh hưởng: harness luôn dùng geometry v2. Nhãn không sửa.
+
+## Kết quả P9.1: chẩn đoán ứng viên P8 ở mờ chuyển động 3 và marine snow 5 (2026-10-17, offline, không sửa gì)
+
+4 capture có vết (seed 3, 4, 101, 106) và 2 capture sạch (seed 2, 5) của tập phát triển, 4 điều kiện, đúng quy tắc ứng viên P8, đọc lưới token từ cache. Kết quả và script: `auv_inspection/output/p9_diagnosis/` (`p9_diag.py`, `defect_views.jsonl`, `frames.jsonl`).
+
+| Điều kiện | Lượt nhìn vết hit | Mất vì cổng | Mất vì ngưỡng tầng (điểm tuyệt đối vẫn vượt ngưỡng pixel) | Tỷ lệ hit giả mỗi ô sạch mỗi lượt nhìn | Median điểm frame |
+|---|---|---|---|---|---|
+| Gốc | 135/166 | 1 | 2 | 0,26% | 0,076 |
+| Mờ chuyển động 3 | **58/166** | 2 | **80** | 0,21% | 0,164 |
+| Marine snow 3 | 126/166 | 8 | 4 | 0,63% | 0,089 |
+| Marine snow 5 | 90/166 | **46** | 9 | **1,67%** | 0,139 |
+
+- **Mờ chuyển động:** điểm tuyệt đối của vết vẫn cao (median 2,6 lần ngưỡng pixel) nhưng median của cả frame tăng gấp đôi (0,076 → 0,164), nên điểm chuẩn hóa của vết rơi xuống đúng ngưỡng tầng (tỷ lệ median 0,99). 80/84 lượt nhìn mất hit chỉ vì tiêu chí tương đối. Hit giả trên ô sạch không tăng (0,21%). Nguyên nhân là phép chuẩn hóa theo median frame, không phải detector.
+- **Marine snow 5:** tỷ lệ hit giả mỗi ô sạch tăng 6,4 lần (0,26% → 1,67%); bộ lọc vùng ≥ 196 px chỉ bớt một phần (2,2% → 1,7%) vì hạt dày chồng thành vùng lớn. Quy tắc bề mặt k = 3 lượt nhìn không đủ ở mức nhiễu này. Cổng còn bỏ 22% frame (46 lượt nhìn vết).
+- **Hướng P9.2 (chưa làm, cần duyệt):** (1) mờ chuyển động: điều chỉnh phép chuẩn hóa hoặc nới tiêu chí tương đối khi điểm tuyệt đối rất cao, đo hit giả trước; (2) marine snow 5: bằng chứng phụ thuộc mức nhiễu của frame (frame có tỷ lệ hit cao đóng góp ít hơn, hoặc cần nhiều lượt nhìn hơn). Seed 201-206 và map C đã xem nên thành dữ liệu phát triển; heldout P9 cần seed mới.
+
+## Kết quả P9.2 mục 1: ngưỡng chặt chỉ theo điểm tuyệt đối (2026-10-17, tập phát triển 12 capture) - bác bỏ
+
+Ngưỡng chặt (`calibrate_pixel --strict`, model `_floor`): mỗi ô sạch của 3 capture calibration lấy giá trị lớn nhất qua 7 yếu tố suy giảm mức 1, phân vị conformal như ngưỡng pixel; kết quả 1,10-1,21 lần ngưỡng pixel (mọi nhóm `data_limited`). Biến thể `dino_floor_bgsrh` = ứng viên P8 + hit khi điểm tuyệt đối ≥ ngưỡng chặt, phát lại từ cache (`output/benchmark_p9_dev/`).
+
+| Detector | Recall | Báo nhầm | /100 m | FPR ô | Frame bị cổng |
+|---|---|---|---|---|---|
+| `dino_floor_bgsr` (ứng viên P8) | 159/175 (90,9%) | 127 | 0,74 | 0,043% | 3,8% |
+| `dino_floor_bgsrh` | 122/175 (69,7%) | 901 | 5,25 | 5,9% | 33,0% |
+
+Mờ chuyển động 3: 11/25 (trước 17/25), 311 báo nhầm, cổng bỏ 63% frame; độ đục 4: 13/25, 315 báo nhầm, cổng 50%; marine snow 5: 0/25, cổng 96%. Nguyên nhân: dưới suy giảm mức 3-5 điểm tuyệt đối của **cả bề mặt sạch** vượt 1,2 lần ngưỡng pixel, nên mọi ô thành hit, cổng bỏ phần lớn frame và phần còn lại sinh báo nhầm (đúng điều P5 đã thấy khi dùng riêng ngưỡng tuyệt đối). Ngưỡng calibrate ở mức suy giảm 1 không đại diện cho mức 3. **Quyết định: không dùng hướng này.** Mờ chuyển động cần một phép chuẩn hóa khác (ví dụ theo nền cục bộ) chứ không nới tiêu chí tương đối.
+
+## Kết quả P9.2 mục 2: bằng chứng theo mức nhiễu của frame (2026-10-17, tập phát triển 12 capture)
+
+`dino_floor_bgsrn` = ứng viên P8 + `NoiseModel` (trọng số hit min(1, log q / log base), q = tỷ lệ ô hit của frame ở xa ô hơn 0,6 m; base = 1,04×10⁻⁴ từ 3 capture calibration sạch), phát lại từ cache (`output/benchmark_p9_dev/`).
+
+| Detector | Recall | Báo nhầm | /100 m | FPR ô |
+|---|---|---|---|---|
+| `dino_floor_bgsr` (ứng viên P8) | 159/175 (90,9%) | 127 | 0,74 | 0,043% |
+| `dino_floor_bgsrn` | 136/175 (77,7%) | **15** | **0,09** | 0,002% |
+
+Theo điều kiện (recall, báo nhầm): gốc 24/25, 1; độ đục 2 21/25, 3; độ đục 4 22/25, 2; marine snow 3 23/25, 6; **marine snow 5 7/25, 0** (trước 20/25, 75); đèn yếu 4 24/25, 3; mờ chuyển động 3 15/25, 0.
+
+- Báo nhầm giảm 8 lần (marine snow 5: 75 → 0) nhưng recall giảm 13 điểm, mạnh nhất ở marine snow 5 (20 → 7) và độ đục 2 (25 → 21): hit của vết trong frame nhiễu bị giảm trọng số như hit giả, mà vết trên ống chỉ có 4-6 lượt nhìn.
+- Tỷ lệ cơ sở lấy trên capture calibration (profile train, sạch, 1,04×10⁻⁴) thấp hơn nhiều so với frame heldout bình thường (0,26% ở điều kiện gốc, P9.1), nên cả frame bình thường cũng bị giảm trọng số.
+- Theo quy tắc chọn (recall cao nhất với ≤ 1 báo nhầm/100 m) `dino_floor_bgsr` vẫn thắng. Biến thể này không thay ứng viên P8.
+- **Biến thể tỷ lệ cơ sở mức 1** (`dino_floor_bgsrq`, `calibrate_noise --severity1`: tỷ lệ gộp qua 7 yếu tố suy giảm mức 1 trên 3 capture calibration, 438 hit / 1.610.049 lượt nhìn ô = 2,72×10⁻⁴): 138/175 (78,9%), 15 báo nhầm (0,09/100 m); marine snow 5 vẫn 7/25. Gần như không đổi so với `bgsrn`: tỷ lệ hit giả của frame nhiễu (1,7% ở marine snow 5) lớn hơn tỷ lệ cơ sở hàng trăm lần, nên trọng số của vết trong frame nhiễu vẫn thấp dù cơ sở tăng 2,6 lần.
+
+**Quyết định P9 (2026-10-17): dừng.** Ba hướng sửa (ngưỡng chặt, bằng chứng theo nhiễu với hai tỷ lệ cơ sở) đều không thắng ứng viên P8 theo quy tắc chọn. Ứng viên P8 `dino_floor_bgsr` giữ nguyên (đã đạt nghiệm thu P8). Marine snow 5 (recall 13/18 và 52/80 báo nhầm trên heldout P8) và mờ chuyển động 3 (14/18) ghi nhận là giới hạn đã biết. Bằng chứng theo nhiễu đổi recall lấy báo nhầm (0,09/100 m với 78% recall), có thể dùng khi ưu tiên ít báo nhầm. Code của P9 giữ dạng tùy chọn, mặc định tắt; không đăng ký, không cần heldout mới.
+
 ## Tiêu chí nghiệm thu (bản đầu)
 
 Đo trên **điều kiện môi trường chưa từng dùng** để train hay chọn ngưỡng:
@@ -274,6 +411,15 @@ Theo quy tắc đã đăng ký, không đổi ngưỡng, bank, cổng hay nhãn 
 | 2026-10-08 | Chấp nhận kế hoạch, thứ tự phase và tiêu chí nghiệm thu bản đầu ở trên |
 | 2026-10-08 | Đồng ý thêm dependency DINOv2 (qua `torch.hub` hoặc `timm`) vào `.venv-patchcore` cho P4 |
 | 2026-10-09 | Live P2 xác nhận nguồn báo nhầm chính là **biên ROI** (đầu ống, mép ống khi nhìn xiên): ROI giới hạn tâm đặc trưng nhưng trường nhìn của đặc trưng rộng hơn. Thêm vào **P3** một lề chấm điểm bên trong ROI theo trường nhìn của đặc trưng, đánh giá trên tập phát triển trước. Báo trùng cùng một vết (hai vị trí cách 2,08 m) để **P5** gộp theo tọa độ bề mặt |
+| 2026-10-17 | **Sửa cách chấm live**: `locate_event()` dùng geometry đã hiệu chỉnh (trước đó dùng mặc định chưa hiệu chỉnh, khác harness); chấm lại live P7/P8 bằng `score_live_session.py`: P7 map B 5/5, 1 báo nhầm; P8 map C 6/6, 0 báo nhầm. Lỗi nằm ở công cụ chấm live, không ở detector hay nhãn; nghiệm thu offline không đổi |
+| 2026-10-17 | **Dừng P9**: ngưỡng chặt (69,7% / 5,25 báo nhầm/100 m) và bằng chứng theo mức nhiễu của frame (77,7% và 78,9% / 0,09) đều thua ứng viên P8 (90,9% / 0,74) theo quy tắc chọn trên tập phát triển. Marine snow 5 và mờ chuyển động 3 là giới hạn đã biết; code P9 giữ tùy chọn, mặc định tắt |
+| 2026-10-17 | **Kết quả nghiệm thu P8 offline: ứng viên `dino_floor_bgsr` đạt** cả ba tiêu chí đã đăng ký (recall 92,9%, bootstrap 91,4-94,3%; 0,92 báo nhầm/100 m, bootstrap 0,50-1,33; FPR mức ô 0,071%). Đối chứng P7: 71,4%, 0,25. Biên báo nhầm sát (marine snow 5: 52/80). Không đổi gì sau khi xem kết quả |
+| 2026-10-17 | **Khóa nhãn map C** (`robustness/inventories/map_C.json`, SHA256 `2de6f4f4...`, mục `map_C_labels_locked` trong đăng ký P8): 6 vết vẽ chỉ từ ảnh seed 205, kiểm trên seed 206, người dùng duyệt trước khi detector nào chạy trên map C |
+| 2026-10-16 | **Đăng ký trước P8** (`auv_inspection/robustness/acceptance_preregistration_p8.json`, code `64e21e9`, người dùng duyệt): ứng viên `dino_floor_bgsr`, đối chứng `dino_surface_b`, SHA256 artifact và code chấm điểm/harness, heldout mới seed 201-202 (map A), 203-204 (map sạch), 205-206 (map C); 7 điều kiện; tiêu chí như P7; không đổi gì sau đăng ký. Dashboard mặc định ứng viên P8 khi khớp hồ sơ |
+| 2026-10-16 | **Map C cho heldout P8** (người dùng duyệt): `create_validation_map_c.py` tạo `AUVInspection_PatchCoreC_20261016_v1` từ map A, 6 vết ở vị trí chưa dùng (2 mặt trước ống, 2 mặt sau ống, mặt sau trụ 0, mặt trước trụ 1 ở độ cao mới). Thứ tự: tạo map C → đăng ký trước P8 (artifact, hash code, seed, map) → capture heldout → vẽ nhãn C từ ảnh và khóa → chấm |
+| 2026-10-16 | **Ứng viên P8 trên tập phát triển: `dino_floor_bgsr`** (90,9% recall, 0,74 báo nhầm/100 m). Chọn theo quy tắc đã chốt trước (recall cao nhất với ≤ 1/100 m); cần đăng ký trước P8 và heldout mới trước khi nói về khái quát hóa |
+| 2026-10-15 | **Mở P8** (người dùng duyệt kế hoạch): seed 101-106 chuyển vào tập phát triển; P8.1 chẩn đoán trước khi chọn phương án. Kết quả: mất recall dưới marine snow là do cổng lan tỏa (tiêu chí > 6 vùng), không phải điểm của vết; 17/30 báo nhầm P7 là mặt đáy lọt vào ROI trụ vì `PIER_Z_RANGE` dưới mặt đáy. Heldout P8 cần seed mới; map C đề xuất, chờ người dùng quyết |
+| 2026-10-15 | **Cổng phê duyệt kiểm hash code (D11)**: `approval_gate.SCORING_CODE` (live_service và 16 module project nó nạp), hash sau khi đổi CRLF thành LF. Mặc định v2 cần `code_sha256` trong `acceptance_preregistration.json` (lấy từ chính commit đăng ký `2114d6a`, trùng working tree); cổng v1 cần `code_sha256` trong báo cáo đánh giá B. Báo cáo `patchcore_evaluation_B_v1.json` (2026-09-26) không có hash code, và code chấm điểm đã đổi nhiều từ đó (quy tắc bề mặt, hình học v2), nên cổng v1 không còn tự chọn PatchCore v1 (giao diện mặc định Classical khi tắt v2; vẫn chọn PatchCore bằng tay được). Không sửa file đánh giá hay `patchcore_artifacts/` |
 | 2026-10-15 | **Dashboard mặc định dùng v2 + lề mép ảnh** (người dùng duyệt): dù không đạt nghiệm thu, ứng viên tốt hơn v1.4 ở cả ba chỉ số trên dữ liệu heldout (recall 72,3% so với 58,9%, 0,345 so với 2,89 báo nhầm/100 m). Chỉ bật khi mọi file của ứng viên còn khớp SHA256 trong `acceptance_preregistration.json`; nếu không, quay về PatchCore v1 sau cổng phê duyệt cũ; `--v1` chọn v1. Thêm `--world` để chạy live trên map B |
 | 2026-10-15 | **Kết quả nghiệm thu P7 offline: ứng viên v2 + lề mép ảnh không đạt** vì recall 72,3% (bootstrap 63,5-79,4%) < 90%; báo nhầm 0,345/100 m và FPR mức ô 0,031% đạt. Đối chứng v1.4: 58,9%, 2,89/100 m. Thiếu hụt chủ yếu ở marine snow (8/32). Giữ nguyên kết luận theo đăng ký; không chỉnh gì trên dữ liệu heldout này |
 | 2026-10-14 | **Khóa nhãn map B** (`robustness/inventories/map_B.json`, SHA256 `ecedd4f0...`, ghi vào `acceptance_preregistration.json` mục `map_B_labels_locked`): 5 vết (2 nứt và 2 lỗ trên mặt trước ống, 1 nứt mặt trước trụ 1), vẽ chỉ từ ảnh seed 105 (mỗi vết 2 frame, lệch ≤ 0,04 m), kiểm trên seed 106, người dùng duyệt bảng ảnh trước khi detector nào chạy trên map B. Vị trí đặt decal trong script tạo map chỉ dùng để đối chiếu |
@@ -322,7 +468,7 @@ Hệ thống hiện tại không hỏng ở model mà ở **cách đặt bài to
 | D8 | Không có khái niệm chất lượng ảnh | `live_service.py` | Frame mờ hay đục vẫn bị chấm điểm |
 | D9 | Pose lấy đúng tuyệt đối từ mô phỏng | `PoseSensor` | AUV thật có sai số DVL/INS và trôi theo thời gian |
 | D10 | Đánh giá 5 vết, 1 bố trí, 1 seed, không khoảng tin cậy | `patchcore_evaluation_B_v1.json` | Không biết độ bất định |
-| D11 | Cổng hash không hash code | `approval_gate.py` | Sửa logic xong vẫn hiện "đã nghiệm thu" |
+| D11 | Cổng hash không hash code | `approval_gate.py` | Sửa logic xong vẫn hiện "đã nghiệm thu". **Đã sửa 2026-10-15:** cổng kiểm thêm SHA256 của 17 file code chấm điểm (`SCORING_CODE`) |
 | D13 | Suy luận PatchCore chạy đồng bộ trong vòng mô phỏng | Live P0: 130-243 ms/frame trên RTX 3050 dùng chung với Unreal; mô phỏng còn 12,2 tick/s (Classical 23,5) | Trên AUV thật, suy luận chậm sẽ chặn vòng điều khiển; cần tách bất đồng bộ (bỏ frame cũ). Xử lý ở P4 |
 | D14 | Bộ điều khiển vị trí HoveringAUV quá cứng: `Kp = 100 s⁻²`, gia tốc tối đa 1 m/s² | Capture heldout với dòng chảy 0,35-0,45 m/s: sai lệch ngang giống hệt lượt không dòng chảy (khoảng 6 cm, là độ lệch socket PoseSensor); lực cản khoảng 24 N trên AUV 31 kg chỉ gây lệch khoảng 0,8 cm | AUV thật giữ vị trí kém hơn nhiều và còn sai số định vị (ước lượng pose khác pose thật). Dòng chảy trong mô phỏng không đại diện được điều này; sai số pose sẽ được mô phỏng bằng cách làm nhiễu **pose đưa cho khối nhận thức** ở P2 |
 | D12 | Độ phân giải chưa gắn với yêu cầu kiểm định | 640×480, FOV 80° nên f ≈ 381 px; ở 2 m mỗi pixel ≈ 5,2 mm | Vết mảnh hơn vài mm không thể thấy về mặt vật lý |

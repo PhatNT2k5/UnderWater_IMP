@@ -54,6 +54,10 @@ class DinoScorer:
     transforms: dict[str, FeatureTransform | ChainedTransform] | None = None
 
     def __call__(self, frame: np.ndarray, roi: np.ndarray, category: str) -> np.ndarray:
+        return expand(self.grid(frame, category), frame.shape[:2], roi)
+
+    def grid(self, frame: np.ndarray, category: str) -> np.ndarray:
+        """Token-level distances (h, w) float32; the expensive, ROI-independent part (P8 cache)."""
         if category not in self.banks:
             raise ValueError(f"No bank for structure group {category}")
         tokens = frame_tokens(self.extractor, frame)
@@ -64,10 +68,14 @@ class DinoScorer:
             flat = transform.apply(flat).to(self.banks[category].dtype)
         distance = nearest_distance(flat, self.banks[category],
                                     transform.metric if transform is not None else "cosine")
-        grid = distance.reshape(grid_h, grid_w).cpu().numpy().astype(np.float32)
-        scores = cv2.resize(grid, (frame.shape[1], frame.shape[0]), interpolation=cv2.INTER_LINEAR)
-        scores[roi == 0] = np.nan
-        return scores
+        return distance.reshape(grid_h, grid_w).cpu().numpy().astype(np.float32)
+
+
+def expand(grid: np.ndarray, shape: tuple[int, int], roi: np.ndarray) -> np.ndarray:
+    """Token grid to a camera-resolution score map, NaN outside the ROI."""
+    scores = cv2.resize(grid, (shape[1], shape[0]), interpolation=cv2.INTER_LINEAR)
+    scores[roi == 0] = np.nan
+    return scores
 
 
 def is_v2_model(model_dir: Path) -> bool:
@@ -94,3 +102,19 @@ def load_scorer(model_dir: Path, device: torch.device) -> DinoScorer:
     banks = {category: bank if transforms and transforms[category].metric == "euclidean"
              else bank.to(extractor.dtype) for category, bank in banks.items()}
     return DinoScorer(extractor, banks, transforms)
+
+
+def grid_cache_key(model_dir: Path) -> str:
+    """Identity of a model's token grids: backbone, scale, bank and transform contents (not geometry,
+    thresholds or rules, which act after the grid). Models sharing banks share cached grids."""
+    import hashlib
+    config = json.loads((model_dir / "config.json").read_text(encoding="utf-8"))
+    bank_dir = Path(config.get("bank_dir", model_dir))
+    digest = hashlib.sha256(f"{config['backbone']}|{config['scale']}".encode())
+    files = [bank_dir / f"{category}_bank.pt" for category in sorted(config["bank_sizes"])]
+    if config.get("transform_file"):
+        files.append(model_dir / config["transform_file"])
+    for path in files:
+        digest.update(path.name.encode())
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    return digest.hexdigest()[:16]
