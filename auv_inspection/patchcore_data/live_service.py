@@ -29,8 +29,8 @@ from robustness.geometry import GeometryParams, load_params  # noqa: E402
 from robustness.quality import measure  # noqa: E402
 from detector_v2.scorer import is_v2_model, load_scorer  # noqa: E402
 from robustness.surface_evidence import (  # noqa: E402
-    CALIBRATION_FILE as SURFACE_CALIBRATION_FILE, POOL_PX, SurfaceAlert, SurfaceEvidence,
-    frame_cells, load_calibration)
+    CALIBRATION_FILE as SURFACE_CALIBRATION_FILE, POOL_PX, NoiseModel, SurfaceAlert, SurfaceEvidence,
+    frame_cells, load_calibration, load_noise_model)
 
 ROI_MODES = ("geometry", "reference")
 # track: three image-space detections along a trajectory (v1); surface: k views of one surface
@@ -92,7 +92,8 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    border_margin: bool = False, gate_min_region_px: int = 0,
                    gate_region_share: bool = True, evidence_min_region_px: int = 0,
                    gate_spread_all_regions: bool = False,
-                   strict_thresholds_file: Path | None = None) -> Session:
+                   strict_thresholds_file: Path | None = None,
+                   noise_calibration_file: Path | None = None) -> Session:
     if score_margin_px < 0 or gate_min_region_px < 0 or evidence_min_region_px < 0:
         raise ValueError("score_margin_px and the region sizes must be non-negative")
     if alert_rule not in ALERT_RULES:
@@ -116,6 +117,16 @@ def create_session(model_dir: Path, reference_dataset: Path,
         strict = {category: float(strict_file["groups"][category]["threshold"]) for category in CATEGORIES}
         if any(strict[c] < thresholds[c] for c in CATEGORIES):
             raise ValueError("A strict threshold below the pixel threshold would loosen the hit rule")
+    noise = None
+    if noise_calibration_file is not None:
+        if alert_rule != "surface":
+            raise ValueError("Frame-adaptive evidence needs the surface alert rule")
+        noise_data = json.loads(noise_calibration_file.read_text(encoding="utf-8"))
+        if Path(noise_data["model_dir"]).resolve() != model_dir.resolve():
+            raise ValueError("Noise calibration refers to a different model")
+        if noise_data.get("pixel_thresholds_sha256") != hashlib.sha256(thresholds_file.read_bytes()).hexdigest():
+            raise ValueError("Noise calibration was made with a different pixel threshold file")
+        noise = load_noise_model(noise_calibration_file)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     scorer = load_scorer(model_dir, device) if is_v2_model(model_dir) else None
     if scorer is not None and roi_mode != "geometry":
@@ -132,8 +143,8 @@ def create_session(model_dir: Path, reference_dataset: Path,
                    geometry=model_geometry(model_dir) if roi_mode == "geometry" else None,
                    score_margin_px=score_margin_px, border_margin=border_margin,
                    diffuse_gate=diffuse_gate,
-                   evidence=(surface_evidence(surface_calibration, thresholds_file, thresholds, strict)
-                             if alert_rule == "surface" else None),
+                   evidence=with_noise(surface_evidence(surface_calibration, thresholds_file, thresholds, strict)
+                                       if alert_rule == "surface" else None, noise),
                    scorer=scorer, gate_min_region_px=gate_min_region_px,
                    gate_region_share=gate_region_share, evidence_min_region_px=evidence_min_region_px,
                    gate_spread_all_regions=gate_spread_all_regions, strict_thresholds=strict)
@@ -157,6 +168,12 @@ def surface_evidence(calibration_file: Path, thresholds_file: Path, thresholds: 
     if calibration.pixel_thresholds_sha256 != hashlib.sha256(thresholds_file.read_bytes()).hexdigest():
         raise ValueError("Surface calibration was made with a different pixel threshold file")
     return SurfaceEvidence(calibration, thresholds, strict_thresholds)
+
+
+def with_noise(evidence: SurfaceEvidence | None, noise: NoiseModel | None) -> SurfaceEvidence | None:
+    if evidence is not None:
+        evidence.noise = noise
+    return evidence
 
 
 def interior(roi: np.ndarray, margin_px: int, image_border: bool = False) -> np.ndarray:
@@ -456,6 +473,8 @@ def main() -> None:
                         help="P8 candidate rules: the P8 gate (regions counted from GATE_MIN_REGION_PX, no "
                              "single-large-region rule, spread over all regions) and evidence only from regions "
                              "of at least GATE_MIN_REGION_PX; overrides the separate gate/evidence options")
+    parser.add_argument("--noise-calibration", type=Path,
+                        help="P9: frame-adaptive evidence (robustness/calibrate_noise.py output)")
     parser.add_argument("--strict-thresholds", type=Path,
                         help="P9: absolute-only hit thresholds (calibrate_pixel --strict output)")
     parser.add_argument("--gate-spread-all-regions", action="store_true",
@@ -471,7 +490,7 @@ def main() -> None:
                          args.alert_rule, args.surface_calibration, args.border_margin,
                          args.gate_min_region_px, not args.no_gate_region_share,
                          args.evidence_min_region_px, args.gate_spread_all_regions,
-                         args.strict_thresholds))
+                         args.strict_thresholds, args.noise_calibration))
 
 
 if __name__ == "__main__":

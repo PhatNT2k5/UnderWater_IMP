@@ -139,6 +139,36 @@ class CellState:
     views: int = 0
     hits: int = 0
     alert_id: int | None = None
+    evidence: float = 0.0          # sum of hit weights (= hits without a noise model)
+
+
+@dataclass(frozen=True)
+class NoiseModel:
+    """Frame-adaptive evidence (P9). A view's hit on a cell weighs log(1/q) / log(1/base_rate), at most 1,
+    where q is the share of the frame's cells that are hits farther than `radius_m` from that cell (the
+    frame's own false-hit rate, a defect's own cells excluded) and base_rate the per-view hit rate of
+    clean calibration cells. Clean frames keep weight 1 (k views as before); in a frame whose hit rate
+    is 10x the base rate a hit counts about half, so dense marine snow needs more separated views."""
+    base_rate: float
+    radius_m: float = 0.6
+
+    def weights(self, hit_keys: list[CellKey], cells_in_view: int) -> dict[CellKey, float]:
+        if not hit_keys:
+            return {}
+        uv = np.array([(key[1], key[2]) for key in hit_keys], float)
+        groups = np.array([key[0] for key in hit_keys])
+        distance = np.hypot(uv[:, None, 0] - uv[None, :, 0], uv[:, None, 1] - uv[None, :, 1]) * CELL_M
+        far = (distance > self.radius_m) | (groups[:, None] != groups[None, :])
+        rates = np.maximum(far.sum(axis=1) / max(cells_in_view, 1), self.base_rate)
+        weight = np.minimum(1.0, np.log(rates) / np.log(self.base_rate))
+        return dict(zip(hit_keys, weight.tolist()))
+
+
+def load_noise_model(path: Path) -> NoiseModel:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not 0 < data["base_hit_rate"] < 1:
+        raise ValueError(f"Base hit rate must lie in (0, 1): {path}")
+    return NoiseModel(float(data["base_hit_rate"]), float(data.get("radius_m", 0.6)))
 
 
 @dataclass(frozen=True)
@@ -163,6 +193,7 @@ class SurfaceEvidence:
     calibration: SurfaceCalibration
     pixel_thresholds: dict[str, float]      # locked per-group PatchCore thresholds
     strict_thresholds: dict[str, float] | None = None  # P9: absolute-only hit level per group
+    noise: NoiseModel | None = None                   # P9: frame-adaptive hit weights
     cells: dict[CellKey, CellState] = field(default_factory=dict)
     alerts: list[SurfaceAlert] = field(default_factory=list)
 
@@ -171,6 +202,8 @@ class SurfaceEvidence:
         """Add one analysed frame; return new alerts and the cells that reached the rule now."""
         position = np.asarray(position, float)
         reached: list[CellKey] = []
+        hits = {key for key, value in values.items() if self._is_hit(key, value)}
+        weights = self.noise.weights(sorted(hits), len(values)) if self.noise else {}
         for key, value in values.items():
             state = self.cells.get(key)
             if state is None:
@@ -179,10 +212,12 @@ class SurfaceEvidence:
                 continue
             state.last_position = position
             state.views += 1
-            strict = self.strict_thresholds[key[0]] if self.strict_thresholds else None
-            if is_hit(value, self.pixel_thresholds[key[0]], self.calibration.threshold(key), strict):
+            if key in hits:
+                before = state.evidence
                 state.hits += 1
-                if state.hits == VIEWS_REQUIRED and state.alert_id is None:
+                state.evidence += weights.get(key, 1.0)
+                # Reached once, when the evidence first crosses k (k hits without a noise model).
+                if before < VIEWS_REQUIRED - 1e-9 <= state.evidence and state.alert_id is None:
                     reached.append(key)
         new_alerts = []
         for key in reached:
@@ -196,6 +231,10 @@ class SurfaceEvidence:
             self.cells[key].alert_id = alert.alert_id
             new_alerts.append(alert)
         return new_alerts, reached
+
+    def _is_hit(self, key: CellKey, value: CellValue) -> bool:
+        strict = self.strict_thresholds[key[0]] if self.strict_thresholds else None
+        return is_hit(value, self.pixel_thresholds[key[0]], self.calibration.threshold(key), strict)
 
     def _nearby_alert(self, key: CellKey) -> int | None:
         radius = MERGE_RADIUS_M / CELL_M

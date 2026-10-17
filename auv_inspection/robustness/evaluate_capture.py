@@ -100,14 +100,14 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
                        surface_calibration: Path | None = None, border_margin: bool = False,
                        gate_min_region_px: int = 0, gate_region_share: bool = True,
                        evidence_min_region_px: int = 0, gate_spread_all_regions: bool = False,
-                       strict_thresholds: Path | None = None) -> Detector:
+                       strict_thresholds: Path | None = None, noise_calibration: Path | None = None) -> Detector:
     """reference: P0/v1.1 ROI and capture categories; geometry: P2 ROI and pose-derived groups."""
     from auv_inspection.patchcore_data.live_service import (
         SURFACE_CALIBRATION_FILE, analyze_request, create_session, encode_png)
     session = create_session(model_dir, reference, thresholds, roi_mode, score_margin_px, diffuse_gate,
                              alert_rule, surface_calibration or SURFACE_CALIBRATION_FILE, border_margin,
                              gate_min_region_px, gate_region_share, evidence_min_region_px,
-                             gate_spread_all_regions, strict_thresholds)
+                             gate_spread_all_regions, strict_thresholds, noise_calibration)
     cache_state: dict = {"cache": None, "tick": None}
     grid_key: str | None = None
     if session.scorer is not None:
@@ -173,7 +173,7 @@ def patchcore_detector(model_dir: Path, reference: Path, thresholds: Path,
 
 DETECTORS = ("classical", "patchcore", "patchcore_geo", "patchcore_geo_m", "patchcore_geo_md",
              "patchcore_surface", *V2_MODELS, *(f"{name}_b" for name in V2_MODELS),
-             *(f"{name}_{suffix}" for name in V2_MODELS for suffix in ("bg", "br", "bgr", "bgsr", "bgsrh")))
+             *(f"{name}_{suffix}" for name in V2_MODELS for suffix in ("bg", "br", "bgr", "bgsr", "bgsrh", "bgsrn")))
 
 
 def make_detector(name: str) -> Detector:
@@ -187,7 +187,8 @@ def make_detector(name: str) -> Detector:
     (live_service.GATE_MIN_REGION_PX, no single-large-region rule) and "r" lets only hit regions of
     at least GATE_MIN_REGION_PX give surface evidence; "s" keeps the gate's spread over regions of
     every size; "h" (P9) adds the strict absolute-only hit thresholds of <model>/strict_thresholds.json
-    ("_bg", "_br", "_bgr", "_bgsr", "_bgsrh")."""
+    and "n" (P9) the frame-adaptive evidence of <model>/noise_calibration.json
+    ("_bg", "_br", "_bgr", "_bgsr", "_bgsrh", "_bgsrn")."""
     if name == "classical":
         return classical_detector()
     if name == "patchcore":
@@ -207,6 +208,8 @@ def make_detector(name: str) -> Detector:
                                                           else 0),
                                   gate_spread_all_regions=p8_gate and "s" in flags,
                                   strict_thresholds=(model / "strict_thresholds.json" if base != name and "h" in flags
+                                                     else None),
+                                  noise_calibration=(model / "noise_calibration.json" if base != name and "n" in flags
                                                      else None))
     if name == "patchcore_surface":
         from auv_inspection.patchcore_data.live_service import DEFAULT_SCORE_MARGIN_PX
