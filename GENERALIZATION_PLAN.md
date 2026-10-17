@@ -21,7 +21,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt). Live: map A 3/3, 0 báo nhầm; map B 4/5, 2 báo nhầm theo quy tắc (1 trong 2 nằm trên vết khi xem ảnh). Cổng hash code xong (D11) | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
 | P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Offline: đạt** (`dino_floor_bgsr`: recall 92,9%, 0,92 báo nhầm/100 m, FPR ô 0,071% trên heldout seed 201-206 gồm map C); live: map A 3/3, 0 báo nhầm; map C 6/6, 0 báo nhầm (chấm lại bằng geometry v2) | Xem Kết quả P8 | Xem Kết quả P8.1 |
-| P9 | Mờ chuyển động 3 và marine snow 5 (vòng mới, đăng ký và heldout mới) | **Đang làm** (P9.1 chẩn đoán xong) | Xem Kết quả P9.1 |
+| P9 | Mờ chuyển động 3 và marine snow 5 (vòng mới, đăng ký và heldout mới) | **Đang làm** (P9.1 chẩn đoán xong; P9.2 mục 1 ngưỡng chặt bị bác bỏ: 69,7% / 5,25) | Xem Kết quả P9.1 |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
 
@@ -362,6 +362,17 @@ Lưu ý (không đổi kết luận):
 - **Mờ chuyển động:** điểm tuyệt đối của vết vẫn cao (median 2,6 lần ngưỡng pixel) nhưng median của cả frame tăng gấp đôi (0,076 → 0,164), nên điểm chuẩn hóa của vết rơi xuống đúng ngưỡng tầng (tỷ lệ median 0,99). 80/84 lượt nhìn mất hit chỉ vì tiêu chí tương đối. Hit giả trên ô sạch không tăng (0,21%). Nguyên nhân là phép chuẩn hóa theo median frame, không phải detector.
 - **Marine snow 5:** tỷ lệ hit giả mỗi ô sạch tăng 6,4 lần (0,26% → 1,67%); bộ lọc vùng ≥ 196 px chỉ bớt một phần (2,2% → 1,7%) vì hạt dày chồng thành vùng lớn. Quy tắc bề mặt k = 3 lượt nhìn không đủ ở mức nhiễu này. Cổng còn bỏ 22% frame (46 lượt nhìn vết).
 - **Hướng P9.2 (chưa làm, cần duyệt):** (1) mờ chuyển động: điều chỉnh phép chuẩn hóa hoặc nới tiêu chí tương đối khi điểm tuyệt đối rất cao, đo hit giả trước; (2) marine snow 5: bằng chứng phụ thuộc mức nhiễu của frame (frame có tỷ lệ hit cao đóng góp ít hơn, hoặc cần nhiều lượt nhìn hơn). Seed 201-206 và map C đã xem nên thành dữ liệu phát triển; heldout P9 cần seed mới.
+
+## Kết quả P9.2 mục 1: ngưỡng chặt chỉ theo điểm tuyệt đối (2026-10-17, tập phát triển 12 capture) - bác bỏ
+
+Ngưỡng chặt (`calibrate_pixel --strict`, model `_floor`): mỗi ô sạch của 3 capture calibration lấy giá trị lớn nhất qua 7 yếu tố suy giảm mức 1, phân vị conformal như ngưỡng pixel; kết quả 1,10-1,21 lần ngưỡng pixel (mọi nhóm `data_limited`). Biến thể `dino_floor_bgsrh` = ứng viên P8 + hit khi điểm tuyệt đối ≥ ngưỡng chặt, phát lại từ cache (`output/benchmark_p9_dev/`).
+
+| Detector | Recall | Báo nhầm | /100 m | FPR ô | Frame bị cổng |
+|---|---|---|---|---|---|
+| `dino_floor_bgsr` (ứng viên P8) | 159/175 (90,9%) | 127 | 0,74 | 0,043% | 3,8% |
+| `dino_floor_bgsrh` | 122/175 (69,7%) | 901 | 5,25 | 5,9% | 33,0% |
+
+Mờ chuyển động 3: 11/25 (trước 17/25), 311 báo nhầm, cổng bỏ 63% frame; độ đục 4: 13/25, 315 báo nhầm, cổng 50%; marine snow 5: 0/25, cổng 96%. Nguyên nhân: dưới suy giảm mức 3-5 điểm tuyệt đối của **cả bề mặt sạch** vượt 1,2 lần ngưỡng pixel, nên mọi ô thành hit, cổng bỏ phần lớn frame và phần còn lại sinh báo nhầm (đúng điều P5 đã thấy khi dùng riêng ngưỡng tuyệt đối). Ngưỡng calibrate ở mức suy giảm 1 không đại diện cho mức 3. **Quyết định: không dùng hướng này.** Mờ chuyển động cần một phép chuẩn hóa khác (ví dụ theo nền cục bộ) chứ không nới tiêu chí tương đối.
 
 ## Tiêu chí nghiệm thu (bản đầu)
 
