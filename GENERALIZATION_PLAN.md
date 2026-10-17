@@ -21,6 +21,7 @@ Hệ thống phải hoạt động tốt hoặc chấp nhận được trong **n
 | P6 | Quay lại chụp gần khi bằng chứng mơ hồ | **Dừng ở mức đo** (P6.1: lợi ích tối đa 2-4/15 vết sót, chi phí 3,3-18,7 lần/100 m; lợi ích vật lý không đo được trong mô phỏng hiện tại) | Xem Kết quả P6.1 |
 | P7 | Nghiệm thu đầy đủ (test kín + live), cổng hash thêm hash code | **Offline: không đạt** (recall 72,3% < 90%; báo nhầm 0,345/100 m và FPR ô 0,031% đạt). Live: map A 3/3, 0 báo nhầm; map B 4/5, 2 báo nhầm theo quy tắc (1 trong 2 nằm trên vết khi xem ảnh). Cổng hash code xong (D11) | Xem Kết quả P7 | `robustness/acceptance_preregistration.json` |
 | P8 | Marine snow, báo nhầm chân trụ và rìa quầng đèn (vòng mới, đăng ký và heldout mới) | **Offline: đạt** (`dino_floor_bgsr`: recall 92,9%, 0,92 báo nhầm/100 m, FPR ô 0,071% trên heldout seed 201-206 gồm map C); live: map A 3/3, 0 báo nhầm; map C 6/6, 0 báo nhầm (chấm lại bằng geometry v2) | Xem Kết quả P8 | Xem Kết quả P8.1 |
+| P9 | Mờ chuyển động 3 và marine snow 5 (vòng mới, đăng ký và heldout mới) | **Đang làm** (P9.1 chẩn đoán xong) | Xem Kết quả P9.1 |
 
 Thứ tự thực hiện đã chốt: **P0 → P1 → P2 → P3 → P5 → P4 → P6 → P7**. P1 phải đi trước P4 vì thiếu bài đo đúng thì không chứng minh được đổi model có lợi; P5 đi trước P4 vì sửa lỗi tracker và ngưỡng cho mọi backbone.
 
@@ -346,6 +347,21 @@ Lưu ý (không đổi kết luận):
 - Tiêu chí live (ít nhất 1 cảnh báo đi trọn vòng) đạt trên cả hai map.
 
 **Sửa 2026-10-17 (chấm lại live):** các số live P7/P8 ở trên được chấm bằng `defect_inventory.locate_event()`, hàm này khi đó dùng geometry mặc định chưa hiệu chỉnh (ống bán kính 0,5 m, trụ nửa cạnh 0,95 m, không offset camera) thay vì geometry v2 của harness và của nhãn. Chấm lại bằng `robustness/score_live_session.py` (geometry v2): live P7 map A 3/3, 0 báo nhầm (0,20/0,04/0,12 m); **live P7 map B 5/5 vết, 1 báo nhầm** (tick 7596 khớp `B_pier_1_crack` 0,05 m; còn tick 2352 mép vòng bích mặt sau ống là báo nhầm thật); live P8 map A 3/3, 0 báo nhầm (0,20/0,04/0,11 m); **live P8 map C 6/6 vết, 0 báo nhầm** (tick 7221 khớp `C_pier_1_crack` 0,08 m; các cảnh báo khác 0,03-0,13 m). Kết quả nghiệm thu offline P7/P8 không bị ảnh hưởng: harness luôn dùng geometry v2. Nhãn không sửa.
+
+## Kết quả P9.1: chẩn đoán ứng viên P8 ở mờ chuyển động 3 và marine snow 5 (2026-10-17, offline, không sửa gì)
+
+4 capture có vết (seed 3, 4, 101, 106) và 2 capture sạch (seed 2, 5) của tập phát triển, 4 điều kiện, đúng quy tắc ứng viên P8, đọc lưới token từ cache. Kết quả và script: `auv_inspection/output/p9_diagnosis/` (`p9_diag.py`, `defect_views.jsonl`, `frames.jsonl`).
+
+| Điều kiện | Lượt nhìn vết hit | Mất vì cổng | Mất vì ngưỡng tầng (điểm tuyệt đối vẫn vượt ngưỡng pixel) | Tỷ lệ hit giả mỗi ô sạch mỗi lượt nhìn | Median điểm frame |
+|---|---|---|---|---|---|
+| Gốc | 135/166 | 1 | 2 | 0,26% | 0,076 |
+| Mờ chuyển động 3 | **58/166** | 2 | **80** | 0,21% | 0,164 |
+| Marine snow 3 | 126/166 | 8 | 4 | 0,63% | 0,089 |
+| Marine snow 5 | 90/166 | **46** | 9 | **1,67%** | 0,139 |
+
+- **Mờ chuyển động:** điểm tuyệt đối của vết vẫn cao (median 2,6 lần ngưỡng pixel) nhưng median của cả frame tăng gấp đôi (0,076 → 0,164), nên điểm chuẩn hóa của vết rơi xuống đúng ngưỡng tầng (tỷ lệ median 0,99). 80/84 lượt nhìn mất hit chỉ vì tiêu chí tương đối. Hit giả trên ô sạch không tăng (0,21%). Nguyên nhân là phép chuẩn hóa theo median frame, không phải detector.
+- **Marine snow 5:** tỷ lệ hit giả mỗi ô sạch tăng 6,4 lần (0,26% → 1,67%); bộ lọc vùng ≥ 196 px chỉ bớt một phần (2,2% → 1,7%) vì hạt dày chồng thành vùng lớn. Quy tắc bề mặt k = 3 lượt nhìn không đủ ở mức nhiễu này. Cổng còn bỏ 22% frame (46 lượt nhìn vết).
+- **Hướng P9.2 (chưa làm, cần duyệt):** (1) mờ chuyển động: điều chỉnh phép chuẩn hóa hoặc nới tiêu chí tương đối khi điểm tuyệt đối rất cao, đo hit giả trước; (2) marine snow 5: bằng chứng phụ thuộc mức nhiễu của frame (frame có tỷ lệ hit cao đóng góp ít hơn, hoặc cần nhiều lượt nhìn hơn). Seed 201-206 và map C đã xem nên thành dữ liệu phát triển; heldout P9 cần seed mới.
 
 ## Tiêu chí nghiệm thu (bản đầu)
 
