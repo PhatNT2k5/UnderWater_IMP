@@ -131,5 +131,56 @@
     "sha256": "2de6f4f446c387b0ffa4528360e05ce63046575ed35e07a8737ebdc91471ce13",
     "defects": 6,
     "note": "traced from seed 205 images only, checked on seed 206, approved by the user before any detector ran on map C"
-  }
+  },
+  "code_revisions": [
+    {
+      "added": "2026-10-18T10:16:04+07:00",
+      "code_commit": "f8daace85a7646567361ca3bbbaddc2b56cc7078",
+      "reason": "P9 added opt-in options (strict thresholds, frame-adaptive evidence) to live_service.py and surface_evidence.py; both are off for the candidate",
+      "changed_files": [
+        "auv_inspection/patchcore_data/live_service.py",
+        "auv_inspection/robustness/surface_evidence.py"
+      ],
+      "code_sha256": {
+        "auv_inspection/detector_v2/__init__.py": "38bb549650e2ad11aa548be9dcf3a5d733c11a51317bd8e9fe52b88b5bbe09e2",
+        "auv_inspection/detector_v2/features.py": "984382eeabe7c8986de108196ae79a7602d4e1e60478020cb30b556af24efe55",
+        "auv_inspection/detector_v2/scorer.py": "80f233a0f0e791a2284346a5f6f996749f365c2ba28476f1d073801a734726da",
+        "auv_inspection/detector_v2/transforms.py": "8ebbf21979428b2df9e56a9f559b168f9a328494a8f98b140df434fcc6c0f023",
+        "auv_inspection/inspection_route.py": "2b904495fb7e089daa638421e03e23c09c625c607550865c1bf6c7120e7342c9",
+        "auv_inspection/patchcore_data/__init__.py": "e569d2bd65197e484e2a13572eaecbd85da964c333bde97681740b19909bc886",
+        "auv_inspection/patchcore_data/alerts.py": "465a7cfb1722281abdc808301b233e00036c1ed0eba251065d4a689968a4a637",
+        "auv_inspection/patchcore_data/live_roi.py": "407ac81f66ee5784f328535dd59f8b4176b8687c2c54d28d9306ac9c900d100e",
+        "auv_inspection/patchcore_data/live_service.py": "38bd635cdb6a72b69601023554be9c71ea8b7c3cd17a98553d9edb73e87d899a",
+        "auv_inspection/patchcore_data/model.py": "5b6a8e1f9093b14ae7887f697d3e33056ed084b400923faf911941cc133b84cb",
+        "auv_inspection/patchcore_data/predict.py": "9581c141e7bbe6a4cdeef1124a2a773dc294a52861c623e052e8db4c8df0cf63",
+        "auv_inspection/robustness/__init__.py": "158b3826463ae5f551f1287fe1ec2dd48fe83959114daab9f251f5a0b7a2cb5f",
+        "auv_inspection/robustness/geometric_roi.py": "b3d4b22ef4682328b6cedd253f0bcf45c5456fa26d5f0bbcf90ad171a3341f92",
+        "auv_inspection/robustness/geometry.py": "2fc484a28b058ccbea96e17b9d4a22136dc89913b66cf8fc0b913a0be8448069",
+        "auv_inspection/robustness/quality.py": "2042ce3c401b1eb2f1c9d036d4e5ce3cbc98d0b4bee4172091867756210fbf72",
+        "auv_inspection/robustness/surface.py": "151d38d0212f2848c02cee3d9f675356678f6c5e6d1176f4f948dcf266b99257",
+        "auv_inspection/robustness/surface_evidence.py": "cd8960a204b94a47fc5c94ca2897c4db1d1986eb96122c1c2681692f30af4ccc"
+      },
+      "equivalence": {
+        "method": "the registered candidate dino_floor_bgsr re-scored on every held-out acceptance run (cached token grids, same degradation seed) with this code and compared field by field with the registered results (robustness/compare_runs.py)",
+        "reference": "auv_inspection/output/benchmark_p8_acceptance",
+        "replay": "auv_inspection/output/benchmark_p8_equivalence",
+        "fields": [
+          "defects",
+          "false_alerts",
+          "surveyed_length_m",
+          "false_alerts_per_100m",
+          "events",
+          "availability",
+          "ambiguity",
+          "frame_flag_rate_without_defect",
+          "degradations",
+          "frames"
+        ],
+        "runs": 42,
+        "runs_compared": 42,
+        "identical": true,
+        "comparison_sha256": "0a3efcc4196a6a3063b80721edfcb1afc93799b8348cbcb3f512f08793c5ee96"
+      }
+    }
+  ]
 }

@@ -124,6 +124,20 @@ class ApprovalGateTests(unittest.TestCase):
             self.assertFalse(registered_candidate_matches(model, registration, root, code))
             registration.write_text(json.dumps(content), encoding="utf-8")
 
+            (root / "scorer.py").write_text("value = 2\n", encoding="ascii")    # a later, proven revision
+            revision = {"code_sha256": code_hashes(root, code),
+                        "equivalence": {"identical": True, "runs": 84, "runs_compared": 84}}
+            registration.write_text(json.dumps({**content, "code_revisions": [revision]}), encoding="utf-8")
+            self.assertTrue(registered_candidate_matches(model, registration, root, code))
+            for evidence in ({"identical": False, "runs": 84, "runs_compared": 84},
+                             {"identical": True, "runs": 84, "runs_compared": 80},
+                             {"identical": True, "runs": 0, "runs_compared": 0}):
+                registration.write_text(json.dumps({**content, "code_revisions": [
+                    {**revision, "equivalence": evidence}]}), encoding="utf-8")
+                self.assertFalse(registered_candidate_matches(model, registration, root, code))
+            write_code(root, code)
+            registration.write_text(json.dumps(content), encoding="utf-8")
+
             (model / "pixel_thresholds.json").write_text("changed", encoding="utf-8")
             self.assertFalse(registered_candidate_matches(model, registration, root, code))
             (model / "pixel_thresholds.json").unlink()

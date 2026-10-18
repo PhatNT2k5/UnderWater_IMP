@@ -107,19 +107,33 @@ def approval_matches(model_dir: Path, reference_dataset: Path,
         return False
 
 
+def equivalent_revisions(registration: dict) -> list[dict]:
+    """Code revisions accepted after a registration: each records new scoring-code hashes and the
+    evidence that the registered candidate scores the held-out runs identically with them."""
+    revisions = []
+    for revision in registration.get("code_revisions", []):
+        evidence = revision.get("equivalence", {})
+        if (evidence.get("identical") is True and evidence.get("runs", 0) > 0
+                and evidence.get("runs") == evidence.get("runs_compared")):
+            revisions.append(revision)
+    return revisions
+
+
 def registered_candidate_matches(model_dir: Path, registration_file: Path, root: Path,
                                  required_code: tuple[str, ...] = SCORING_CODE) -> bool:
-    """Detector v2 default: every file and the scoring code of the P7 candidate still match.
+    """Detector v2 default: every file of the registered candidate still matches, and the scoring
+    code matches the registration or a later revision shown to score the held-out runs identically.
 
     This checks the artifacts that were scored on held-out data, not that they passed the
-    acceptance criteria (they did not: robustness/acceptance_preregistration.json, P7 result).
+    acceptance criteria (see the registration's own result).
     """
     try:
         registration = json.loads(registration_file.read_text(encoding="utf-8"))
         candidate = registration["candidate"]
         if (root / candidate["model_dir"]).resolve() != model_dir.resolve() or not candidate["sha256"]:
             return False
-        if not code_matches(registration.get("code_sha256"), root, required_code):
+        accepted = [registration.get("code_sha256")] + [r.get("code_sha256") for r in equivalent_revisions(registration)]
+        if not any(code_matches(hashes, root, required_code) for hashes in accepted):
             return False
         return all((model_dir / name).is_file() and file_sha256(model_dir / name) == digest
                    for name, digest in candidate["sha256"].items())
