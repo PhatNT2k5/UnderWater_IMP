@@ -9,7 +9,7 @@ Mô phỏng AUV khảo sát đường ống và trụ cầu dưới nước bằ
 | `auv_dashboard/` | Dashboard Tkinter và bridge chạy Unreal/HoloOcean |
 | `auv_inspection/` | Route, runtime AUV, detector, PatchCore tools và tài liệu |
 | `holoocean_overlay/` | Map, Unreal asset, plugin editor và thay đổi C++ áp dụng lên HoloOcean |
-| `patchcore_artifacts/` | Model, ngưỡng và tập sạch tham chiếu dùng để chạy PatchCore |
+| `patchcore_artifacts/` | Model, ngưỡng và tập sạch tham chiếu: PatchCore v1 và bộ phát hiện P8 (DINOv2, `detector_v2_*`) |
 | `scripts/setup_project.ps1` | Clone đúng HoloOcean revision và áp dụng overlay/artifact |
 
 `holoocean/`, `worlds/`, cache Unreal, virtual environment và output runtime không được commit. Chúng quá lớn, phụ thuộc máy, hoặc có thể chứa log/token cục bộ.
@@ -21,6 +21,7 @@ Mô phỏng AUV khảo sát đường ống và trụ cầu dưới nước bằ
 - Unreal Engine 5.3.x, có khả năng build project HoloOcean từ source
 - Python/Conda cho runtime dashboard, cùng Python 3.11 riêng cho PatchCore
 - GPU CUDA là tùy chọn cho PatchCore; CPU chạy được nhưng chậm hơn
+- Internet ở lần chạy đầu: bộ phát hiện P8 tải trọng số DINOv2 `vit_small_patch14_dinov2.lvd142m` (khoảng 85 MB) từ Hugging Face qua `timm`, lưu vào cache `%USERPROFILE%\.cache\huggingface`
 
 Sau khi clone, tải LFS trước khi setup:
 
@@ -38,13 +39,28 @@ Set-ExecutionPolicy -Scope Process Bypass
 .\scripts\setup_project.ps1
 ```
 
-Script sẽ clone HoloOcean tại revision `49e70552`, chép map/asset/plugin/C++ overlay vào `holoocean/`, rồi cài artifact PatchCore vào `auv_inspection/output/`.
+Script sẽ clone HoloOcean tại revision `49e70552`, chép map/asset/plugin/C++ overlay vào `holoocean/` (gồm map A, B, C và các map sạch), rồi cài artifact vào `auv_inspection/output/`: PatchCore v1 và bộ phát hiện P8 (`detector_v2_dino_s2_aug_g2`, `detector_v2_dino_s2_aug_g2_floor`).
 
 Nếu người dùng đã có một HoloOcean checkout riêng, truyền đường dẫn của checkout đó. Script từ chối ghi đè overlay đang tồn tại nếu không có `-Force`.
 
 ```powershell
 .\scripts\setup_project.ps1 -HoloOceanPath D:\HoloOcean -Force
 ```
+
+### Cập nhật một máy đã setup trước đây
+
+Máy đã chạy `setup_project.ps1` trước bản P8 chỉ cần lấy code, LFS và chép thêm model P8 cùng map C (không cần chạy lại toàn bộ script):
+
+```powershell
+git checkout main
+git pull
+git lfs pull
+Copy-Item -Recurse -Force .\patchcore_artifacts\detector_v2_dino_s2_aug_g2 .\auv_inspection\output\
+Copy-Item -Recurse -Force .\patchcore_artifacts\detector_v2_dino_s2_aug_g2_floor .\auv_inspection\output\
+Copy-Item -Force .\holoocean_overlay\engine\Content\AUVInspection\Maps\AUVInspection_PatchCoreC_20261016_v1.umap .\holoocean\engine\Content\AUVInspection\Maps\
+```
+
+Nếu `holoocean` nằm ở chỗ khác, thay đường dẫn đích ở lệnh cuối. Sau đó kiểm tra như mục "Kiểm tra bộ phát hiện P8" bên dưới.
 
 Sau đó mở `holoocean\engine\Holodeck.uproject` trong Unreal Engine 5.3 và build `HolodeckEditor` nếu Unreal yêu cầu. Map nằm tại:
 
@@ -75,7 +91,7 @@ python -m venv .venv-patchcore
 .\.venv-patchcore\Scripts\python.exe -m pip install -r .\auv_inspection\patchcore_data\requirements-patchcore.txt
 ```
 
-Artifact model, ngưỡng và ảnh sạch tham chiếu được setup script chép sẵn từ `patchcore_artifacts/`.
+Artifact model, ngưỡng và ảnh sạch tham chiếu được setup script chép sẵn từ `patchcore_artifacts/`. Lần đầu bộ phát hiện P8 chạy, `timm` tải trọng số DINOv2 từ Hugging Face (cần Internet một lần).
 
 ## Chạy dashboard
 
@@ -84,6 +100,33 @@ Sau khi HoloOcean đã build, từ root repository với `mainenv` đã activate
 ```powershell
 python -m unittest auv_dashboard.test_dashboard auv_inspection.tests.test_find_editor -v
 python .\auv_dashboard\run_dashboard.py
+```
+
+Dashboard mặc định dùng **bộ phát hiện P8** (DINOv2, ứng viên đã đạt nghiệm thu) khi mọi file model và mã chấm điểm còn khớp mã băm đã đăng ký trong `auv_inspection/robustness/acceptance_preregistration_p8.json`. Nếu không khớp, dashboard lùi về bộ phát hiện cũ hơn. Một số tùy chọn:
+
+| Lệnh | Tác dụng |
+|---|---|
+| `python .\auv_dashboard\run_dashboard.py` | Map A, bộ phát hiện P8 |
+| `... --world /Game/AUVInspection/Maps/AUVInspection_PatchCoreC_20261016_v1` | Map C (6 vết, có vết mặt sau ống và trụ) |
+| `... --world /Game/AUVInspection/Maps/AUVInspection_PatchCoreB_20260926_v3` | Map B (5 vết, có lỗ thủng) |
+| `... --v1` | PatchCore v1 cũ, để so sánh |
+
+### Kiểm tra bộ phát hiện P8
+
+Với `mainenv` đã activate, từ root repository:
+
+```powershell
+python -c "from pathlib import Path; from auv_inspection.patchcore_data.approval_gate import registered_candidate_matches as ok; print(ok(Path('auv_inspection/output/detector_v2_dino_s2_aug_g2_floor'), Path('auv_inspection/robustness/acceptance_preregistration_p8.json'), Path('.')))"
+```
+
+`True` nghĩa là dashboard sẽ dùng P8. `False` thường do thiếu `git lfs pull` (file bank `.pt` khi đó chỉ là con trỏ LFS vài trăm byte), chưa chép `patchcore_artifacts/detector_v2_*` vào `auv_inspection/output/`, hoặc đã sửa file JSON của model. Các file JSON này và `auv_inspection/robustness/calibration/geometry_v3.json` được `.gitattributes` checkout với xuống dòng CRLF để mã băm khớp trên mọi máy; không mở rồi lưu lại chúng bằng editor đổi kiểu xuống dòng.
+
+Test của bộ phát hiện chạy trong `.venv-patchcore`:
+
+```powershell
+.\.venv-patchcore\Scripts\python.exe -m unittest discover -s auv_inspection\patchcore_data\tests
+.\.venv-patchcore\Scripts\python.exe -m unittest discover -s auv_inspection\detector_v2\tests
+.\.venv-patchcore\Scripts\python.exe -m unittest discover -s auv_inspection\robustness\tests
 ```
 
 

@@ -1,0 +1,154 @@
+{
+  "model": "DINOv2-kNN",
+  "backbone": "vit_small_patch14_dinov2.lvd142m",
+  "scale": 2.0,
+  "score": "1 - max cosine similarity",
+  "created": "2026-10-12T23:21:46+07:00",
+  "erosion_px": 12,
+  "augment": {
+    "enabled": true,
+    "severity": 1,
+    "factors": [
+      "turbidity",
+      "marine_snow",
+      "illumination",
+      "defocus",
+      "motion_blur",
+      "sensor_noise",
+      "jpeg"
+    ],
+    "frames": {
+      "none": 2239,
+      "defocus": 306,
+      "marine_snow": 316,
+      "illumination": 302,
+      "sensor_noise": 295,
+      "motion_blur": 331,
+      "turbidity": 340,
+      "jpeg": 349
+    }
+  },
+  "max_per_frame": 200,
+  "max_candidates": 60000,
+  "coreset_ratio": 0.25,
+  "seed": 20261012,
+  "tokens_seen": {
+    "pipe_front": 171600,
+    "pipe_back": 171600,
+    "pier_0": 277200,
+    "pier_1": 275200
+  },
+  "bank_sizes": {
+    "pipe_front": 15000,
+    "pipe_back": 15000,
+    "pier_0": 15000,
+    "pier_1": 15000
+  },
+  "sources": [
+    {
+      "capture": "auv_inspection\\output\\capture_train_clean_20261012_182016_486788",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "conditions": {
+        "profile": "train",
+        "seed": 21,
+        "pipe_offset_m": 2.126,
+        "pier_radius_m": 2.95,
+        "depth_jitter_m": 0.125,
+        "yaw_jitter_deg": 2.64,
+        "current_mps": [
+          -0.0889,
+          0.0477,
+          0.0
+        ],
+        "current_variation_mps": 0.034,
+        "light_intensity": 2378.5,
+        "light_pitch_deg": -1.55,
+        "capture_interval_ticks": [
+          7,
+          13
+        ]
+      },
+      "frames_used": 587,
+      "frames_sha256": "f0d06ebc5e3faee1dfba12037064e8ce2f771dae11e99f6a62bc3c769dc8a6ae"
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_train_clean_20261012_182617_290316",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "conditions": {
+        "profile": "train",
+        "seed": 22,
+        "pipe_offset_m": 2.224,
+        "pier_radius_m": 2.663,
+        "depth_jitter_m": 0.061,
+        "yaw_jitter_deg": 3.1,
+        "current_mps": [
+          0.0119,
+          0.1015,
+          0.0
+        ],
+        "current_variation_mps": 0.011,
+        "light_intensity": 2213.7,
+        "light_pitch_deg": -0.38,
+        "capture_interval_ticks": [
+          7,
+          13
+        ]
+      },
+      "frames_used": 544,
+      "frames_sha256": "19c7f7a2537f9cdaab88daa94952c735afe30ce84eb792a5727eb8f495b4c1d9"
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_train_clean_20261012_183207_523279",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "conditions": {
+        "profile": "train",
+        "seed": 23,
+        "pipe_offset_m": 2.338,
+        "pier_radius_m": 2.551,
+        "depth_jitter_m": 0.002,
+        "yaw_jitter_deg": 0.56,
+        "current_mps": [
+          0.0396,
+          -0.0691,
+          0.0
+        ],
+        "current_variation_mps": 0.047,
+        "light_intensity": 2946.7,
+        "light_pitch_deg": 3.27,
+        "capture_interval_ticks": [
+          7,
+          13
+        ]
+      },
+      "frames_used": 520,
+      "frames_sha256": "f9e7d8eadef243917ee21f682009f61b4a9aae868b60d5b5ecbdefb586739d68"
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_train_clean_20261012_183703_841403",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "conditions": {
+        "profile": "train",
+        "seed": 24,
+        "pipe_offset_m": 2.08,
+        "pier_radius_m": 3.022,
+        "depth_jitter_m": 0.083,
+        "yaw_jitter_deg": 3.58,
+        "current_mps": [
+          0.0393,
+          0.015,
+          0.0
+        ],
+        "current_variation_mps": 0.009,
+        "light_intensity": 2159.2,
+        "light_pitch_deg": -3.41,
+        "capture_interval_ticks": [
+          7,
+          13
+        ]
+      },
+      "frames_used": 588,
+      "frames_sha256": "5da139d4f320f1c549f8f7b1b67172943e24eec3f85146e8b00558383ef232e3"
+    }
+  ],
+  "torch": "2.14.0+cu130"
+}

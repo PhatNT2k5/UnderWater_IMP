@@ -2,3 +2,9 @@
 *.uasset filter=lfs diff=lfs merge=lfs -text
 *.umap filter=lfs diff=lfs merge=lfs -text
 *.pt filter=lfs diff=lfs merge=lfs -text
+
+# The P8 registration (auv_inspection/robustness/acceptance_preregistration_p8.json) hashes these
+# files with Windows line endings. Check them out with CRLF on every machine, whatever
+# core.autocrlf says, so the dashboard's SHA256 gate still accepts the registered candidate.
+auv_inspection/robustness/calibration/geometry_v3.json text eol=crlf
+patchcore_artifacts/detector_v2_*/*.json text eol=crlf

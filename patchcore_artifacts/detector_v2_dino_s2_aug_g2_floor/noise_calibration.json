@@ -1,0 +1,33 @@
+{
+  "model_dir": "E:\\AUV-Production\\UnderWater_IMP\\auv_inspection\\output\\detector_v2_dino_s2_aug_g2_floor",
+  "created": "2026-10-17T17:33:53+07:00",
+  "method": "pooled per-view hit rate of clean calibration cells under the runtime rules",
+  "base_hit_rate": 0.00010434465038020582,
+  "radius_m": 0.6,
+  "cell_views": 230007,
+  "hits": 24,
+  "frames": 1631,
+  "frames_gated": 0,
+  "p8_rules": true,
+  "pixel_thresholds_sha256": "0f7f24b9ef897b4efadfc7e942a5be46851e93f5b2ca424f0660334e0cb0df55",
+  "sources": [
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_110540_192827",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 70385,
+      "hits": 12
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_111452_059585",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 88442,
+      "hits": 7
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_114918_998711",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 71180,
+      "hits": 5
+    }
+  ]
+}

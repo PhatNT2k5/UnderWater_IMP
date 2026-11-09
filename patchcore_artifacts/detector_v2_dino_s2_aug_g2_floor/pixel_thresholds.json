@@ -1,0 +1,75 @@
+{
+  "model_dir": "E:\\AUV-Production\\UnderWater_IMP\\auv_inspection\\output\\detector_v2_dino_s2_aug_g2_floor",
+  "created": "2026-10-15T13:57:52+07:00",
+  "method": "conformal upper quantile of the per-cell k-th highest absolute score",
+  "views_required": 3,
+  "min_move_m": 0.3,
+  "score_margin_px": 24,
+  "alpha_per_cell": 8.271725455509892e-05,
+  "geometry": {
+    "pipe_radius_m": 0.423,
+    "pipe_axis_z": -10.2943,
+    "pier_half_width_m": 0.8781,
+    "camera_lateral_m": -0.207,
+    "camera_forward_m": 0.41,
+    "camera_up_m": 0.09,
+    "camera_pitch_deg": 0.0054,
+    "pier_floor_z": -10.35
+  },
+  "evaluated_cells": 31968,
+  "surveyed_length_m": 528.9,
+  "sources": [
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_110540_192827",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "evaluated_cells": 9703,
+      "surveyed_length_m": 171.1
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_111452_059585",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "evaluated_cells": 12156,
+      "surveyed_length_m": 183.8
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_114918_998711",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "evaluated_cells": 10109,
+      "surveyed_length_m": 173.9
+    }
+  ],
+  "groups": {
+    "pier_0": {
+      "threshold": 0.1568367034196854,
+      "cells": 11554,
+      "achieved_level": 8.654262224145392e-05,
+      "data_limited": true,
+      "calibration_p50": 0.08210610970854759,
+      "calibration_max": 0.15683670341968536
+    },
+    "pier_1": {
+      "threshold": 0.1579493433237076,
+      "cells": 10808,
+      "achieved_level": 9.25154963456379e-05,
+      "data_limited": true,
+      "calibration_p50": 0.0804346390068531,
+      "calibration_max": 0.15794934332370758
+    },
+    "pipe_back": {
+      "threshold": 0.12231606990098955,
+      "cells": 4895,
+      "achieved_level": 0.0002042483660130719,
+      "data_limited": true,
+      "calibration_p50": 0.0623302198946476,
+      "calibration_max": 0.12231606990098953
+    },
+    "pipe_front": {
+      "threshold": 0.11969494819641115,
+      "cells": 4711,
+      "achieved_level": 0.00021222410865874363,
+      "data_limited": true,
+      "calibration_p50": 0.062160879373550415,
+      "calibration_max": 0.11969494819641113
+    }
+  }
+}
