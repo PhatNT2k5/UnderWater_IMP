@@ -67,6 +67,19 @@ class ScorerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 scorer.load_scorer(path, torch.device("cpu"))
 
+    def test_bank_folder_falls_back_beside_the_model_on_another_machine(self) -> None:
+        with TemporaryDirectory() as folder:
+            root = Path(folder)
+            base, derived = root / "base_model", root / "derived_model"
+            base.mkdir()
+            derived.mkdir()
+            self.assertEqual(scorer.bank_directory(derived, {}), derived)
+            self.assertEqual(scorer.bank_directory(derived, {"bank_dir": str(base)}), base)
+            moved = {"bank_dir": r"E:\Elsewhere\UnderWater_IMP\auv_inspection\output\base_model"}
+            self.assertEqual(scorer.bank_directory(derived, moved), base)
+            with self.assertRaises(FileNotFoundError):
+                scorer.bank_directory(derived, {"bank_dir": r"E:\Elsewhere\missing_model"})
+
 
 class TransformTests(unittest.TestCase):
     def test_nuisance_projection_removes_the_nuisance_direction_only(self) -> None:

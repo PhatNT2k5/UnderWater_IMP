@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 import cv2
 import numpy as np
@@ -83,13 +83,28 @@ def is_v2_model(model_dir: Path) -> bool:
     return config.is_file() and json.loads(config.read_text(encoding="utf-8")).get("model") == MODEL_KIND
 
 
+def bank_directory(model_dir: Path, config: dict) -> Path:
+    """Folder holding a model's banks. A derived model records its base model's folder as an
+    absolute path, which is missing on another machine or checkout; then use the folder of the
+    same name beside this model, where the repository installs it."""
+    recorded = config.get("bank_dir")
+    if not recorded:
+        return model_dir
+    if Path(recorded).is_dir():
+        return Path(recorded)
+    sibling = model_dir.parent / PureWindowsPath(recorded).name
+    if sibling.is_dir():
+        return sibling
+    raise FileNotFoundError(f"Bank folder not found: {recorded} (nor {sibling})")
+
+
 def load_scorer(model_dir: Path, device: torch.device) -> DinoScorer:
     config = json.loads((model_dir / "config.json").read_text(encoding="utf-8"))
     if config.get("model") != MODEL_KIND or config.get("backbone") != MODEL_NAME:
         raise ValueError(f"Not a {MODEL_KIND} model directory: {model_dir}")
     extractor = load_extractor(device, float(config["scale"]))
     # A derived model (derive_model.py) reuses another model's banks and adds a transform.
-    bank_dir = Path(config.get("bank_dir", model_dir))
+    bank_dir = bank_directory(model_dir, config)
     banks = {category: torch.load(bank_dir / f"{category}_bank.pt", map_location=device,
                                   weights_only=True)
              for category in config["bank_sizes"]}
@@ -109,7 +124,7 @@ def grid_cache_key(model_dir: Path) -> str:
     thresholds or rules, which act after the grid). Models sharing banks share cached grids."""
     import hashlib
     config = json.loads((model_dir / "config.json").read_text(encoding="utf-8"))
-    bank_dir = Path(config.get("bank_dir", model_dir))
+    bank_dir = bank_directory(model_dir, config)
     digest = hashlib.sha256(f"{config['backbone']}|{config['scale']}".encode())
     files = [bank_dir / f"{category}_bank.pt" for category in sorted(config["bank_sizes"])]
     if config.get("transform_file"):
