@@ -116,7 +116,10 @@ foreach ($relativePath in @(
 
 Copy-OverlayDirectory (Join-Path $overlayRoot "engine\Plugins\FunplayMCP") (Join-Path $enginePath "Plugins\FunplayMCP")
 
-foreach ($artifact in @("patchcore_model_v1", "patchcore_dataset_clean_20260925")) {
+# detector_v2_*: the P8 candidate (DINOv2 banks and the registered derived model). Copied byte for
+# byte: the dashboard enables it only while every file matches acceptance_preregistration_p8.json.
+foreach ($artifact in @("patchcore_model_v1", "patchcore_dataset_clean_20260925",
+                        "detector_v2_dino_s2_aug_g2", "detector_v2_dino_s2_aug_g2_floor")) {
     $source = Join-Path $artifactRoot $artifact
     $destination = Join-Path $repositoryRoot "auv_inspection\output\$artifact"
     if (-not (Test-Path -LiteralPath $source)) {
@@ -146,4 +149,5 @@ $evaluation.reference_sha256 = Get-ReferenceFingerprint $referenceDestination
 $evaluation.thresholds_sha256 = (Get-FileHash -LiteralPath $thresholdDestination -Algorithm SHA256).Hash.ToLowerInvariant()
 Write-JsonNoBom $evaluationDestination $evaluation
 
-Write-Host "Overlay installed. Open $enginePath\Holodeck.uproject with Unreal Engine 5.3, build if requested, then run auv_dashboard\run_dashboard.py."
+Write-Host "Overlay and detector artifacts installed (PatchCore v1 and the P8 candidate under auv_inspection\output)."
+Write-Host "Open $enginePath\Holodeck.uproject with Unreal Engine 5.3, build if requested, then run auv_dashboard\run_dashboard.py."

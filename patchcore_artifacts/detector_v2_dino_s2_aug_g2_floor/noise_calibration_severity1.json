@@ -1,0 +1,163 @@
+{
+  "model_dir": "E:\\AUV-Production\\UnderWater_IMP\\auv_inspection\\output\\detector_v2_dino_s2_aug_g2_floor",
+  "created": "2026-10-17T20:03:47+07:00",
+  "method": "pooled per-view hit rate of clean calibration cells under the runtime rules",
+  "base_hit_rate": 0.0002720414099198223,
+  "radius_m": 0.6,
+  "cell_views": 1610049,
+  "hits": 438,
+  "frames": 11417,
+  "frames_gated": 0,
+  "p8_rules": true,
+  "severity1": true,
+  "pixel_thresholds_sha256": "0f7f24b9ef897b4efadfc7e942a5be46851e93f5b2ca424f0660334e0cb0df55",
+  "sources": [
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_110540_192827",
+      "degradation": "turbidity",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 70385,
+      "hits": 26
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_110540_192827",
+      "degradation": "marine_snow",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 70385,
+      "hits": 2
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_110540_192827",
+      "degradation": "illumination",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 70385,
+      "hits": 8
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_110540_192827",
+      "degradation": "defocus",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 70385,
+      "hits": 10
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_110540_192827",
+      "degradation": "motion_blur",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 70385,
+      "hits": 13
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_110540_192827",
+      "degradation": "sensor_noise",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 70385,
+      "hits": 21
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_110540_192827",
+      "degradation": "jpeg",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 70385,
+      "hits": 31
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_111452_059585",
+      "degradation": "turbidity",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 88442,
+      "hits": 31
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_111452_059585",
+      "degradation": "marine_snow",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 88442,
+      "hits": 49
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_111452_059585",
+      "degradation": "illumination",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 88442,
+      "hits": 10
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_111452_059585",
+      "degradation": "defocus",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 88442,
+      "hits": 7
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_111452_059585",
+      "degradation": "motion_blur",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 88442,
+      "hits": 10
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_111452_059585",
+      "degradation": "sensor_noise",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 88442,
+      "hits": 29
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_111452_059585",
+      "degradation": "jpeg",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 88442,
+      "hits": 58
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_114918_998711",
+      "degradation": "turbidity",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 71180,
+      "hits": 19
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_114918_998711",
+      "degradation": "marine_snow",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 71180,
+      "hits": 25
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_114918_998711",
+      "degradation": "illumination",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 71180,
+      "hits": 1
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_114918_998711",
+      "degradation": "defocus",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 71180,
+      "hits": 12
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_114918_998711",
+      "degradation": "motion_blur",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 71180,
+      "hits": 11
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_114918_998711",
+      "degradation": "sensor_noise",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 71180,
+      "hits": 22
+    },
+    {
+      "capture": "auv_inspection\\output\\capture_calibration_clean_20261012_114918_998711",
+      "degradation": "jpeg",
+      "map_sha256": "ea94a84fd4a05e44686eb08c982d16107049890ab9bf4eee28d91584acfe6ee0",
+      "cell_views": 71180,
+      "hits": 43
+    }
+  ]
+}
